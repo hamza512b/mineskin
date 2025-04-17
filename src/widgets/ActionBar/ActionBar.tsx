@@ -56,16 +56,15 @@ export default function ActionBar({
         className,
       )}
     >
-      {mode ? (
-        <SelectBox
-          leftIcon={modeOptions.find((option) => option.value === mode)?.icon}
-          options={modeOptions}
-          value={mode}
-          onValueChange={(mode: Mode) => setMode(mode)}
-        />
-      ) : (
-        <div />
-      )}
+      <SelectBox
+        leftIcon={
+          modeOptions.find((option) => option.value === mode)?.icon ||
+          modeOptions[0].icon
+        }
+        options={modeOptions}
+        value={mode || "Preview"}
+        onValueChange={(mode: Mode) => setMode(mode)}
+      />
       <div className="flex gap-2">
         <div className="hidden md:flex gap-2 ">
           {/* Desktop buttons */}
