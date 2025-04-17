@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  @apply dark:bg-slate-950 dark:text-white bg-slate-100 text-slate-900;
+}
+
+#__next {
+  width: 100%;
+  height: 100%;
+}
+
+.canvasContainer {
+  position: relative;
+  flex: 1;
+}
+.canvasContainer > canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.controlPanelContainer {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.animate-slideUp {
+  animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
+}
