@@ -1,15 +1,14 @@
-# Minsekin – Minecraft Skin Editor and Preview
+# Mineskin – Minecraft Skin Editor and Preview Tool
 
-This is as project for tool to test and edit minecraft skins. The tool went through
-a lot of iterations accross the years. Now the project completly free and open sourced under the MIT license.
+This is a project and tool for testing and editing Minecraft skins. The tool has gone through many iterations over the years. It is now completely free and open-source under the MIT license.
 
-## Technical information
+## Technical Information
 
-I intially used three.js to create the website. But than I wanted at some point to learn more about 3d graphics and Webgl api. I did redid the project in plain Webgl calls. No libraries are used. I tried to create abstraction and make the code more readable.
+I initially used Three.js to build the website, but later wanted to learn more about 3D graphics and the WebGL API. So I rewrote the project using plain WebGL calls, without any libraries. I also added some abstractions to make the code more readable.
 
 ## Contributing
 
-I am open to contributions. If you have any suggestions or improvements, please create an issue or a pull request.
+I'm open to contributions. If you have suggestions or improvements, feel free to create an issue or submit a pull request.
 
 ## License
 
