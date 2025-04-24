@@ -115,9 +115,11 @@ export class UndoRedoManager {
       if (current) this.redoStack.push(current);
       const prev = this.undoStack.peek();
       if (prev) {
-        this.renderer.getMainSkin().material = prev.material.clone();
+        const material = prev.material.clone();
+        this.renderer.getMainSkin().material = material;
         // Update the skinIsPocket flag to match the snapshot.
         this.renderer.state.setSkinIsPocket(prev.skinIsPocket, true, "App");
+        this.renderer.state.storeSkinImageData(material.imageData, "main_skin");
       }
     }
   }
@@ -130,9 +132,11 @@ export class UndoRedoManager {
       const next = this.redoStack.pop();
       if (next) {
         this.undoStack.push(next);
-        this.renderer.getMainSkin().material = next.material.clone();
+        const material = next.material.clone();
+        this.renderer.getMainSkin().material = material;
 
         this.renderer.state.setSkinIsPocket(next.skinIsPocket, true, "App");
+        this.renderer.state.storeSkinImageData(material.imageData, "main_skin");
       }
     }
   }
