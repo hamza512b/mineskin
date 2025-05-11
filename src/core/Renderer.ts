@@ -264,7 +264,7 @@ export class Renderer {
     a.click();
   }
 
-  public uploadTexture(setError: (msg: string) => void) {
+  public uploadTexture(setError?: (msg: string) => void) {
     const input = document.createElement("input");
     input.style.display = "none";
     input.type = "file";
@@ -278,13 +278,14 @@ export class Renderer {
         (file.type && file.type !== "image/png") ||
         (!file.type && !file.name.toLowerCase().endsWith(".png"))
       ) {
-        setError("Skin must be a PNG image.");
+        setError?.("Skin must be a PNG image.");
         return;
       }
       try {
         await new Promise((res, rej) => {
           const reader = new FileReader();
           reader.onload = async () => {
+            console.log("reader.result", reader.result);
             await this.uploadTextureUrl(reader.result as string, setError);
             res(undefined);
           };
@@ -294,7 +295,7 @@ export class Renderer {
           reader.readAsDataURL(file);
         });
       } catch {
-        setError("Skin upload failed.");
+        setError?.("Skin upload failed.");
       }
     };
     input.click();

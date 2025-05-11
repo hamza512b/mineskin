@@ -1,5 +1,5 @@
 import { omit } from "lodash";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { z, ZodError } from "zod";
 import { Renderer } from "../core/Renderer";
 import { State, StateShape } from "../core/State";
@@ -160,39 +160,42 @@ export function useRendererState(renderer: Renderer | null) {
     };
   }, [renderer]);
 
-  const handleChange = (
-    name: keyof FormValues,
-    value: string | number | boolean,
-    origin = "App",
-  ) => {
-    const valueSchema = formSchema.shape[name];
-    const fieldSchema = z.object({ [name]: valueSchema });
-    const argsValeue =
-      valueSchema instanceof z.ZodNumber ? Number(value) : value;
-    const result = fieldSchema.safeParse({ [name]: argsValeue });
-    setValues((prev) => ({ ...prev, [name]: value }));
-    if (result.success) {
-      if (!renderer) return;
-      const currentArgs = renderer.state.toObject();
-      const newArgs = {
-        ...omit(currentArgs, [...Object.keys(errors), name]),
-        [name]: argsValeue,
-      };
-      renderer?.state.setAll(newArgs as StateShape, true, origin);
-      renderer.state.save();
-      setErrors((prev) => omit(prev, [name]));
-    } else {
-      let error: string | undefined;
+  const handleChange = useCallback(
+    (
+      name: keyof FormValues,
+      value: string | number | boolean,
+      origin = "App",
+    ) => {
+      const valueSchema = formSchema.shape[name];
+      const fieldSchema = z.object({ [name]: valueSchema });
+      const argsValeue =
+        valueSchema instanceof z.ZodNumber ? Number(value) : value;
+      const result = fieldSchema.safeParse({ [name]: argsValeue });
+      setValues((prev) => ({ ...prev, [name]: value }));
+      if (result.success) {
+        if (!renderer?.state) return;
+        const currentArgs = renderer.state.toObject();
+        const newArgs = {
+          ...omit(currentArgs, [...Object.keys(errors), name]),
+          [name]: argsValeue,
+        };
+        renderer?.state.setAll(newArgs as StateShape, true, origin);
+        renderer.state.save();
+        setErrors((prev) => omit(prev, [name]));
+      } else {
+        let error: string | undefined;
 
-      if (result.error instanceof ZodError) {
-        error = result.error.issues[0].message;
+        if (result.error instanceof ZodError) {
+          error = result.error.issues[0].message;
+        }
+        setErrors((prev) => ({
+          ...prev,
+          [name]: error || undefined,
+        }));
       }
-      setErrors((prev) => ({
-        ...prev,
-        [name]: error || undefined,
-      }));
-    }
-  };
+    },
+    [renderer?.state],
+  );
 
   return {
     setErrors,

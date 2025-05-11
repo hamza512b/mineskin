@@ -121,4 +121,4 @@ const PartsPreview: React.FC<PartsComponentProps> = ({ values, className }) => {
   );
 };
 
-export default PartsPreview;
+export default React.memo(PartsPreview);

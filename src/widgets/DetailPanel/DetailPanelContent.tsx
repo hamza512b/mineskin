@@ -16,21 +16,59 @@ export interface DetailPanelProps {
     origin?: string,
   ) => void;
   errors: FieldErrors;
-  values: FormValues;
   className?: string;
   open: boolean;
   setOpen: (open: boolean) => void;
   mode: "editor" | "preview";
   exitButton?: React.ReactNode;
-  reset: () => void;
+  reset: (() => void) | undefined;
+  skinIsPocket: boolean;
+  diffuseStrength: number;
+  specularStrength: number;
+  objectTranslationX: number;
+  objectTranslationZ: number;
+  objectTranslationY: number;
+  objectRotationX: number;
+  objectRotationY: number;
+  objectRotationZ: number;
+  cameraFieldOfView: number;
+  cameraSpeed: number;
+  cameraDampingFactor: number;
+  // cameraRadius: number;
+  // cameraTheta: number;
+  // cameraPhi: number;
+  directionalLightIntensity: number;
+  ambientLight: number;
+  diffuseLightPositionX: number;
+  diffuseLightPositionZ: number;
+  diffuseLightPositionY: number;
 }
 export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   errors,
   handleChange,
-  values,
   className,
   exitButton,
   reset,
+  skinIsPocket,
+  diffuseStrength,
+  specularStrength,
+  objectTranslationX,
+  objectTranslationZ,
+  objectTranslationY,
+  objectRotationX,
+  objectRotationY,
+  objectRotationZ,
+  cameraFieldOfView,
+  cameraSpeed,
+  cameraDampingFactor,
+  // cameraRadius,
+  // cameraTheta,
+  // cameraPhi,
+  directionalLightIntensity,
+  ambientLight,
+  diffuseLightPositionX,
+  diffuseLightPositionZ,
+  diffuseLightPositionY,
 }) => {
   const { getConfirmation } = useConfirmation();
 
@@ -53,7 +91,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <ToggleSwitch
           label="Slim mode"
           id="pocket-mode"
-          checked={values.skinIsPocket}
+          checked={skinIsPocket}
           onCheckedChange={(checked) => {
             getConfirmation({
               title: "Change skin mode",
@@ -72,7 +110,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       <Accordion label="Skin">
         <Slider
           label="Diffuse Strength"
-          value={values.diffuseStrength}
+          value={diffuseStrength}
           onChange={(value) => handleChange("diffuseStrength", value)}
           max={1}
           min={0}
@@ -82,7 +120,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
         <Slider
           label="Specular Strength"
-          value={values.specularStrength}
+          value={specularStrength}
           onChange={(value) => handleChange("specularStrength", value)}
           max={1}
           min={0}
@@ -97,7 +135,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           type="number"
           onChange={(e) => handleChange("objectTranslationX", e.target.value)}
           error={errors.objectTranslationX}
-          value={values.objectTranslationX}
+          value={objectTranslationX}
           step="any"
           max={100}
           min={-100}
@@ -107,7 +145,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           type="number"
           onChange={(e) => handleChange("objectTranslationZ", e.target.value)}
           error={errors.objectTranslationZ}
-          value={values.objectTranslationZ}
+          value={objectTranslationZ}
           step="any"
         />
         <Input
@@ -115,7 +153,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           type="number"
           onChange={(e) => handleChange("objectTranslationY", e.target.value)}
           error={errors.objectTranslationY}
-          value={values.objectTranslationY}
+          value={objectTranslationY}
           step="any"
         />
 
@@ -123,7 +161,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
         <Slider
           label="Rotation X"
-          value={values.objectRotationX}
+          value={objectRotationX}
           onChange={(value) => handleChange("objectRotationX", value)}
           max={Math.PI}
           min={-Math.PI}
@@ -132,7 +170,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
         <Slider
           label="Rotation Y"
-          value={values.objectRotationY}
+          value={objectRotationY}
           onChange={(value) => handleChange("objectRotationY", value)}
           max={Math.PI}
           min={-Math.PI}
@@ -141,7 +179,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
         <Slider
           label="Rotation Z"
-          value={values.objectRotationZ}
+          value={objectRotationZ}
           onChange={(value) => handleChange("objectRotationZ", value)}
           max={Math.PI}
           min={-Math.PI}
@@ -152,7 +190,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       <Accordion label="Camera">
         <Slider
           label="Field Of View"
-          value={values.cameraFieldOfView}
+          value={cameraFieldOfView}
           onChange={(value) => handleChange("cameraFieldOfView", value)}
           max={Math.PI - 0.1}
           min={0.4}
@@ -163,7 +201,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
         <Slider
           label="Speed"
-          value={values.cameraSpeed}
+          value={cameraSpeed}
           onChange={(value) => handleChange("cameraSpeed", value)}
           max={0.5}
           min={0}
@@ -172,7 +210,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
         <Slider
           label="Damping"
-          value={values.cameraDampingFactor}
+          value={cameraDampingFactor}
           onChange={(value) => handleChange("cameraDampingFactor", value)}
           max={1}
           min={0}
@@ -180,11 +218,11 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           error={errors.cameraDampingFactor}
         />
 
-        <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
+        {/* <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" /> */}
 
-        <Slider
+        {/* <Slider
           label="Zoom Radius"
-          value={values.cameraRadius}
+          value={cameraRadius}
           onChange={(v) => handleChange("cameraRadius", v)}
           min={30}
           max={100}
@@ -194,7 +232,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <Slider
           label="Theta angle (ϴ)"
           loop={true}
-          value={values.cameraTheta}
+          value={cameraTheta}
           onChange={(v) => handleChange("cameraTheta", v)}
           min={0}
           max={Math.PI}
@@ -205,19 +243,19 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <Slider
           label="Phi angle (φ)"
           loop={true}
-          value={values.cameraPhi}
+          value={cameraPhi}
           onChange={(v) => handleChange("cameraPhi", v)}
           min={0}
           max={Math.PI}
           step={0.01}
           formatValue={(v) => `${v.toFixed(1)}°`}
-        />
+        /> */}
       </Accordion>
 
       <Accordion label="Light">
         <Slider
           label="Directional Light"
-          value={values.directionalLightIntensity}
+          value={directionalLightIntensity}
           onChange={(value) => handleChange("directionalLightIntensity", value)}
           max={1}
           min={0}
@@ -226,7 +264,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
         <Slider
           label="Ambient Light"
-          value={values.ambientLight}
+          value={ambientLight}
           onChange={(value) => handleChange("ambientLight", value)}
           max={1}
           min={0}
@@ -241,7 +279,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
             handleChange("diffuseLightPositionX", e.target.value)
           }
           error={errors.diffuseLightPositionX}
-          value={values.diffuseLightPositionX}
+          value={diffuseLightPositionX}
           step="any"
         />
         <Input
@@ -251,7 +289,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
             handleChange("diffuseLightPositionZ", e.target.value)
           }
           error={errors.diffuseLightPositionZ}
-          value={values.diffuseLightPositionZ}
+          value={diffuseLightPositionZ}
           step="any"
         />
         <Input
@@ -261,7 +299,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
             handleChange("diffuseLightPositionY", e.target.value)
           }
           error={errors.diffuseLightPositionY}
-          value={values.diffuseLightPositionY}
+          value={diffuseLightPositionY}
           step="any"
         />
       </Accordion>
@@ -298,7 +336,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
                 cancelText: "Cancel",
               });
               if (confirmed) {
-                reset();
+                reset?.();
               }
             }}
           >

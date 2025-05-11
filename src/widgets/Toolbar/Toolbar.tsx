@@ -1,4 +1,3 @@
-import { Renderer } from "@/core/Renderer";
 import { FormValues } from "@/hooks/useRendererState";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
@@ -15,6 +14,7 @@ import {
   PenToolIcon,
 } from "../../components/Icons/Icons";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
+import { Mode } from "../ActionBar/ActionBar";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -22,8 +22,8 @@ const isMac =
 const cmdKey = isMac ? "⌘" : "Ctrl";
 
 interface FloatingToolbarProps {
-  redo: () => void;
-  undo: () => void;
+  redo: (() => void) | undefined;
+  undo: (() => void) | undefined;
   redoCount: number;
   undoCount: number;
 
@@ -33,12 +33,25 @@ interface FloatingToolbarProps {
   paintMode: "pixel" | "bulk" | "eraser";
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
-  values: FormValues;
+  getUniqueColors: () => string[];
+  mode: Mode;
+  paintColor: string;
   setValues: (
     key: keyof FormValues,
     value: FormValues[keyof FormValues],
   ) => void;
-  renderer: Renderer | null;
+  baseheadVisible: boolean;
+  basebodyVisible: boolean;
+  baseleftArmVisible: boolean;
+  baserightArmVisible: boolean;
+  baseleftLegVisible: boolean;
+  baserightLegVisible: boolean;
+  overlayheadVisible: boolean;
+  overlaybodyVisible: boolean;
+  overlayleftArmVisible: boolean;
+  overlayrightArmVisible: boolean;
+  overlayleftLegVisible: boolean;
+  overlayrightLegVisible: boolean;
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -50,12 +63,24 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   colorPickerActive,
   setPaintMode,
   paintMode,
-
   settingsOpen,
   setSettingsOpen,
-  values,
+  getUniqueColors,
+  mode,
+  paintColor,
   setValues,
-  renderer,
+  baseheadVisible,
+  basebodyVisible,
+  baseleftArmVisible,
+  baserightArmVisible,
+  baseleftLegVisible,
+  baserightLegVisible,
+  overlayheadVisible,
+  overlaybodyVisible,
+  overlayleftArmVisible,
+  overlayrightArmVisible,
+  overlayleftLegVisible,
+  overlayrightLegVisible,
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -70,15 +95,15 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
       <ScrollArea.Root className="max-h-[calc(100dvh-30px)] h-min overflow-y-auto">
         <ScrollArea.Viewport>
           <div className="p-2">
-            {values.mode === "Editing" && (
+            {mode === "Editing" && (
               <>
                 <div className="space-y-2">
                   <ColorPicker
-                    value={values.paintColor}
+                    value={paintColor}
                     onChange={(color) => setValues("paintColor", color)}
                     label="Color picker"
                     id="color-picker"
-                    renderer={renderer}
+                    getUniqueColors={getUniqueColors}
                   />
 
                   <Tooltip.Provider>
@@ -209,8 +234,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         <div>
                           <IconButton
                             label="Undo"
-                            onClick={undo}
-                            disabled={undoCount === 0}
+                            onClick={undo || (() => {})}
+                            disabled={undoCount === 0 && !!undo}
                           >
                             <ReloadIcon className="-scale-x-100 w-full h-full dark:text-white" />
                           </IconButton>
@@ -236,8 +261,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         <div>
                           <IconButton
                             label="Redo"
-                            onClick={redo}
-                            disabled={redoCount === 0}
+                            onClick={redo || (() => {})}
+                            disabled={redoCount === 0 && !!redo}
                           >
                             <ReloadIcon className="w-full h-full dark:text-white" />
                           </IconButton>
@@ -328,11 +353,22 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
       <PartFilterDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        values={values}
+        baseheadVisible={baseheadVisible}
+        basebodyVisible={basebodyVisible}
+        baseleftArmVisible={baseleftArmVisible}
+        baserightArmVisible={baserightArmVisible}
+        baseleftLegVisible={baseleftLegVisible}
+        baserightLegVisible={baserightLegVisible}
+        overlayheadVisible={overlayheadVisible}
+        overlaybodyVisible={overlaybodyVisible}
+        overlayleftArmVisible={overlayleftArmVisible}
+        overlayrightArmVisible={overlayrightArmVisible}
+        overlayleftLegVisible={overlayleftLegVisible}
+        overlayrightLegVisible={overlayrightLegVisible}
         setValues={setValues}
       />
     </div>
   );
 };
 
-export default Toolbar;
+export default React.memo(Toolbar);

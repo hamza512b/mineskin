@@ -9,6 +9,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "preview": "next dev --turbopack --port 3001",
     "format": "prettier --write .",
     "lint": "eslint ."
   },

@@ -6,7 +6,18 @@ import { PartButton } from "./PartButton";
 type PartFilterDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  values: FormValues;
+  baseheadVisible: boolean;
+  basebodyVisible: boolean;
+  baseleftArmVisible: boolean;
+  baserightArmVisible: boolean;
+  baseleftLegVisible: boolean;
+  baserightLegVisible: boolean;
+  overlayheadVisible: boolean;
+  overlaybodyVisible: boolean;
+  overlayleftArmVisible: boolean;
+  overlayrightArmVisible: boolean;
+  overlayleftLegVisible: boolean;
+  overlayrightLegVisible: boolean;
   setValues: (
     key: keyof FormValues,
     value: FormValues[keyof FormValues],
@@ -15,9 +26,20 @@ type PartFilterDialogProps = {
 
 export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   open,
-  onOpenChange,
-  values,
+  baseheadVisible,
+  basebodyVisible,
+  baseleftArmVisible,
+  baserightArmVisible,
+  baseleftLegVisible,
+  baserightLegVisible,
+  overlayheadVisible,
+  overlaybodyVisible,
+  overlayleftArmVisible,
+  overlayrightArmVisible,
+  overlayleftLegVisible,
+  overlayrightLegVisible,
   setValues,
+  onOpenChange,
 }) => {
   const scale = 6;
   const headWidth = 8 * scale;
@@ -37,42 +59,42 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   ) => {
     if (layer === "base") {
       if (part === "head") {
-        setValues(`baseheadVisible`, !values.baseheadVisible);
+        setValues(`baseheadVisible`, !baseheadVisible);
       }
       if (part === "body") {
-        setValues(`basebodyVisible`, !values.basebodyVisible);
+        setValues(`basebodyVisible`, !basebodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`baseleftArmVisible`, !values.baseleftArmVisible);
+        setValues(`baseleftArmVisible`, !baseleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`baserightArmVisible`, !values.baserightArmVisible);
+        setValues(`baserightArmVisible`, !baserightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`baseleftLegVisible`, !values.baseleftLegVisible);
+        setValues(`baseleftLegVisible`, !baseleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`baserightLegVisible`, !values.baserightLegVisible);
+        setValues(`baserightLegVisible`, !baserightLegVisible);
       }
     }
     if (layer === "overlay") {
       if (part === "head") {
-        setValues(`overlayheadVisible`, !values.overlayheadVisible);
+        setValues(`overlayheadVisible`, !overlayheadVisible);
       }
       if (part === "body") {
-        setValues(`overlaybodyVisible`, !values.overlaybodyVisible);
+        setValues(`overlaybodyVisible`, !overlaybodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`overlayleftArmVisible`, !values.overlayleftArmVisible);
+        setValues(`overlayleftArmVisible`, !overlayleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`overlayrightArmVisible`, !values.overlayrightArmVisible);
+        setValues(`overlayrightArmVisible`, !overlayrightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`overlayleftLegVisible`, !values.overlayleftLegVisible);
+        setValues(`overlayleftLegVisible`, !overlayleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`overlayrightLegVisible`, !values.overlayrightLegVisible);
+        setValues(`overlayrightLegVisible`, !overlayrightLegVisible);
       }
     }
   };
@@ -118,7 +140,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Head"
                   tooltip={tooltips.head}
-                  isActive={values.baseheadVisible}
+                  isActive={baseheadVisible}
                   onClick={() => toggleVisibility("base", "head")}
                   width={headWidth}
                   height={headHeight}
@@ -131,7 +153,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Body"
                   tooltip={tooltips.body}
-                  isActive={values.basebodyVisible}
+                  isActive={basebodyVisible}
                   onClick={() => toggleVisibility("base", "body")}
                   width={bodyWidth}
                   height={bodyHeight}
@@ -144,7 +166,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Left Arm"
                   tooltip={tooltips.rightArm}
-                  isActive={values.baseleftArmVisible}
+                  isActive={baseleftArmVisible}
                   onClick={() => toggleVisibility("base", "leftArm")}
                   width={armWidth}
                   height={armHeight}
@@ -157,7 +179,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Right Arm"
                   tooltip={tooltips.leftArm}
-                  isActive={values.baserightArmVisible}
+                  isActive={baserightArmVisible}
                   onClick={() => toggleVisibility("base", "rightArm")}
                   width={armWidth}
                   height={armHeight}
@@ -170,7 +192,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Left Leg"
                   tooltip={tooltips.rightLeg}
-                  isActive={values.baseleftLegVisible}
+                  isActive={baseleftLegVisible}
                   onClick={() => toggleVisibility("base", "leftLeg")}
                   width={legWidth}
                   height={legHeight}
@@ -183,7 +205,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Right Leg"
                   tooltip={tooltips.leftLeg}
-                  isActive={values.baserightLegVisible}
+                  isActive={baserightLegVisible}
                   onClick={() => toggleVisibility("base", "rightLeg")}
                   width={legWidth}
                   height={legHeight}
@@ -211,7 +233,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Head"
                   tooltip={tooltips.head}
-                  isActive={values.overlayheadVisible}
+                  isActive={overlayheadVisible}
                   onClick={() => toggleVisibility("overlay", "head")}
                   width={headWidth}
                   height={headHeight}
@@ -224,7 +246,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Body"
                   tooltip={tooltips.body}
-                  isActive={values.overlaybodyVisible}
+                  isActive={overlaybodyVisible}
                   onClick={() => toggleVisibility("overlay", "body")}
                   width={bodyWidth}
                   height={bodyHeight}
@@ -237,7 +259,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Left Arm"
                   tooltip={tooltips.leftArm}
-                  isActive={values.overlayleftArmVisible}
+                  isActive={overlayleftArmVisible}
                   onClick={() => toggleVisibility("overlay", "leftArm")}
                   width={armWidth}
                   height={armHeight}
@@ -250,7 +272,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Right Arm"
                   tooltip={tooltips.rightArm}
-                  isActive={values.overlayrightArmVisible}
+                  isActive={overlayrightArmVisible}
                   onClick={() => toggleVisibility("overlay", "rightArm")}
                   width={armWidth}
                   height={armHeight}
@@ -263,7 +285,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Left Leg"
                   tooltip={tooltips.leftLeg}
-                  isActive={values.overlayleftLegVisible}
+                  isActive={overlayleftLegVisible}
                   onClick={() => toggleVisibility("overlay", "leftLeg")}
                   width={legWidth}
                   height={legHeight}
@@ -276,7 +298,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 <PartButton
                   label="Right Leg"
                   tooltip={tooltips.rightLeg}
-                  isActive={values.overlayrightLegVisible}
+                  isActive={overlayrightLegVisible}
                   onClick={() => toggleVisibility("overlay", "rightLeg")}
                   width={legWidth}
                   height={legHeight}

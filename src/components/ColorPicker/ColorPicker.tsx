@@ -2,17 +2,16 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Popover from "@radix-ui/react-popover";
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import useMediaQuery from "../../hooks/useMediaQuery";
 import ColorPickerContent from "./ColorPickerContent";
 import { hexToHsv, hsvToHex } from "./colorUtils";
-import useMediaQuery from "../../hooks/useMediaQuery";
-import { Renderer } from "../../core/Renderer";
 
 interface ColorPickerProps {
   value: string;
   onChange: (color: string) => void;
   label: string;
   id: string;
-  renderer: Renderer | null;
+  getUniqueColors: (() => string[]) | undefined;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -20,7 +19,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   onChange,
   label,
   id,
-  renderer,
+  getUniqueColors,
 }) => {
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState(() => hexToHsv(value));
@@ -56,10 +55,10 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   }, [value, isDragging]);
 
   useEffect(() => {
-    if (open && renderer) {
-      setUniqueColors(renderer.getUniqueColors());
+    if (open && getUniqueColors) {
+      setUniqueColors(getUniqueColors());
     }
-  }, [open, renderer]);
+  }, [open, getUniqueColors]);
 
   const commonProps = {
     hsv,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import Button from "@/components/Button";
 import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import { EditorIcon, PreviewIcon } from "@/components/Icons/Icons";
@@ -9,17 +9,17 @@ import {
   UploadIcon,
 } from "@radix-ui/react-icons";
 import clsx from "clsx";
-type Mode = "Preview" | "Editing";
+export type Mode = "Preview" | "Editing";
 
 interface TopBarProps {
   className?: string;
-  downlodTexture: () => void;
-  uploadTexture: () => void;
-  mode: "Preview" | "Editing";
+  downlodTexture: (() => void) | undefined;
+  uploadTexture: ((setError?: (msg: string) => void) => void) | undefined;
+  mode: Mode;
   setMode: (mode: Mode) => void;
 }
 
-export default function ActionBar({
+function ActionBar({
   className,
   downlodTexture,
   uploadTexture,
@@ -49,6 +49,18 @@ export default function ActionBar({
       ),
     },
   ];
+
+  const handleUploadTexture = useCallback(
+    () => {
+      uploadTexture?.();
+    },
+    [uploadTexture],
+  );
+
+  const handleDownloadTexture = useCallback(() => {
+    downlodTexture?.();
+  }, [downlodTexture]);
+
   return (
     <div
       className={clsx(
@@ -70,7 +82,7 @@ export default function ActionBar({
           {/* Desktop buttons */}
           <Button
             variant="secondary"
-            onClick={() => uploadTexture()}
+            onClick={handleUploadTexture}
             leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
           >
             Upload
@@ -78,7 +90,7 @@ export default function ActionBar({
           {mode === "Editing" && (
             <Button
               variant="primary"
-              onClick={() => downlodTexture()}
+              onClick={handleDownloadTexture}
               leftIcon={<DownloadIcon className="h-4 w-4" aria-hidden="true" />}
             >
               Save
@@ -97,13 +109,13 @@ export default function ActionBar({
               }
             >
               <DropdownItem
-                onClick={() => uploadTexture()}
+                onClick={handleUploadTexture}
                 leftIcon={<UploadIcon className="h-4 w-4" />}
               >
                 Upload
               </DropdownItem>
               <DropdownItem
-                onClick={() => downlodTexture()}
+                onClick={downlodTexture}
                 leftIcon={<DownloadIcon className="h-4 w-4" />}
               >
                 Save
@@ -112,7 +124,7 @@ export default function ActionBar({
           ) : (
             <Button
               variant="secondary"
-              onClick={() => uploadTexture()}
+              onClick={handleUploadTexture}
               leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
               size={"sm"}
             >
@@ -124,3 +136,5 @@ export default function ActionBar({
     </div>
   );
 }
+
+export default React.memo(ActionBar);

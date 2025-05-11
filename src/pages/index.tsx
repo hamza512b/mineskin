@@ -2,11 +2,11 @@ import { useRenderer } from "@/hooks/useRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
-import ActionBar from "@/widgets/ActionBar/ActionBar";
+import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
-import PartsPreview from "@/widgets/PartsPreview/PartsPreview";
+import PartsPreview from "@/widgets/tableOfContents/PartsPreview";
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState("");
@@ -28,6 +28,59 @@ export default function Home() {
 
   const { values, errors, handleChange, redoCount, undoCount } =
     useRendererState(renderer);
+
+  const setColorPickerActive = useCallback(
+    (active: boolean) => {
+      handleChange("colorPickerActive", active);
+    },
+    [handleChange],
+  );
+
+  const setPaintMode = useCallback(
+    (mode: "pixel" | "bulk" | "eraser") => {
+      handleChange("paintMode", mode);
+    },
+    [handleChange],
+  );
+
+  const setSettingsOpen = useCallback(
+    (open: boolean) => {
+      setControlPanelOpen(open);
+    },
+    [setControlPanelOpen],
+  );
+
+  const setMode = useCallback(
+    (mode: Mode) => {
+      handleChange("mode", mode);
+    },
+    [handleChange],
+  );
+
+  const undo = useCallback(() => {
+    renderer?.undo();
+  }, [renderer]);
+
+  const redo = useCallback(() => {
+    renderer?.redo();
+  }, [renderer]);
+
+  const downloadTexture = useCallback(() => {
+    renderer?.downloadTexture();
+  }, [renderer]);
+
+  const uploadTexture = useCallback(() => {
+    renderer?.uploadTexture();
+  }, [renderer]);
+
+  const reset = useCallback(() => {
+    renderer?.reset();
+  }, [renderer]);
+
+  const getUniqueColors = useCallback((): string[] => {
+    return renderer?.getUniqueColors() || [];
+  }, [renderer]);
+
   return (
     <>
       <Head>
@@ -100,14 +153,7 @@ export default function Home() {
       <div className="relative flex justify-between h-dvh w-full overflow-hidden">
         <div className="relative flex-1">
           <canvas ref={canvasRef} className="w-full h-full" />
-          {/* <div className="absolute bottom-0 left-0 p-3 md:p-4 flex flex-col items-end gap-2 w-full">
-            {error && <p className="text-red-500 block md:hidden">{error}</p>}
-            <div className="flex gap-2 justify-between w-full items-center">
-              <div className="flex gap-4 items-center">
-                <p className="text-red-500 md:block hidden">{error}</p>
-              </div>
-            </div>
-          </div> */}
+
           <div className="absolute top-0 right-0 p-4 pointer-events-none z-0">
             <GlobalRotationGizmo
               rotation={[values.cameraPhi, values.cameraTheta, 0]}
@@ -120,34 +166,39 @@ export default function Home() {
           </div>
 
           <Toolbar
-            renderer={renderer}
-            values={values}
             setValues={handleChange}
-            redo={() => renderer?.redo()}
-            undo={() => renderer?.undo()}
+            redo={redo}
+            undo={undo}
             redoCount={redoCount}
             undoCount={undoCount}
-            setColorPickerActive={(active) =>
-              handleChange("colorPickerActive", active)
-            }
+            setColorPickerActive={setColorPickerActive}
             colorPickerActive={values.colorPickerActive}
-            setPaintMode={(mode) => handleChange("paintMode", mode)}
+            setPaintMode={setPaintMode}
             paintMode={values.paintMode}
             settingsOpen={controlPanelOpen}
-            setSettingsOpen={setControlPanelOpen}
+            setSettingsOpen={setSettingsOpen}
+            getUniqueColors={getUniqueColors}
+            mode={values.mode}
+            paintColor={values.paintColor}
+            baseheadVisible={values.baseheadVisible}
+            basebodyVisible={values.basebodyVisible}
+            baseleftArmVisible={values.baseleftArmVisible}
+            baserightArmVisible={values.baserightArmVisible}
+            baseleftLegVisible={values.baseleftLegVisible}
+            baserightLegVisible={values.baserightLegVisible}
+            overlayheadVisible={values.overlayheadVisible}
+            overlaybodyVisible={values.overlaybodyVisible}
+            overlayleftArmVisible={values.overlayleftArmVisible}
+            overlayrightArmVisible={values.overlayrightArmVisible}
+            overlayleftLegVisible={values.overlayleftLegVisible}
+            overlayrightLegVisible={values.overlayrightLegVisible}
           />
           <ActionBar
             className={"absolute bottom-0 left-0 right-0"}
-            downlodTexture={() => {
-              renderer?.downloadTexture();
-            }}
-            uploadTexture={() => {
-              renderer?.uploadTexture(setError);
-            }}
+            downlodTexture={downloadTexture}
+            uploadTexture={uploadTexture}
             mode={values.mode}
-            setMode={(mode) => {
-              handleChange("mode", mode);
-            }}
+            setMode={setMode}
           />
         </div>
 
@@ -155,13 +206,30 @@ export default function Home() {
         <DetailPanel
           handleChange={handleChange}
           errors={errors}
-          values={values}
           open={controlPanelOpen}
           setOpen={setControlPanelOpen}
           mode={"preview"}
-          reset={() => {
-            renderer?.reset();
-          }}
+          reset={reset}
+          skinIsPocket={values.skinIsPocket}
+          diffuseStrength={values.diffuseStrength}
+          specularStrength={values.specularStrength}
+          objectTranslationX={values.objectTranslationX}
+          objectTranslationZ={values.objectTranslationZ}
+          objectTranslationY={values.objectTranslationY}
+          objectRotationX={values.objectRotationX}
+          objectRotationY={values.objectRotationY}
+          objectRotationZ={values.objectRotationZ}
+          cameraFieldOfView={values.cameraFieldOfView}
+          cameraSpeed={values.cameraSpeed}
+          cameraDampingFactor={values.cameraDampingFactor}
+          // cameraRadius={values.cameraRadius}
+          // cameraTheta={values.cameraTheta}
+          // cameraPhi={values.cameraPhi}
+          directionalLightIntensity={values.directionalLightIntensity}
+          ambientLight={values.ambientLight}
+          diffuseLightPositionX={values.diffuseLightPositionX}
+          diffuseLightPositionZ={values.diffuseLightPositionZ}
+          diffuseLightPositionY={values.diffuseLightPositionY}
         />
       </div>
     </>
