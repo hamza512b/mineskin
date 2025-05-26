@@ -1,6 +1,6 @@
 # Mineskin – Minecraft Skin Editor and Preview Tool
 
-This is a project and tool for testing and editing Minecraft skins. The tool has gone through many iterations over the years. It is now completely free and open-source under the MIT license.
+This is a project and tool for testing and editing Minecraft skins. The tool has gone through many iterations over the years.
 
 ## Technical Information
 
