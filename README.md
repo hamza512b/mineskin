@@ -11,5 +11,4 @@ I initially used Three.js to build the website, but later wanted to learn more a
 I'm open to contributions. If you have suggestions or improvements, feel free to create an issue or submit a pull request.
 
 ## License
-
-This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for details.
+This project is licensed under AGPL-3.0. Commercial use is only allowed if your version is also AGPL-compliant and open source. Contact me for alternative licensing.
