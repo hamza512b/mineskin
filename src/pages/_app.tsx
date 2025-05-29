@@ -5,7 +5,21 @@ import { AppProps } from "next/app";
 import Script from "next/script";
 import CookiePopup from "@/widgets/CookiePopup";
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MineskinApp({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <GoogleAnalyticsScript />
+      <TooltipProvider>
+        <ConfirmationDialogProvider>
+          <Component {...pageProps} />
+        </ConfirmationDialogProvider>
+      </TooltipProvider>
+      <CookiePopup />
+    </>
+  );
+}
+
+const GoogleAnalyticsScript = () => {
   return (
     <>
       <Script
@@ -26,14 +40,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         gtag('config', '${process.env.NEXT_PUBLIC_TAG_MANAGER}');
         `}
       </Script>
-      <TooltipProvider>
-        <ConfirmationDialogProvider>
-          <Component {...pageProps} />
-        </ConfirmationDialogProvider>
-      </TooltipProvider>
-      <CookiePopup />
     </>
   );
-}
+};
 
-export default MyApp;
+export default MineskinApp;

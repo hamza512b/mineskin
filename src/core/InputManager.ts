@@ -64,13 +64,15 @@ export class InputManager {
         return;
       }
 
-      // Otherwise (pixel mode), proceed as before.
+      // Otherwise (pixel or variation mode), proceed as before.
       if (this.renderer.getMeshHitAt(x, y)) {
         this.isDrawing = true;
         this.renderer.backend.attachedCanvas.style.cursor = "crosshair";
         this.renderer.undoRedoManager?.beginBatch();
         if (this.renderer.state.getPaintMode() === "eraser") {
           this.renderer.eraseAt(x, y);
+        } else if (this.renderer.state.getPaintMode() === "variation") {
+          this.renderer.variateAt(x, y);
         } else {
           this.renderer.drawAt(x, y);
         }
@@ -93,6 +95,8 @@ export class InputManager {
       if (this.isDrawing) {
         if (this.renderer.state.getPaintMode() === "eraser") {
           this.renderer.eraseAt(x, y);
+        } else if (this.renderer.state.getPaintMode() === "variation") {
+          this.renderer.variateAt(x, y);
         } else {
           this.renderer.drawAt(x, y);
         }
@@ -127,6 +131,8 @@ export class InputManager {
             this.renderer.undoRedoManager?.beginBatch();
             if (this.renderer.state.getPaintMode() === "eraser") {
               this.renderer.eraseAt(x, y);
+            } else if (this.renderer.state.getPaintMode() === "variation") {
+              this.renderer.variateAt(x, y);
             } else {
               this.renderer.drawAt(x, y);
             }
@@ -229,6 +235,12 @@ export class InputManager {
     if (e.key === "u") {
       this.renderer.state.setColorPickerActive(false);
       this.renderer.state.setPaintMode("bulk");
+    }
+
+    // V for variation
+    if (e.key === "v") {
+      this.renderer.state.setColorPickerActive(false);
+      this.renderer.state.setPaintMode("variation");
     }
   };
 

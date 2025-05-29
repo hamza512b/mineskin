@@ -103,7 +103,13 @@ const formSchema = z.object({
     .min(0, "Diffuse strength must be positive")
     .max(1, "Diffuse strength cannot exceed 1"),
   colorPickerActive: z.boolean(),
-  paintMode: z.enum(["pixel", "bulk", "eraser"]),
+  paintMode: z.enum(["pixel", "bulk", "eraser", "variation"]),
+  variationIntensity: z
+    .number({
+      invalid_type_error: "Please enter a valid number",
+    })
+    .min(0, "Variation intensity must be positive")
+    .max(1, "Variation intensity cannot exceed 1"),
   baseheadVisible: z.boolean(),
   basebodyVisible: z.boolean(),
   baseleftArmVisible: z.boolean(),

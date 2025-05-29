@@ -12,6 +12,7 @@ import {
   PaintCanIcon,
   PartsFilterIcon,
   PenToolIcon,
+  VariationIcon,
 } from "../../components/Icons/Icons";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import { Mode } from "../ActionBar/ActionBar";
@@ -29,8 +30,8 @@ interface FloatingToolbarProps {
 
   setColorPickerActive: (active: boolean) => void;
   colorPickerActive: boolean;
-  setPaintMode: (mode: "pixel" | "bulk" | "eraser") => void;
-  paintMode: "pixel" | "bulk" | "eraser";
+  setPaintMode: (mode: "pixel" | "bulk" | "eraser" | "variation") => void;
+  paintMode: "pixel" | "bulk" | "eraser" | "variation";
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
   getUniqueColors: () => string[];
@@ -127,8 +128,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                           side="right"
                           sideOffset={5}
                         >
-                          Color picker{" "}
-                          <span className="text-gray-400">({cmdKey}+I)</span>
+                          Color p<span className="underline">i</span>cker{" "}
+                          <span className="text-gray-400">(I)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
                       </Tooltip.Portal>
@@ -159,7 +160,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                           side="right"
                           sideOffset={5}
                         >
-                          Pen tool <span className="text-gray-400">(P)</span>
+                          <span className="underline">P</span>en tool{" "}
+                          <span className="text-gray-400">(P)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
                       </Tooltip.Portal>
@@ -188,7 +190,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                           side="right"
                           sideOffset={5}
                         >
-                          Bulk paint <span className="text-gray-400">(U)</span>
+                          B<span className="underline">u</span>lk paint{" "}
+                          <span className="text-gray-400">(U)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
                       </Tooltip.Portal>
@@ -219,7 +222,40 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                           side="right"
                           sideOffset={5}
                         >
-                          Eraser <span className="text-gray-400">(E)</span>
+                          <span className="underline">E</span>raser{" "}
+                          <span className="text-gray-400">(E)</span>
+                          <Tooltip.Arrow className="fill-gray-800" />
+                        </Tooltip.Content>
+                      </Tooltip.Portal>
+                    </Tooltip.Root>
+                  </Tooltip.Provider>
+
+                  <Tooltip.Provider>
+                    <Tooltip.Root>
+                      <Tooltip.Trigger asChild>
+                        <div>
+                          <IconButton
+                            label="Variation/shading"
+                            onClick={() => {
+                              setPaintMode("variation");
+                              setColorPickerActive(false);
+                            }}
+                            active={
+                              paintMode === "variation" && !colorPickerActive
+                            }
+                          >
+                            <VariationIcon className="w-full h-full dark:text-white" />
+                          </IconButton>
+                        </div>
+                      </Tooltip.Trigger>
+                      <Tooltip.Portal>
+                        <Tooltip.Content
+                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                          side="right"
+                          sideOffset={5}
+                        >
+                          <span className="underline">V</span>ariation/Shading{" "}
+                          <span className="text-gray-400">(V)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
                       </Tooltip.Portal>
@@ -319,7 +355,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Trigger asChild>
                     <div>
                       <IconButton
-                        label="Advanced settings"
+                        label="Settings"
                         onClick={() => setSettingsOpen(!settingsOpen)}
                         active={settingsOpen}
                       >
@@ -333,7 +369,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       side="right"
                       sideOffset={5}
                     >
-                      Advanced settings
+                      Settings
                       <Tooltip.Arrow className="fill-gray-800" />
                     </Tooltip.Content>
                   </Tooltip.Portal>

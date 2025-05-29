@@ -43,7 +43,8 @@ export interface StateShape {
   overlayleftLegVisible: boolean;
   overlayrightLegVisible: boolean;
   colorPickerActive: boolean;
-  paintMode: "pixel" | "bulk" | "eraser";
+  paintMode: "pixel" | "bulk" | "eraser" | "variation";
+  variationIntensity: number;
   directionalLightIntensity: number;
   mode: "Preview" | "Editing";
 }
@@ -201,6 +202,7 @@ export class State {
   private redoCount = 0;
   private colorPickerActive = false;
   private paintMode = "pixel";
+  private variationIntensity = 0.5;
   private directionalLightIntensity = 0.3;
   private baseheadVisible = true;
   private basebodyVisible = true;
@@ -333,6 +335,9 @@ export class State {
   }
   public getPaintMode() {
     return this.paintMode;
+  }
+  public getVariationIntensity() {
+    return this.variationIntensity;
   }
   public getFloorColor() {
     return this.floorColor;
@@ -597,12 +602,20 @@ export class State {
     if (notify) this.notify(this, origin, "colorPickerActive");
   }
   public setPaintMode(
-    mode: "pixel" | "bulk" | "eraser",
+    mode: "pixel" | "bulk" | "eraser" | "variation",
     notify: boolean = true,
     origin?: string,
   ) {
     this.paintMode = mode;
     if (notify) this.notify(this, origin, "paintMode");
+  }
+  public setVariationIntensity(
+    intensity: number,
+    notify: boolean = true,
+    origin?: string,
+  ) {
+    this.variationIntensity = intensity;
+    if (notify) this.notify(this, origin, "variationIntensity");
   }
 
   public setDirectionalLightIntensity(
@@ -653,7 +666,8 @@ export class State {
       overlayleftLegVisible: this.overlayleftLegVisible,
       overlayrightLegVisible: this.overlayrightLegVisible,
       colorPickerActive: this.colorPickerActive,
-      paintMode: this.paintMode as "pixel" | "bulk" | "eraser",
+      variationIntensity: this.variationIntensity,
+      paintMode: this.paintMode as "pixel" | "bulk" | "eraser" | "variation",
       directionalLightIntensity: this.directionalLightIntensity,
       mode: this.mode as "Preview" | "Editing",
     };
@@ -703,6 +717,7 @@ export class State {
 
     this.colorPickerActive = config.colorPickerActive;
     this.paintMode = config.paintMode;
+    this.variationIntensity = config.variationIntensity ?? 0.5;
     this.directionalLightIntensity = config.directionalLightIntensity;
     if (notify) {
       this.notify(this, origin, "all");

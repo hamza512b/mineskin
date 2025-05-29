@@ -4,7 +4,7 @@ import { Renderer } from "../core/Renderer";
 import { State } from "../core/State";
 
 export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
-  const rendererRef = useRef<Renderer | null>(null);
+  const rendererRef = useRef<Renderer>(null);
   const stateRef = useRef<State | null>(null);
 
   // UseEffect is guaranteed to run after the DOM is painted, but after it runs, we need to render.

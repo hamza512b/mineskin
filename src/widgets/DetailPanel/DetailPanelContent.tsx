@@ -42,6 +42,7 @@ export interface DetailPanelProps {
   diffuseLightPositionX: number;
   diffuseLightPositionZ: number;
   diffuseLightPositionY: number;
+  variationIntensity: number;
 }
 export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   errors,
@@ -69,6 +70,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   diffuseLightPositionX,
   diffuseLightPositionZ,
   diffuseLightPositionY,
+  variationIntensity,
 }) => {
   const { getConfirmation } = useConfirmation();
 
@@ -106,6 +108,18 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           }}
         />
       </fieldset>
+
+      <Accordion label="Paint">
+        <Slider
+          label="Variation Intensity"
+          value={variationIntensity}
+          onChange={(value) => handleChange("variationIntensity", value)}
+          max={1}
+          min={0.05}
+          step={0.01}
+          error={errors.variationIntensity}
+        />
+      </Accordion>
 
       <Accordion label="Skin">
         <Slider
@@ -310,6 +324,8 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           <a
             href="https://github.com/hamza512b/minskin/issues"
             className="text-blue-600 dark:text-blue-400 hover:underline"
+            target="_blank"
+            rel="noreferrer"
           >
             GitHub
           </a>

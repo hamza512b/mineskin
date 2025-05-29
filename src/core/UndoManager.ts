@@ -48,6 +48,8 @@ export class UndoRedoManager {
       } else {
         this.undo();
       }
+    } else if (e.ctrlKey && e.key.toLowerCase() === "y") {
+      this.redo();
     }
   };
 

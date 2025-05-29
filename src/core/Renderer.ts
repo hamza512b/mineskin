@@ -1,4 +1,8 @@
-import { sortColors } from "@/components/ColorPicker/colorUtils";
+import {
+  hsvToRgb,
+  rgbToHsv,
+  sortColors,
+} from "@/components/ColorPicker/colorUtils";
 import { Backend } from "./backend/Backend";
 import { InputManager } from "./InputManager";
 import { Mesh, MeshGroup } from "./mesh";
@@ -8,6 +12,7 @@ import { OrbitControl } from "./orbitControl";
 import { computeRay, getMeshAtRay } from "./rayTracing";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
+import { randomInRange } from "@/lib/utils";
 
 const DEFAULT_SKIN = "/steve.png";
 export class Renderer {
@@ -367,7 +372,8 @@ export class Renderer {
     }
     const toHex = (n: number) => ("0" + n.toString(16)).slice(-2);
     const color = `#${toHex(pixel[0])}${toHex(pixel[1])}${toHex(pixel[2])}`;
-    this.state.setPaintColor(color);
+    this.state.setPaintColor(color, true, "App");
+    this.state.save();
     return;
   }
 
@@ -415,6 +421,48 @@ export class Renderer {
       hit.mesh.metadata.u as number,
       hit.mesh.metadata.v as number,
     );
+  }
+
+  public variateAt(x: number, y: number): void {
+    const hit = this.getMeshHitAt(x, y);
+    if (!hit) return;
+
+    const u = hit.mesh.metadata.u as number;
+    const v = hit.mesh.metadata.v as number;
+    const material = this.getMainSkin().material;
+
+    // Get the current pixel color
+    const currentColor = material.getPixel(u, v);
+    if (!currentColor || currentColor[3] === 0) {
+      // If no color or transparent, use the paint color
+      const paintColor = this.state.getPaintColor();
+      material.setPixelHex(u, v, paintColor);
+      return;
+    }
+
+    // Apply variation to the existing color
+    const intensity = this.state.getVariationIntensity();
+    const variedColor = this.applyColorVariation(currentColor, intensity);
+    material.setPixel(
+      u,
+      v,
+      variedColor[0],
+      variedColor[1],
+      variedColor[2],
+      variedColor[3],
+    );
+  }
+
+  private applyColorVariation(
+    color: [number, number, number, number],
+    intensity: number,
+  ): [number, number, number, number] {
+    const hsv = rgbToHsv(color[0], color[1], color[2]);
+
+    // const saturation = hsv.s * 0.05 * intensity * randomInRange(-1, 1);
+    const value = hsv.v + hsv.v * 0.1 * intensity * randomInRange(-1, 1);
+    const rgb = hsvToRgb(hsv.h, hsv.s, value);
+    return [rgb.r, rgb.g, rgb.b, color[3]];
   }
 
   public getUniqueColors(): string[] {
