@@ -594,7 +594,7 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
           "w-24 h-24 rounded-full dark:bg-slate-700/50 dark:hover:bg-slate-700/60 bg-slate-200/50 hover:bg-slate-200/60 pointer-events-auto"
         }
       >
-        <canvas ref={canvasRef} className="w-full h-full" />
+        <canvas ref={canvasRef} className="w-full h-full select-none" />
       </div>
     </div>
   );

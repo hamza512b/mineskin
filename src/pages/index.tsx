@@ -82,7 +82,7 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
 
       <div className="relative flex justify-between h-dvh w-full overflow-hidden">
         <div className="relative flex-1">
-          <canvas ref={canvasRef} className="w-full h-full" />
+          <canvas ref={canvasRef} className="w-full h-full select-none" />
 
           <div className="absolute top-0 right-0 p-4 pointer-events-none z-0">
             <div className="flex items-start justify-end gap-8">
