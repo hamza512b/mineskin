@@ -1,9 +1,10 @@
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import "../styles/global.css";
-import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
+import CookiePopup from "@/widgets/CookiePopup";
 import { AppProps } from "next/app";
 import Script from "next/script";
-import CookiePopup from "@/widgets/CookiePopup";
+import "../styles/global.css";
+import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
+import { Toaster } from "../components/ui/toaster";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 function MineskinApp({ Component, pageProps }: AppProps) {
   return (
@@ -13,6 +14,7 @@ function MineskinApp({ Component, pageProps }: AppProps) {
         <ConfirmationDialogProvider>
           <Component {...pageProps} />
         </ConfirmationDialogProvider>
+        <Toaster />
       </TooltipProvider>
       <CookiePopup />
     </>

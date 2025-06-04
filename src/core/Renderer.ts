@@ -6,7 +6,7 @@ import {
 import { Backend } from "./backend/Backend";
 import { InputManager } from "./InputManager";
 import { Mesh, MeshGroup } from "./mesh";
-import { MeshImageMaterial, Minecraft64SkinMaterial } from "./MeshMaterial";
+import { MeshImageMaterial, MinecraftSkinMaterial } from "./MeshMaterial";
 import { MinecraftSkin } from "./MinecraftSkin";
 import { OrbitControl } from "./orbitControl";
 import { computeRay, getMeshAtRay } from "./rayTracing";
@@ -290,7 +290,6 @@ export class Renderer {
         await new Promise((res, rej) => {
           const reader = new FileReader();
           reader.onload = async () => {
-            console.log("reader.result", reader.result);
             await this.uploadTextureUrl(reader.result as string, setError);
             res(undefined);
           };
@@ -309,20 +308,18 @@ export class Renderer {
     return new Promise((res, rej) => {
       const img = new Image();
       img.onload = () => {
-        if (img.width !== 64 || img.height !== 64) {
-          setError?.("Skin dimensions must be 64x64 pixels.");
-          console.error("Skin dimensions must be 64x64 pixels.");
+        if (img.width !== 64 || ![32, 64].includes(img.height)) {
+          setError?.("Skin dimensions must be 64x64 or 64x32 pixels.");
           return;
         }
-        setError?.("");
         const skin = this.getMainSkin();
         this.undoRedoManager?.beginBatch();
 
-        skin.material = Minecraft64SkinMaterial.createFromImage(
-          img.width,
-          img.height,
-          img,
-        );
+        if (img.height === 64) {
+          skin.material = MinecraftSkinMaterial.createFrom64Image(img);
+        } else {
+          skin.material = MinecraftSkinMaterial.createFrom32Image(img);
+        }
 
         this.state.setSkinIsPocket(
           skin.material.version === "slim",

@@ -1,8 +1,8 @@
-import { Minecraft64SkinMaterial } from "./MeshMaterial";
+import { MinecraftSkinMaterial } from "./MeshMaterial";
 import { Renderer } from "./Renderer";
 
 interface Snapshot {
-  material: Minecraft64SkinMaterial;
+  material: MinecraftSkinMaterial;
   skinIsPocket: boolean;
 }
 

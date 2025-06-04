@@ -386,7 +386,7 @@ export class MeshImageMaterial implements MeshMaterial {
   }
 }
 
-export class Minecraft64SkinMaterial extends MeshImageMaterial {
+export class MinecraftSkinMaterial extends MeshImageMaterial {
   constructor(
     width: number = 64,
     height: number = 64,
@@ -443,11 +443,10 @@ export class Minecraft64SkinMaterial extends MeshImageMaterial {
    * Loads an image from an Image object into the texture
    * @param img The Image object to load
    */
-  static createFromImage(
-    width: number,
-    height: number,
+  static createFrom64Image(
+
     img: HTMLImageElement,
-  ): Minecraft64SkinMaterial {
+  ): MinecraftSkinMaterial {
     // Create a canvas to draw the image and extract its pixel data
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -456,16 +455,73 @@ export class Minecraft64SkinMaterial extends MeshImageMaterial {
       throw new Error("Could not get 2D context from canvas");
     }
 
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = 64;
+    canvas.height = 64;
 
     // Draw the image onto the canvas
     ctx.drawImage(img, 0, 0);
 
     // Get the image data
-    const imageData = ctx.getImageData(0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, 64, 64);
 
-    return new Minecraft64SkinMaterial(width, height, imageData.data);
+    return new MinecraftSkinMaterial(64, 64, imageData.data);
+  }
+
+  static createFrom32Image(
+    img: HTMLImageElement,
+  ): MinecraftSkinMaterial {
+    // Create a canvas to draw the image and extract its pixel data
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Could not get 2D context from canvas");
+    }
+
+    canvas.width = 64;
+    canvas.height = 64;
+
+    // Draw the original image (64x32) onto the canvas (64x64)
+    ctx.drawImage(img, 0, 0);
+
+    // Create a temporary canvas for flipping operations
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    if (!tempCtx) {
+      throw new Error('Could not get 2D context from temporary canvas');
+    }
+    tempCanvas.width = 64;
+    tempCanvas.height = 64;
+
+    // Helper function to crop
+    const cropFlipAndPaste = (srcX: number, srcY: number, width: number, height: number, destX: number, destY: number) => {
+      tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+      tempCtx.drawImage(img, srcX, srcY, width, height, 0, 0, width, height);
+      tempCtx.save();
+      tempCtx.scale(-1, 1);
+      tempCtx.drawImage(tempCanvas, 0, 0, width, height, -width, 0, width, height);
+      tempCtx.restore();
+      ctx.drawImage(tempCanvas, 0, 0, width, height, destX, destY, width, height);
+    };
+
+    // Apply all crop, flip and paste operations from the ImageMagick script
+    cropFlipAndPaste(4, 16, 4, 4, 20, 48);
+    cropFlipAndPaste(8, 16, 4, 4, 24, 48);
+    cropFlipAndPaste(8, 20, 4, 12, 16, 52);
+    cropFlipAndPaste(4, 20, 4, 12, 20, 52);
+    cropFlipAndPaste(0, 20, 4, 12, 24, 52);
+    cropFlipAndPaste(12, 20, 4, 12, 28, 52);
+    cropFlipAndPaste(44, 16, 4, 4, 36, 48);
+    cropFlipAndPaste(48, 16, 4, 4, 40, 48);
+    cropFlipAndPaste(48, 20, 4, 12, 32, 52);
+    cropFlipAndPaste(44, 20, 4, 12, 36, 52);
+    cropFlipAndPaste(40, 20, 4, 12, 40, 52);
+    cropFlipAndPaste(52, 20, 4, 12, 44, 52);
+
+    // Get the image data
+    const imageData = ctx.getImageData(0, 0, 64, 64);
+
+    return new MinecraftSkinMaterial(64, 64, imageData.data);
   }
 
   static createFromImageData(imageData: ImageData) {
@@ -473,7 +529,7 @@ export class Minecraft64SkinMaterial extends MeshImageMaterial {
     const height = imageData.height;
 
     // Create a new with the same dimensions and data
-    return new Minecraft64SkinMaterial(width, height, imageData.data);
+    return new MinecraftSkinMaterial(width, height, imageData.data);
   }
 
   /**
@@ -482,13 +538,13 @@ export class Minecraft64SkinMaterial extends MeshImageMaterial {
    * @param resize Whether to resize the texture to match the loaded image dimensions (default: true)
    * @returns A promise that resolves when the image has been loaded
    */
-  static async createFromUrl(url: string): Promise<Minecraft64SkinMaterial> {
+  static async createFromUrl(url: string): Promise<MinecraftSkinMaterial> {
     return new Promise((resolve, reject) => {
       const img = new Image();
 
       img.onload = () => {
         try {
-          resolve(this.createFromImage(img.width, img.height, img));
+          resolve(this.createFrom64Image(img));
         } catch (error) {
           reject(error);
         }
@@ -502,13 +558,13 @@ export class Minecraft64SkinMaterial extends MeshImageMaterial {
     });
   }
 
-  static async creatFromUrl(url: string): Promise<Minecraft64SkinMaterial> {
-    const mskin = await Minecraft64SkinMaterial.createFromUrl(url);
+  static async creatFromUrl(url: string): Promise<MinecraftSkinMaterial> {
+    const mskin = await MinecraftSkinMaterial.createFromUrl(url);
     return mskin;
   }
 
-  clone(): Minecraft64SkinMaterial {
+  clone(): MinecraftSkinMaterial {
     const newData = new Uint8ClampedArray(this.imageData.data);
-    return new Minecraft64SkinMaterial(this.width, this.height, newData);
+    return new MinecraftSkinMaterial(this.width, this.height, newData);
   }
 }

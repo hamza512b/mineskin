@@ -11,6 +11,7 @@ import { GetStaticProps } from "next";
 import Head from "next/head";
 import path from "path";
 import React, { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export default function Home({ changeloghtml }: { changeloghtml: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -60,7 +61,11 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
   }, [renderer]);
 
   const uploadTexture = useCallback(() => {
-    renderer?.uploadTexture();
+    renderer?.uploadTexture((err) =>
+      toast.error(err, {
+        position: "bottom-center",
+      }),
+    );
   }, [renderer]);
 
   const reset = useCallback(() => {
@@ -90,7 +95,10 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
                 }}
               />
             </div>
-            <PartsPreview values={values} className="w-min ml-auto mr-[30px] mt-8" />
+            <PartsPreview
+              values={values}
+              className="w-min ml-auto mr-[30px] mt-8"
+            />
           </div>
 
           <Toolbar
@@ -233,7 +241,7 @@ export const IndexSEO = React.memo(() => {
   );
 });
 
-IndexSEO.displayName = "IndexSEO"
+IndexSEO.displayName = "IndexSEO";
 
 export const getStaticProps: GetStaticProps = async () => {
   const html = await markdownFileToHtml(path.resolve("./CHANGELOG.md"));

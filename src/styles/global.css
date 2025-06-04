@@ -20,7 +20,8 @@ body {
   position: relative;
   flex: 1;
 }
-.canvasContainer > canvas {
+
+.canvasContainer>canvas {
   width: 100%;
   height: 100%;
 }
@@ -30,10 +31,12 @@ body {
   overflow: hidden;
   height: 100%;
 }
+
 @keyframes slideDown {
   from {
     height: 0;
   }
+
   to {
     height: var(--radix-accordion-content-height);
   }
@@ -43,6 +46,7 @@ body {
   from {
     height: var(--radix-accordion-content-height);
   }
+
   to {
     height: 0;
   }

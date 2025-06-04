@@ -1,10 +1,10 @@
 import { M44, multiplyM44, scaleM44, translateM44 } from "./maths";
 import { MeshGroup, MinecraftPart } from "./mesh";
-import { Minecraft64SkinMaterial } from "./MeshMaterial";
+import { MinecraftSkinMaterial } from "./MeshMaterial";
 import { Layers, Parts, State } from "./State";
 
 export class MinecraftSkin extends MeshGroup {
-  material: Minecraft64SkinMaterial;
+  material: MinecraftSkinMaterial;
 
   // Base layer parts
   baseHead: MinecraftPart | null = null;
@@ -29,7 +29,7 @@ export class MinecraftSkin extends MeshGroup {
   private constructor(
     name: string,
     parent: MeshGroup | null,
-    material: Minecraft64SkinMaterial,
+    material: MinecraftSkinMaterial,
     transformMatrix?: M44,
   ) {
     super(name, parent, transformMatrix);
@@ -42,11 +42,11 @@ export class MinecraftSkin extends MeshGroup {
     texture: string | ImageData,
     transformMatrix?: M44,
   ) {
-    let material: Minecraft64SkinMaterial;
+    let material: MinecraftSkinMaterial;
     if (texture instanceof ImageData) {
-      material = await Minecraft64SkinMaterial.createFromImageData(texture);
+      material = await MinecraftSkinMaterial.createFromImageData(texture);
     } else {
-      material = await Minecraft64SkinMaterial.creatFromUrl(texture);
+      material = await MinecraftSkinMaterial.creatFromUrl(texture);
     }
     const mesh = new MinecraftSkin(name, parent, material, transformMatrix);
     const overlayScale = scaleM44(1.02, 1.02, 1.02);
@@ -287,4 +287,6 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.visible = state.getPartVisibility(layer, part);
   }
+
+
 }
