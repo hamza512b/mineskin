@@ -109,6 +109,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
     rightLeg: "Right Leg",
   };
 
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -138,82 +139,106 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
               >
                 {/* Head – top center */}
                 <PartButton
-                  label="Head"
                   tooltip={tooltips.head}
-                  isActive={baseheadVisible}
                   onClick={() => toggleVisibility("base", "head")}
-                  width={headWidth}
-                  height={headHeight}
                   style={{
                     top: 0,
                     left: (containerWidth - headWidth) / 2,
+                    width: headWidth,
+                    height: headHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: baseheadVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Body – below head */}
                 <PartButton
-                  label="Body"
                   tooltip={tooltips.body}
-                  isActive={basebodyVisible}
                   onClick={() => toggleVisibility("base", "body")}
-                  width={bodyWidth}
-                  height={bodyHeight}
                   style={{
                     top: headHeight,
                     left: (containerWidth - bodyWidth) / 2,
+                    width: bodyWidth,
+                    height: bodyHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: basebodyVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Left Arm – left side (maps to rightArm) */}
                 <PartButton
-                  label="Left Arm"
                   tooltip={tooltips.rightArm}
-                  isActive={baseleftArmVisible}
                   onClick={() => toggleVisibility("base", "leftArm")}
-                  width={armWidth}
-                  height={armHeight}
                   style={{
                     top: headHeight,
                     left: 0,
+                    width: armWidth,
+                    height: armHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: baseleftArmVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Right Arm – right side (maps to leftArm) */}
                 <PartButton
-                  label="Right Arm"
                   tooltip={tooltips.leftArm}
-                  isActive={baserightArmVisible}
                   onClick={() => toggleVisibility("base", "rightArm")}
-                  width={armWidth}
-                  height={armHeight}
                   style={{
                     top: headHeight,
                     left: containerWidth - armWidth,
+                    width: armWidth,
+                    height: armHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: baserightArmVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Left Leg – below body, aligned right */}
                 <PartButton
-                  label="Left Leg"
                   tooltip={tooltips.rightLeg}
-                  isActive={baseleftLegVisible}
                   onClick={() => toggleVisibility("base", "leftLeg")}
-                  width={legWidth}
-                  height={legHeight}
                   style={{
                     top: headHeight + bodyHeight,
                     left: (containerWidth - bodyWidth) / 2,
+                    width: legWidth,
+                    height: legHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: baseleftLegVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Right Leg – below body, aligned left */}
                 <PartButton
-                  label="Right Leg"
                   tooltip={tooltips.leftLeg}
-                  isActive={baserightLegVisible}
                   onClick={() => toggleVisibility("base", "rightLeg")}
-                  width={legWidth}
-                  height={legHeight}
                   style={{
                     top: headHeight + bodyHeight,
                     left:
                       (containerWidth - bodyWidth) / 2 + bodyWidth - legWidth,
+                    width: legWidth,
+                    height: legHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: baserightLegVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
               </div>
             </div>
@@ -231,82 +256,106 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
               >
                 {/* Head */}
                 <PartButton
-                  label="Head"
                   tooltip={tooltips.head}
-                  isActive={overlayheadVisible}
                   onClick={() => toggleVisibility("overlay", "head")}
-                  width={headWidth}
-                  height={headHeight}
                   style={{
                     top: 0,
                     left: (containerWidth - headWidth) / 2,
+                    width: headWidth,
+                    height: headHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlayheadVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Body */}
                 <PartButton
-                  label="Body"
                   tooltip={tooltips.body}
-                  isActive={overlaybodyVisible}
                   onClick={() => toggleVisibility("overlay", "body")}
-                  width={bodyWidth}
-                  height={bodyHeight}
                   style={{
                     top: headHeight,
                     left: (containerWidth - bodyWidth) / 2,
+                    width: bodyWidth,
+                    height: bodyHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlaybodyVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Left Arm */}
                 <PartButton
-                  label="Left Arm"
                   tooltip={tooltips.leftArm}
-                  isActive={overlayleftArmVisible}
                   onClick={() => toggleVisibility("overlay", "leftArm")}
-                  width={armWidth}
-                  height={armHeight}
                   style={{
                     top: headHeight,
                     left: 0,
+                    width: armWidth,
+                    height: armHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlayleftArmVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Right Arm */}
                 <PartButton
-                  label="Right Arm"
                   tooltip={tooltips.rightArm}
-                  isActive={overlayrightArmVisible}
                   onClick={() => toggleVisibility("overlay", "rightArm")}
-                  width={armWidth}
-                  height={armHeight}
                   style={{
                     top: headHeight,
                     left: containerWidth - armWidth,
+                    width: armWidth,
+                    height: armHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlayrightArmVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Left Leg */}
                 <PartButton
-                  label="Left Leg"
                   tooltip={tooltips.leftLeg}
-                  isActive={overlayleftLegVisible}
                   onClick={() => toggleVisibility("overlay", "leftLeg")}
-                  width={legWidth}
-                  height={legHeight}
                   style={{
                     top: headHeight + bodyHeight,
                     left: (containerWidth - bodyWidth) / 2,
+                    width: legWidth,
+                    height: legHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlayleftLegVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
                 {/* Right Leg */}
                 <PartButton
-                  label="Right Leg"
                   tooltip={tooltips.rightLeg}
-                  isActive={overlayrightLegVisible}
                   onClick={() => toggleVisibility("overlay", "rightLeg")}
-                  width={legWidth}
-                  height={legHeight}
                   style={{
                     top: headHeight + bodyHeight,
                     left:
                       (containerWidth - bodyWidth) / 2 + bodyWidth - legWidth,
+                    width: legWidth,
+                    height: legHeight,
+                    border: "1px solid #333",
+                    position: "absolute",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s",
+                    backgroundColor: overlayrightLegVisible ? "#4A90E2" : "#555",
                   }}
+                  className="hover:!bg-[#666]"
                 />
               </div>
             </div>

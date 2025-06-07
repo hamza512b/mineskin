@@ -5,7 +5,7 @@ import { markdownFileToHtml } from "@/utils/markdonwToHtml";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import { ChangelogPopover } from "@/widgets/ChangelogPopover/ChangelogPopover";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
-import PartsPreview from "@/widgets/tableOfContents/PartsPreview";
+import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import { GetStaticProps } from "next";
 import Head from "next/head";
@@ -84,9 +84,12 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
         <div className="relative flex-1">
           <canvas ref={canvasRef} className="w-full h-full select-none" />
 
-          <div className="absolute top-0 right-0 p-4 pointer-events-none z-0">
-            <div className="flex items-start justify-end gap-8">
-              <ChangelogPopover content={changeloghtml} />
+          <div className="absolute top-0 right-0 p-2 pointer-events-none z-0 flex gap-2">
+            <ChangelogPopover
+              content={changeloghtml}
+              className={"pointer-events-auto"}
+            />
+            <div className="flex flex-col gap-6 p-2">
               <GlobalRotationGizmo
                 rotation={[values.cameraPhi, values.cameraTheta, 0]}
                 onRotationChange={(rotation) => {
@@ -94,11 +97,24 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
                   handleChange("cameraTheta", rotation[1]);
                 }}
               />
+              <DesktopPartFilter
+                values={values}
+                baseheadVisible={values.baseheadVisible}
+                basebodyVisible={values.basebodyVisible}
+                baseleftArmVisible={values.baseleftArmVisible}
+                baserightArmVisible={values.baserightArmVisible}
+                baseleftLegVisible={values.baseleftLegVisible}
+                baserightLegVisible={values.baserightLegVisible}
+                overlayheadVisible={values.overlayheadVisible}
+                overlaybodyVisible={values.overlaybodyVisible}
+                overlayleftArmVisible={values.overlayleftArmVisible}
+                overlayrightArmVisible={values.overlayrightArmVisible}
+                overlayleftLegVisible={values.overlayleftLegVisible}
+                overlayrightLegVisible={values.overlayrightLegVisible}
+                setValues={handleChange}
+                className="hidden md:flex"
+              />
             </div>
-            <PartsPreview
-              values={values}
-              className="w-min ml-auto mr-[30px] mt-8"
-            />
           </div>
 
           <Toolbar
@@ -144,7 +160,7 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
           errors={errors}
           open={controlPanelOpen}
           setOpen={setControlPanelOpen}
-          mode={"preview"}
+          mode={values.mode}
           reset={reset}
           skinIsPocket={values.skinIsPocket}
           diffuseStrength={values.diffuseStrength}

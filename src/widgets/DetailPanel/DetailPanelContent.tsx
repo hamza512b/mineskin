@@ -19,7 +19,7 @@ export interface DetailPanelProps {
   className?: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  mode: "editor" | "preview";
+  mode: "Preview" | "Editing";
   exitButton?: React.ReactNode;
   reset: (() => void) | undefined;
   skinIsPocket: boolean;
@@ -50,6 +50,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   className,
   exitButton,
   reset,
+  mode,
   skinIsPocket,
   diffuseStrength,
   specularStrength,
@@ -109,17 +110,19 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
       </fieldset>
 
-      <Accordion label="Paint">
-        <Slider
-          label="Variation Intensity"
-          value={variationIntensity}
-          onChange={(value) => handleChange("variationIntensity", value)}
-          max={1}
-          min={0.05}
-          step={0.01}
-          error={errors.variationIntensity}
-        />
-      </Accordion>
+      {mode === "Editing" && (
+        <Accordion label="Paint">
+          <Slider
+            label="Variation Intensity"
+            value={variationIntensity}
+            onChange={(value) => handleChange("variationIntensity", value)}
+            max={1}
+            min={0.05}
+            step={0.01}
+            error={errors.variationIntensity}
+          />
+        </Accordion>
+      )}
 
       <Accordion label="Skin">
         <Slider

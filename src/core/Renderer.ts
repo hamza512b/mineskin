@@ -456,8 +456,7 @@ export class Renderer {
   ): [number, number, number, number] {
     const hsv = rgbToHsv(color[0], color[1], color[2]);
 
-    // const saturation = hsv.s * 0.05 * intensity * randomInRange(-1, 1);
-    const value = hsv.v + hsv.v * 0.1 * intensity * randomInRange(-1, 1);
+    const value = hsv.v + hsv.v * 0.15 * intensity * randomInRange(-1, 1);
     const rgb = hsvToRgb(hsv.h, hsv.s, value);
     return [rgb.r, rgb.g, rgb.b, color[3]];
   }

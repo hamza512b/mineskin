@@ -1,3 +1,8 @@
+## 2025-06-08
+
+- Add ability to filter parts easily when clicking on small skin modal on deskop.
+- Increase shading feature intensity.
+
 ## 2025-06-04
 
 - Add 64x32 skins support.

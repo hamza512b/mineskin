@@ -2,17 +2,20 @@ import IconButton from "@/components/IconButton/IconButton";
 import * as Icons from "@/components/Icons/Icons";
 import * as Popover from "@radix-ui/react-popover";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface ChangelogPopoverProps {
   content: string;
+  className?: string;
 }
 export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
   content,
+  className,
 }) => {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="pointer-events-auto hidden md:block">
+    <div className={cn("hidden md:block", className)}>
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger asChild>
           <IconButton aria-label="View changelog" label={"Changelog"}>
