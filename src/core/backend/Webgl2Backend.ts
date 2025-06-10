@@ -24,13 +24,13 @@ import { MainProgram } from "./Webgl2Program";
 export default class Webgl2Backend implements Backend {
   private gl: WebGL2RenderingContext;
   private mainProgram: MainProgram;
-  public mainTexture!: WebGLTexture;
   private globalTransformation = identityM44();
   private viewTransformation = identityM44();
   private projectTransformation = identityM44();
   private state?: State;
   private meshes?: MeshGroup;
   attachedCanvas: HTMLCanvasElement;
+  private materialTextureCache: Map<string, WebGLTexture> = new Map();
 
   constructor(canvas: HTMLCanvasElement) {
     this.attachedCanvas = canvas;
@@ -52,7 +52,6 @@ export default class Webgl2Backend implements Backend {
     this.meshes = meshes;
     this.state = state;
     this.meshes.compileBuffers(this.gl, this.mainProgram);
-    this.mainTexture = this.gl.createTexture()!;
   }
   private renderMeshGroup(meshGroup: MeshGroup): void {
     if (!meshGroup.visible) return;
@@ -60,32 +59,40 @@ export default class Webgl2Backend implements Backend {
       console.error("MeshGroup VAO not compiled!");
       return;
     }
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.mainTexture);
     const material = meshGroup.getMaterial();
     if (material instanceof MeshImageMaterial) {
-      this.gl.bindTexture(this.gl.TEXTURE_2D, this.mainTexture);
-      this.gl.texImage2D(
+      if (!this.materialTextureCache.has(material.uuid)) {
+        this.materialTextureCache.set(material.uuid, this.gl.createTexture()!);
+      }
+      this.gl.bindTexture(
         this.gl.TEXTURE_2D,
-        0,
-        this.gl.RGBA,
-        64,
-        64,
-        0,
-        this.gl.RGBA,
-        this.gl.UNSIGNED_BYTE,
-        material.imageData,
+        this.materialTextureCache.get(material.uuid)!,
       );
-      this.gl.generateMipmap(this.gl.TEXTURE_2D);
-      this.gl.texParameteri(
-        this.gl.TEXTURE_2D,
-        this.gl.TEXTURE_MIN_FILTER,
-        this.gl.NEAREST,
-      );
-      this.gl.texParameteri(
-        this.gl.TEXTURE_2D,
-        this.gl.TEXTURE_MAG_FILTER,
-        this.gl.NEAREST,
-      );
+      if (material.isDirty) {
+        this.gl.texImage2D(
+          this.gl.TEXTURE_2D,
+          0,
+          this.gl.RGBA,
+          64,
+          64,
+          0,
+          this.gl.RGBA,
+          this.gl.UNSIGNED_BYTE,
+          material.imageData,
+        );
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        this.gl.texParameteri(
+          this.gl.TEXTURE_2D,
+          this.gl.TEXTURE_MIN_FILTER,
+          this.gl.NEAREST,
+        );
+        this.gl.texParameteri(
+          this.gl.TEXTURE_2D,
+          this.gl.TEXTURE_MAG_FILTER,
+          this.gl.NEAREST,
+        );
+        material.markClean();
+      }
     }
     const m = multiplyM44(
       this.projectTransformation,
@@ -220,8 +227,10 @@ export default class Webgl2Backend implements Backend {
     if (this.mainProgram) {
       this.mainProgram.unmount();
     }
-    if (this.gl && this.mainTexture) {
-      this.gl.deleteTexture(this.mainTexture);
+    if (this.gl) {
+      for (const texture of this.materialTextureCache.values()) {
+        this.gl.deleteTexture(texture);
+      }
     }
 
     if (this.meshes) this.meshes.cleanup(this.gl);
