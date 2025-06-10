@@ -49,7 +49,7 @@ export class MinecraftSkin extends MeshGroup {
       material = await MinecraftSkinMaterial.creatFromUrl(texture);
     }
     const mesh = new MinecraftSkin(name, parent, material, transformMatrix);
-    const overlayScale = scaleM44(1.02, 1.02, 1.02);
+    const overlayScale = scaleM44(9 / 8, 9 / 8, 9 / 8);
     const isPocket = mesh.material.version === "slim";
     const opaqueGroup = new MeshGroup("opaque", mesh);
     const transparentGroup = new MeshGroup("transparent", mesh);

@@ -93,12 +93,12 @@ export class Mesh implements BaseMesh {
     const normalRaw: V3 = [0, 1, 0];
     // prettier-ignore
     const verticesRaw: V3[] = [
-      [- width/2, 0, - depth/2],
-      [- width/2, 0, + depth/2],
-      [+ width/2, 0, - depth/2],
-      [- width/2, 0, + depth/2],
-      [+ width/2, 0, + depth/2],
-      [+ width/2, 0, - depth/2],
+      [- width / 2, 0, - depth / 2],
+      [- width / 2, 0, + depth / 2],
+      [+ width / 2, 0, - depth / 2],
+      [- width / 2, 0, + depth / 2],
+      [+ width / 2, 0, + depth / 2],
+      [+ width / 2, 0, - depth / 2],
     ];
     const rotationMatrix = rotateM33(rotation[0], rotation[1], rotation[2]);
     const normal = multiplyM3V3(rotationMatrix, normalRaw);
@@ -163,7 +163,7 @@ export class MeshGroup implements BaseMesh {
   constructor(name: string, parent: MeshGroup | null, transformMatrix?: M44) {
     this.uuid = uuidv4();
     this.parent = parent || null;
-    this.transformMatrix = transformMatrix || identityM44();
+    this.setTransformMatrix(transformMatrix);
     this.name = name;
   }
   private _visible = true;
@@ -239,14 +239,14 @@ export class MeshGroup implements BaseMesh {
     return this.cachedBoundingBox;
   }
 
-  public setTransformMatrix(matrix: M44) {
-    this.transformMatrix = matrix;
+  public setTransformMatrix(matrix: M44 | undefined) {
+    this.transformMatrix = matrix || identityM44();
     // Invalidate cached values when transform changes
-    this.cachedTransformMatrix = identityM44();
+    this.cachedTransformMatrix = null;
     this.cachedBoundingBox = null;
   }
 
-  private cachedTransformMatrix: M44 = identityM44();
+  private cachedTransformMatrix: M44 | null = null;
 
   public getTransformMatrix(): M44 {
     return (
@@ -429,7 +429,7 @@ export class MinecraftPart extends MeshGroup {
     parent: MeshGroup | null,
     transformMatrix?: M44,
   ) {
-    super(name, parent, transformMatrix);
+    super(name, parent);
     const [width, height, depth] = size;
     const cubeCenter: V3 = position;
 
@@ -572,6 +572,7 @@ export class MinecraftPart extends MeshGroup {
       meshes.push(faceGroup);
     });
     meshes.forEach((group) => this.addMesh(group));
+    if (transformMatrix) this.setTransformMatrix(transformMatrix);
   }
 
   static create(
