@@ -93,7 +93,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
 
   return (
     <div className="absolute top-0 left-0 mt-2 ml-2 transform bg-gray-50 dark:bg-gray-800 rounded-lg items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-transparent dark:border-gray-700 dark:shadow-none">
-      <ScrollArea.Root className="max-h-[calc(100dvh-30px)] h-min overflow-y-auto">
+      <ScrollArea.Root className="max-h-[calc(100dvh-80px)] h-min overflow-y-auto">
         <ScrollArea.Viewport>
           <div className="p-2">
             {mode === "Editing" && (
