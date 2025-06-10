@@ -101,6 +101,7 @@ type LineElement = {
   depth: number;
   baseHSL: string;
 };
+const GizmoPixelRatio = window.devicePixelRatio || 1;
 
 type Element = LineElement | CircleElement;
 
@@ -169,7 +170,7 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     const rect = canvas.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = GizmoPixelRatio;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
@@ -372,9 +373,12 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     pos: { x: number; y: number },
     canvas: HTMLCanvasElement,
   ) => {
-    const center = { x: canvas.width / 2, y: canvas.height / 2 };
-    const radius = Math.min(canvas.width, canvas.height) / 2;
-    return Math.hypot(pos.x - center.x, pos.y - center.y) <= radius;
+    const canvasWidth = canvas.width / GizmoPixelRatio;
+    const canvasHeight = canvas.height / GizmoPixelRatio;
+    const center = { x: canvasWidth / 2, y: canvasHeight / 2 };
+    const radius = Math.min(canvasWidth, canvasHeight) / 2;
+    const res = Math.hypot(pos.x - center.x, pos.y - center.y) <= radius;
+    return res;
   };
 
   const handleClick = (pos: { x: number; y: number }) => {
