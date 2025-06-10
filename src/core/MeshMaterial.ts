@@ -1,7 +1,7 @@
 import { hexToRgb } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 
-class MeshMaterial {
+export class MeshMaterial {
   private _uuid: string;
 
   constructor() {
