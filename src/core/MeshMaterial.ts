@@ -1,14 +1,26 @@
 import { hexToRgb } from "./utils";
+import { v4 as uuidv4 } from "uuid";
 
-export type MeshMaterial = object;
+export class MeshMaterial {
+  private _uuid: string;
 
-export class MeshColorMaterial implements MeshMaterial {
+  constructor() {
+    this._uuid = uuidv4();
+  }
+
+  get uuid(): string {
+    return this._uuid;
+  }
+}
+
+export class MeshColorMaterial extends MeshMaterial {
   private red;
   private blue;
   private green;
   private alpha;
 
   constructor(r: number, g: number, b: number, a: number = 255) {
+    super();
     this.red = r;
     this.green = g;
     this.blue = b;
@@ -26,8 +38,9 @@ export class MeshColorMaterial implements MeshMaterial {
   }
 }
 
-export class MeshImageMaterial implements MeshMaterial {
+export class MeshImageMaterial extends MeshMaterial {
   private image: ImageData;
+  private _isDirty: boolean = true;
 
   /**
    * Creates a new MeshTexture with the specified dimensions
@@ -43,12 +56,14 @@ export class MeshImageMaterial implements MeshMaterial {
     if (initialData && initialData.length !== width * height * 4) {
       throw new Error("Initial data size must match width * height * 4");
     }
+    super();
 
     this.image = new ImageData(
       initialData || new Uint8ClampedArray(width * height * 4).fill(0),
       width,
       height,
     );
+    this._isDirty = true;
   }
 
   /**
@@ -70,6 +85,20 @@ export class MeshImageMaterial implements MeshMaterial {
    */
   get imageData(): ImageData {
     return this.image;
+  }
+
+  /**
+   * Checks if the texture data has been modified and needs re-uploading
+   */
+  get isDirty(): boolean {
+    return this._isDirty;
+  }
+
+  /**
+   * Marks the texture as clean (after it has been uploaded to GPU)
+   */
+  markClean(): void {
+    this._isDirty = false;
   }
 
   /**
@@ -102,6 +131,7 @@ export class MeshImageMaterial implements MeshMaterial {
     data[index + 2] = b;
     data[index + 3] = a;
 
+    this._isDirty = true;
     return true;
   }
 
@@ -193,16 +223,14 @@ export class MeshImageMaterial implements MeshMaterial {
     b: number,
     a: number = 255,
   ): void {
-    // Clamp rectangle to texture bounds
-    const x1 = Math.max(0, Math.min(this.width - 1, x));
-    const y1 = Math.max(0, Math.min(this.height - 1, y));
-    const x2 = Math.max(0, Math.min(this.width, x + width));
-    const y2 = Math.max(0, Math.min(this.height, y + height));
+    const x0 = Math.max(0, Math.min(this.width - 1, Math.floor(x)));
+    const y0 = Math.max(0, Math.min(this.height - 1, Math.floor(y)));
+    const x1 = Math.max(0, Math.min(this.width, Math.floor(x + width)));
+    const y1 = Math.max(0, Math.min(this.height, Math.floor(y + height)));
 
-    // Fill the rectangle pixel by pixel
-    for (let py = y1; py < y2; py++) {
-      for (let px = x1; px < x2; px++) {
-        this.setPixel(px, py, r, g, b, a);
+    for (let cy = y0; cy < y1; cy++) {
+      for (let cx = x0; cx < x1; cx++) {
+        this.setPixel(cx, cy, r, g, b, a);
       }
     }
   }
@@ -263,6 +291,7 @@ export class MeshImageMaterial implements MeshMaterial {
       data[i + 2] = b;
       data[i + 3] = a;
     }
+    this._isDirty = true;
   }
 
   /**
@@ -284,7 +313,14 @@ export class MeshImageMaterial implements MeshMaterial {
    * Clears the entire texture (sets all pixels to transparent)
    */
   clear(): void {
-    this.fill(0, 0, 0, 0);
+    const data = this.image.data;
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
+      data[i + 3] = 0;
+    }
+    this._isDirty = true;
   }
 
   /**
@@ -384,6 +420,10 @@ export class MeshImageMaterial implements MeshMaterial {
     // Create a new MeshImageMaterial with the same dimensions and data
     return new MeshImageMaterial(width, height, imageData.data);
   }
+
+  markDirty(): void {
+    this._isDirty = true;
+  }
 }
 
 export class MinecraftSkinMaterial extends MeshImageMaterial {
@@ -443,10 +483,7 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
    * Loads an image from an Image object into the texture
    * @param img The Image object to load
    */
-  static createFrom64Image(
-
-    img: HTMLImageElement,
-  ): MinecraftSkinMaterial {
+  static createFrom64Image(img: HTMLImageElement): MinecraftSkinMaterial {
     // Create a canvas to draw the image and extract its pixel data
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -467,9 +504,7 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
     return new MinecraftSkinMaterial(64, 64, imageData.data);
   }
 
-  static createFrom32Image(
-    img: HTMLImageElement,
-  ): MinecraftSkinMaterial {
+  static createFrom32Image(img: HTMLImageElement): MinecraftSkinMaterial {
     // Create a canvas to draw the image and extract its pixel data
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -485,23 +520,50 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
     ctx.drawImage(img, 0, 0);
 
     // Create a temporary canvas for flipping operations
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
     if (!tempCtx) {
-      throw new Error('Could not get 2D context from temporary canvas');
+      throw new Error("Could not get 2D context from temporary canvas");
     }
     tempCanvas.width = 64;
     tempCanvas.height = 64;
 
     // Helper function to crop
-    const cropFlipAndPaste = (srcX: number, srcY: number, width: number, height: number, destX: number, destY: number) => {
+    const cropFlipAndPaste = (
+      srcX: number,
+      srcY: number,
+      width: number,
+      height: number,
+      destX: number,
+      destY: number,
+    ) => {
       tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
       tempCtx.drawImage(img, srcX, srcY, width, height, 0, 0, width, height);
       tempCtx.save();
       tempCtx.scale(-1, 1);
-      tempCtx.drawImage(tempCanvas, 0, 0, width, height, -width, 0, width, height);
+      tempCtx.drawImage(
+        tempCanvas,
+        0,
+        0,
+        width,
+        height,
+        -width,
+        0,
+        width,
+        height,
+      );
       tempCtx.restore();
-      ctx.drawImage(tempCanvas, 0, 0, width, height, destX, destY, width, height);
+      ctx.drawImage(
+        tempCanvas,
+        0,
+        0,
+        width,
+        height,
+        destX,
+        destY,
+        width,
+        height,
+      );
     };
 
     // Apply all crop, flip and paste operations from the ImageMagick script

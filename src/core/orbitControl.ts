@@ -3,6 +3,7 @@ import { Renderer } from "./Renderer";
 import { State } from "./State";
 
 export class OrbitControl {
+  private controlling: boolean = false;
   private cursorEnabled = false;
   private rotateVelocity = [0, 0];
   private zoomVelocity = 0;
@@ -24,6 +25,11 @@ export class OrbitControl {
   private constantsListener = this.onConstantsChange.bind(this);
 
   constructor(private renderer: Renderer) {}
+
+  /** Returns true if the orbit control is currently active and responding to user input. */
+  public get isControlling() {
+    return this.controlling;
+  }
 
   public mountListeners() {
     this.debouncedSave = throttle(() => {
@@ -157,15 +163,18 @@ export class OrbitControl {
 
   private onMouseMove(event: MouseEvent) {
     if (!this.cursorEnabled) return;
+    this.controlling = true;
     this.rotateVelocity[0] += event.movementX;
     this.rotateVelocity[1] -= event.movementY;
   }
 
   private onMouseWheel(event: WheelEvent) {
     this.zoomVelocity += event.deltaY;
+    this.controlling = true;
   }
 
   private onTouchStart(event: TouchEvent) {
+    this.controlling = true;
     if (event.touches.length === 1) {
       this.lastTouchX = event.touches[0].pageX;
       this.lastTouchY = event.touches[0].pageY;
@@ -185,12 +194,14 @@ export class OrbitControl {
       this.rotateVelocity[1] -= deltaY;
       this.lastTouchX = event.touches[0].pageX;
       this.lastTouchY = event.touches[0].pageY;
+      this.controlling = true;
     } else if (event.touches.length === 2) {
       const currentPinchDistance = this.getDistanceBetweenTouches(event);
       const pinchDelta =
         currentPinchDistance - (this.initialPinchDistance ?? 0);
       this.zoomVelocity -= pinchDelta * 1.5;
       this.initialPinchDistance = currentPinchDistance;
+      this.controlling = true;
     }
   }
 
@@ -202,23 +213,28 @@ export class OrbitControl {
         this.lastTouchY = event.touches[0].pageY;
       }
       this.initialPinchDistance = null;
+      this.controlling = true;
     }
   }
 
   private onMouseDown() {
     this.cursorEnabled = true;
+    this.controlling = true;
   }
 
   private onMouseUp() {
     this.cursorEnabled = false;
+    this.controlling = false;
   }
 
   private onMouseOut() {
     this.cursorEnabled = false;
+    this.controlling = false;
   }
 
   private onWindowBlur() {
     this.cursorEnabled = false;
+    this.controlling = false;
   }
 
   private onConstantsChange(
@@ -236,6 +252,7 @@ export class OrbitControl {
       return;
     this.rotateVelocity = [0, 0];
     this.zoomVelocity = 0;
+    this.controlling = false;
   }
 
   public update() {

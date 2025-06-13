@@ -101,6 +101,12 @@ type LineElement = {
   depth: number;
   baseHSL: string;
 };
+const GIZMO_DPR =
+  typeof window !== "undefined"
+    ? window.devicePixelRatio
+      ? window.devicePixelRatio
+      : 1
+    : 1;
 
 type Element = LineElement | CircleElement;
 
@@ -169,10 +175,9 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     const rect = canvas.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
+    canvas.width = width * GIZMO_DPR;
+    canvas.height = height * GIZMO_DPR;
+    ctx.scale(GIZMO_DPR, GIZMO_DPR);
     canvas.style.clipPath = `circle(${
       Math.min(width, height) / 2
     }px at 50% 50%)`;
@@ -372,9 +377,12 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     pos: { x: number; y: number },
     canvas: HTMLCanvasElement,
   ) => {
-    const center = { x: canvas.width / 2, y: canvas.height / 2 };
-    const radius = Math.min(canvas.width, canvas.height) / 2;
-    return Math.hypot(pos.x - center.x, pos.y - center.y) <= radius;
+    const canvasWidth = canvas.width / GIZMO_DPR;
+    const canvasHeight = canvas.height / GIZMO_DPR;
+    const center = { x: canvasWidth / 2, y: canvasHeight / 2 };
+    const radius = Math.min(canvasWidth, canvasHeight) / 2;
+    const res = Math.hypot(pos.x - center.x, pos.y - center.y) <= radius;
+    return res;
   };
 
   const handleClick = (pos: { x: number; y: number }) => {

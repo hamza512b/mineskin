@@ -224,14 +224,14 @@ export class Renderer {
     this.state.setCameraRadius(startRadius, true, "parallaxEffect");
 
     // Calculate steps needed for the animation (60 frames per second, animation should be under 1 second)
-    const frameCount = 45; // 0.75 seconds at 60fps
+    const frameCount = 45;
     const fovStep = (initialFOV - startFOV) / frameCount;
     const radiusStep = (initialRadius - startRadius) / frameCount;
 
     let currentFrame = 0;
 
     const animate = () => {
-      if (currentFrame >= frameCount) {
+      if (currentFrame >= frameCount || this.orbitControl.isControlling) {
         // Ensure we end with exact target values
         this.state.setCameraFieldOfView(initialFOV, false, "parallaxEffect");
         this.state.setCameraRadius(initialRadius, false, "parallaxEffect");
