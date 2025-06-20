@@ -1,8 +1,9 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import clsx from "clsx";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useCallback, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { expandShorthand, hexToHsv, hsvToHex } from "./colorUtils";
+import { cn } from "@/lib/utils";
 
 interface ColorPickerContentProps {
   hsv: { h: number; s: number; v: number };
@@ -84,40 +85,45 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = ({
     setTimeout(() => setRecentlyDragged(false), 100);
   };
 
+  const update = useCallback(
+    (type: "h" | "s" | "v", e: React.PointerEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+      const percentage = (x / rect.width) * 100;
+      const buffer = 0;
+      const constrainedPercentage = Math.min(
+        Math.max(percentage, buffer),
+        100 - buffer,
+      );
+      setVisualPosition((prev) => ({
+        ...prev,
+        [type === "h" ? "hue" : type]:
+          constrainedPercentage * (type === "h" ? 3.6 : 1),
+      }));
+      setHsv((prev) => {
+        const newHSV = {
+          ...prev,
+          [type]: constrainedPercentage * (type === "h" ? 3.6 : 1),
+        };
+        const newHex = hsvToHex(newHSV);
+        setHexInput(newHex);
+        onChange(newHex);
+        return newHSV;
+      });
+    },
+    [setHsv, setVisualPosition],
+  );
+
   const updateHue = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
-    const percentage = (x / rect.width) * 100;
-    const buffer = 2;
-    const constrainedPercentage = Math.min(
-      Math.max(percentage, buffer),
-      100 - buffer,
-    );
-    const newH = ((constrainedPercentage - buffer) / (100 - 2 * buffer)) * 360;
-    setVisualPosition((prev) => ({ ...prev, hue: newH }));
-    setLastValidHue(newH);
-    setHsv((prev) => {
-      const newHSV = { h: newH, s: prev.s, v: prev.v };
-      const newHex = hsvToHex(newHSV);
-      setHexInput(newHex);
-      onChange(newHex);
-      return newHSV;
-    });
+    update("h", e);
   };
 
-  const handleHuePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setDragging(true);
-    updateHue(e);
+  const updateSaturation = (e: React.PointerEvent<HTMLDivElement>) => {
+    update("s", e);
   };
-  const handleHuePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.buttons === 1) updateHue(e);
-  };
-  const handleHuePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    setDragging(false);
-    setRecentlyDragged(true);
-    setTimeout(() => setRecentlyDragged(false), 100);
+
+  const updateLightness = (e: React.PointerEvent<HTMLDivElement>) => {
+    update("v", e);
   };
 
   const handleHexInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -215,45 +221,41 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = ({
               <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white to-transparent" />
               <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black to-transparent" />
               <div
-                className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-slate-700"
+                className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-slate-700 outline-none ring-1 ring-black"
                 style={{
                   left: `${visualPosition.s}%`,
                   top: `${100 - visualPosition.v}%`,
                   transform: "translate(-50%, -50%)",
+                  backgroundColor: hsvToHex(hsv),
                 }}
                 aria-hidden="true"
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm dark:text-slate-300 text-slate-900 mb-2 font-semibold">
-              Hue
-            </label>
-            <div
-              className="relative h-8 w-full rounded-lg cursor-pointer focus:outline-none"
-              style={{
-                background:
-                  "linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red)",
-                backgroundSize: "calc(100% - 4%) 100%",
-                backgroundPosition: "2% 0",
-                touchAction: "none",
-              }}
-              onPointerDown={handleHuePointerDown}
-              onPointerMove={handleHuePointerMove}
-              onPointerUp={handleHuePointerUp}
-              role="slider"
-              tabIndex={0}
-              aria-label="Hue selector"
-            >
-              <div
-                className="absolute w-4 h-8 rounded-lg border-2 dark:border-white border-slate-700"
-                style={{
-                  left: `${(visualPosition.hue / 360) * (100 - 4) + 2}%`,
-                  transform: "translateX(-50%)",
-                }}
-                aria-hidden="true"
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <PickerSlider
+              setDragging={setDragging}
+              update={updateHue}
+              setRecentlyDragged={setRecentlyDragged}
+              visualPosition={visualPosition}
+              type="h"
+            />
+
+            <PickerSlider
+              setDragging={setDragging}
+              update={updateSaturation}
+              setRecentlyDragged={setRecentlyDragged}
+              visualPosition={visualPosition}
+              type="s"
+            />
+
+            <PickerSlider
+              setDragging={setDragging}
+              update={updateLightness}
+              setRecentlyDragged={setRecentlyDragged}
+              visualPosition={visualPosition}
+              type="v"
+            />
           </div>
           <div>
             <label
@@ -313,3 +315,93 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = ({
 };
 
 export default React.memo(ColorPickerContent);
+
+const PickerSlider = React.memo(
+  ({
+    setDragging,
+    update,
+    setRecentlyDragged,
+    visualPosition,
+    type,
+    className,
+  }: {
+    setDragging: (dragging: boolean) => void;
+    update: (e: React.PointerEvent<HTMLDivElement>) => void;
+    setRecentlyDragged: (recentlyDragged: boolean) => void;
+    visualPosition: { hue: number; s: number; v: number };
+    type: "h" | "s" | "v";
+    className?: string;
+  }) => {
+    const handleHuePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setDragging(true);
+      update(e);
+    };
+    const handleHuePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.buttons === 1) update(e);
+    };
+    const handleHuePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      setDragging(false);
+      setRecentlyDragged(true);
+      setTimeout(() => setRecentlyDragged(false), 100);
+    };
+
+    const { pos, background, label, ariaLabel } = useMemo(() => {
+      let pos = 0;
+      let background = "";
+      let label = "";
+      let ariaLabel = "";
+      if (type === "h") {
+        pos = visualPosition.hue / 360;
+        background =
+          "linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red)";
+        label = "Hue";
+        ariaLabel = "Hue selector";
+      }
+      if (type === "s") {
+        pos = visualPosition.s / 100;
+        background = `linear-gradient(to right, hsl(${visualPosition.hue}, 100%, 100%), hsl(${visualPosition.hue}, 100%, 50%))`;
+        label = "Saturation";
+        ariaLabel = "Saturation selector";
+      }
+      if (type === "v") {
+        pos = visualPosition.v / 100;
+        background = `linear-gradient(to right, hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 0%), hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 50%), hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 100%))`;
+        label = "Lightness";
+        ariaLabel = "Lightness selector";
+      }
+      return { pos, background, label, ariaLabel };
+    }, [visualPosition, type]);
+
+    return (
+      <div className={cn("flex flex-col gap-1", className)}>
+        <label className="block text-sm dark:text-slate-300 text-slate-900font-semibold">
+          {label}
+        </label>
+        <div
+          className="relative h-4 w-full rounded-lg cursor-pointer focus:outline-none"
+          style={{
+            backgroundImage: background,
+            touchAction: "none",
+          }}
+          onPointerDown={handleHuePointerDown}
+          onPointerMove={handleHuePointerMove}
+          onPointerUp={handleHuePointerUp}
+          role="slider"
+          tabIndex={0}
+          aria-label={ariaLabel}
+        >
+          <div
+            className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-slate-700 outline-none ring-1 ring-black"
+            style={{
+              left: `${pos * (100 - 4) + 2}%`,
+              transform: "translateX(-50%)",
+            }}
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+    );
+  },
+);
