@@ -1,3 +1,8 @@
+## 2025-06-28
+
+- Extruded the second layer to look more like the game.
+- Add option to view grid while editing the second layer.
+
 ## 2025-06-08
 
 - Add ability to filter parts easily when clicking on small skin modal on deskop.
