@@ -5,13 +5,14 @@ in vec3 a_normal;
 
 uniform mat4 u_matrix;
 uniform mat4 u_shadowMatrix;
+uniform bool u_gridLines;
 
 out vec2 v_texcoord;
 out vec3 v_normal;
 out vec4 v_position;
 out vec4 v_shadowCoord;
 
-void main() {
+void main() 
   gl_Position = u_matrix * a_position;
   v_texcoord = a_texcoord;
   v_normal = a_normal;
