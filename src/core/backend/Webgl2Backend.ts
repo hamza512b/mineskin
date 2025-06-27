@@ -34,7 +34,9 @@ export default class Webgl2Backend implements Backend {
 
   constructor(canvas: HTMLCanvasElement) {
     this.attachedCanvas = canvas;
-    const gl = canvas.getContext("webgl2");
+    const gl = canvas.getContext("webgl2", {
+      premultipliedAlpha: false,
+    });
     if (!gl) throw new Error("Could not retrieve WebGL 2 context.");
     this.gl = gl;
     this.mainProgram = new MainProgram(this.gl);
@@ -112,7 +114,10 @@ export default class Webgl2Backend implements Backend {
 
     if (meshGroup.vao) {
       this.gl.bindVertexArray(meshGroup.vao);
-      if (meshGroup.metadata?.overlay && this.state?.getGridVisible() && this.state.getMode() === "Editing") {
+      if (
+        (meshGroup.metadata?.overlay && this.state?.getGridVisible()) ||
+        (!meshGroup.metadata?.overlay && this.state?.getGridVisible())
+      ) {
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
           1,
