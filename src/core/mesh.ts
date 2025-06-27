@@ -295,7 +295,7 @@ export class MeshGroup implements BaseMesh {
     this.linesOffset = this.mergedVertices.length / 3;
     for (const mesh of meshes) {
       // First, collect unique vertices
-      let uniqueVertices: number[] = [];
+      const uniqueVertices: number[] = [];
 
       for (let i = 0; i < mesh.vertices.length; i += 3) {
         const v = mesh.vertices.slice(i, i + 3) as V3;
