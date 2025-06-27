@@ -14,7 +14,7 @@ import {
   translateM44,
   V3,
 } from "../maths";
-import { Mesh, MeshGroup } from "../mesh";
+import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
 import { State } from "../State";
 import { resizeCanvasToDisplaySize } from "../utils";
@@ -48,17 +48,22 @@ export default class Webgl2Backend implements Backend {
   getProjectTransformation(): M44 {
     return this.projectTransformation;
   }
+  private compileMinecraftParts(meshGroup: MeshGroup): void {
+    meshGroup.getChildren().forEach((child) => {
+      if (child instanceof MinecraftPart) {
+        child.compileBuffers(this.gl, this.mainProgram);
+      } else if (child instanceof MeshGroup) {
+        this.compileMinecraftParts(child);
+      }
+    });
+  }
   public onStart(meshes: MeshGroup, state: State) {
     this.meshes = meshes;
     this.state = state;
-    this.meshes.compileBuffers(this.gl, this.mainProgram);
+    this.compileMinecraftParts(meshes);
   }
-  private renderMeshGroup(meshGroup: MeshGroup): void {
+  private renderMeshGroup(meshGroup: MeshGroup, transparent: boolean): void {
     if (!meshGroup.visible) return;
-    if (!meshGroup.vao) {
-      console.error("MeshGroup VAO not compiled!");
-      return;
-    }
     const material = meshGroup.getMaterial();
     if (material instanceof MeshImageMaterial) {
       if (!this.materialTextureCache.has(material.uuid)) {
@@ -104,19 +109,51 @@ export default class Webgl2Backend implements Backend {
       false,
       m,
     );
-    this.gl.bindVertexArray(meshGroup.vao);
-    for (const mesh of meshGroup.getMeshes()) {
-      if (mesh instanceof Mesh) {
-        this.gl.drawArrays(
-          this.gl.TRIANGLES,
-          mesh.vertexOffset,
-          mesh.verticesCount,
+
+    if (meshGroup.vao) {
+      this.gl.bindVertexArray(meshGroup.vao);
+      if (
+        (meshGroup.metadata?.overlay && this.state?.getOverlayGridVisible()) ||
+        (!meshGroup.metadata?.overlay && this.state?.getBaseGridVisible())
+      ) {
+        this.gl.uniform1f(
+          this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
+          1,
         );
-      } else if (mesh instanceof MeshGroup) {
-        this.renderMeshGroup(mesh);
+
+        this.gl.drawArrays(
+          this.gl.LINES,
+          meshGroup.linesOffset,
+          meshGroup.mergedVertices.length / 3 - meshGroup.linesOffset,
+        );
+
+        this.gl.uniform1f(
+          this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
+          0,
+        );
       }
+
+      if (transparent) {
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.depthMask(false);
+      }
+
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);
+
+      if (transparent) {
+        this.gl.disable(this.gl.BLEND);
+        this.gl.depthMask(true);
+      }
+
+      this.gl.bindVertexArray(null);
+    } else {
+      meshGroup.getChildren().forEach((child) => {
+        if (child instanceof MeshGroup) {
+          this.renderMeshGroup(child, transparent);
+        }
+      });
     }
-    this.gl.bindVertexArray(null);
   }
   public onRenderFrame() {
     if (!this.attachedCanvas || !this.meshes || !this.state) return;
@@ -173,8 +210,10 @@ export default class Webgl2Backend implements Backend {
       rotateZM44(this.state.getObjectRotationZ()),
     );
     this.globalTransformation = objectTransformationMatrix;
+
     this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.depthFunc(this.gl.LEQUAL);
+    this.gl.depthFunc(this.gl.LESS);
+    this.gl.depthMask(true);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.gl.useProgram(this.mainProgram.getProgram());
 
@@ -203,7 +242,7 @@ export default class Webgl2Backend implements Backend {
       cameraPosition,
     );
 
-    this.renderMeshGroup(opaqueGroup);
+    this.renderMeshGroup(opaqueGroup, false);
 
     this.gl.uniform1f(
       this.mainProgram.getLocation(
@@ -215,12 +254,8 @@ export default class Webgl2Backend implements Backend {
       this.mainProgram.getLocation("u_useFloorTexture") as WebGLUniformLocation,
       0,
     );
-    this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-    this.gl.depthMask(false);
-    this.renderMeshGroup(transparentGroup);
-    this.gl.depthMask(true);
-    this.gl.disable(this.gl.BLEND);
+
+    this.renderMeshGroup(transparentGroup, true);
   }
   public onEnd() {
     if (this.mainProgram) {

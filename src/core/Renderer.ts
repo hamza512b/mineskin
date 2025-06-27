@@ -57,16 +57,6 @@ export class Renderer {
       state.setSkinIsPocket(skin.material.version === "slim", true, "App");
     }
     renderer.world.addMesh(skin);
-    renderer.world.addMesh(
-      Mesh.createPlane(
-        [0, -18, 0],
-        [1000, 1000],
-        [0, 0, 0],
-        [0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-        renderer.world,
-        "floor",
-      ),
-    );
     return renderer;
   }
 
@@ -92,7 +82,7 @@ export class Renderer {
 
   getMainSkin(): MinecraftSkin {
     const s = this.world
-      .getMeshes()
+      .getChildren()
       .find((grp) => grp.name === "MainSkin") as MinecraftSkin;
 
     return s;
@@ -114,10 +104,10 @@ export class Renderer {
     );
     const skinObject = this.getMainSkin();
     const opaqueGroup = skinObject
-      .getMeshes()
+      .getChildren()
       .find((g: MeshGroup | Mesh) => g.name === "opaque") as MeshGroup;
     const transparentGroup = skinObject
-      .getMeshes()
+      .getChildren()
       .find((g: MeshGroup | Mesh) => g.name === "transparent") as MeshGroup;
     const hitTransparent = transparentGroup
       ? getMeshAtRay(transparentGroup, ray)
@@ -159,7 +149,7 @@ export class Renderer {
       return;
     }
     const skinObject = this.getMainSkin();
-    const directChildren = skinObject.getMeshes();
+    const directChildren = skinObject.getChildren();
     const opaqueGroup = directChildren.find(
       (g: MeshGroup | Mesh) => g.name === "opaque",
     ) as MeshGroup;

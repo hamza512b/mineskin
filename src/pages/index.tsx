@@ -34,6 +34,17 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
     [handleChange],
   );
 
+  const toggleGrid = useCallback(
+    (layer: "base" | "overlay") => {
+      if (layer === "base") {
+        handleChange("baseGridVisible", !values.baseGridVisible);
+      } else {
+        handleChange("overlayGridVisible", !values.overlayGridVisible);
+      }
+    },
+    [handleChange, values.baseGridVisible, values.overlayGridVisible],
+  );
+
   const setSettingsOpen = useCallback(
     (open: boolean) => {
       setControlPanelOpen(open);
@@ -118,6 +129,10 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
                 overlayrightLegVisible={values.overlayrightLegVisible}
                 setValues={handleChange}
                 className="hidden md:flex"
+                baseGridVisible={values.baseGridVisible}
+                overlayGridVisible={values.overlayGridVisible}
+                toggleGrid={toggleGrid}
+                mode={values.mode}
               />
             </div>
           </div>

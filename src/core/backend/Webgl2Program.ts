@@ -38,8 +38,13 @@ uniform float u_floorDiffuse;
 uniform float u_floorSpecular;
 uniform float u_directionalLightIntensity;
 out vec4 outColor;
+uniform bool u_gridLines;
 
-void main() {  
+void main() {
+  if (u_gridLines) {
+    outColor = vec4(0.5, 0.5, 0.5, 1.0);
+    return;
+  }
   vec3 normal = normalize(v_normal);
   vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
   
@@ -116,6 +121,11 @@ export class MainProgram extends RendererProgram {
 
     super(gl, vertexShader, fragmentShader);
 
+    this.setLocation(
+      "u_gridLines",
+      gl.getUniformLocation(this.getProgram(), "u_gridLines")!,
+    );
+    
     this.setLocation(
       "u_matrix",
       gl.getUniformLocation(this.getProgram(), "u_matrix")!,

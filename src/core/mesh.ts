@@ -7,6 +7,7 @@ import {
   M44,
   multiplyM3V3,
   multiplyM44,
+  multiplyM4V3,
   rotateM33,
   scaleVector,
   V2,
@@ -15,7 +16,7 @@ import {
 import { MeshMaterial } from "./MeshMaterial";
 
 type MeshMetadata = {
-  [key: string]: string | number | Record<string, string | number>;
+  [key: string]: string | number | boolean | Record<string, string | number>;
 };
 
 interface BaseMesh {
@@ -31,6 +32,7 @@ export class Mesh implements BaseMesh {
   public normals: number[];
   public uvs: number[];
   readonly verticesCount: number;
+  public linesCount: number = 0;
   public vertexOffset: number = 0;
   readonly metadata: MeshMetadata;
   private transformMatrix = identityM44();
@@ -113,7 +115,7 @@ export class Mesh implements BaseMesh {
     this.transformMatrix = matrix;
   }
 
-  private cachedTransformMatrix: M44 = identityM44();
+  private cachedTransformMatrix: M44 | null = null;
 
   public getTransformMatrix(): M44 {
     return (
@@ -156,6 +158,7 @@ export class MeshGroup implements BaseMesh {
   public mergedNormalsBuffer: WebGLBuffer | null = null;
   public mergedUVsBuffer: WebGLBuffer | null = null;
   public vao: WebGLVertexArrayObject | null = null;
+  public linesOffset: number = 0;
 
   // Cached bounding box
   private cachedBoundingBox: { min: V3; max: V3 } | null = null;
@@ -186,7 +189,7 @@ export class MeshGroup implements BaseMesh {
     this.meshes = this.meshes.filter((m) => m.uuid !== mesh.uuid);
   }
 
-  public getMeshes() {
+  public getChildren() {
     return this.meshes;
   }
 
@@ -235,7 +238,11 @@ export class MeshGroup implements BaseMesh {
       }
     }
 
-    this.cachedBoundingBox = { min, max };
+    const localTransform = this.getTransformMatrix();
+    const transformedMin = multiplyM4V3(localTransform, min);
+    const transformedMax = multiplyM4V3(localTransform, max);
+
+    this.cachedBoundingBox = { min: transformedMin, max: transformedMax };
     return this.cachedBoundingBox;
   }
 
@@ -264,18 +271,69 @@ export class MeshGroup implements BaseMesh {
     this.mergedNormals = [];
     this.mergedUVs = [];
 
-    // For each child mesh
-    for (const mesh of this.meshes) {
-      if (mesh instanceof MeshGroup) {
-        // Recursively compile buffers for nested groups
-        mesh.compileBuffers(gl, mainProgram);
-      } else {
-        // Assign the current vertex offset for picking
-        mesh.vertexOffset = this.mergedVertices.length / 3;
-        // Append the mesh's raw geometry data
-        this.mergedVertices.push(...mesh.vertices);
-        this.mergedNormals.push(...mesh.normals);
-        this.mergedUVs.push(...mesh.uvs);
+    function gatherMeshes(meshGroup: MeshGroup): Mesh[] {
+      const meshes: Mesh[] = [];
+      for (const mesh of meshGroup.getChildren()) {
+        if (mesh instanceof Mesh) {
+          meshes.push(mesh);
+        } else if (mesh instanceof MeshGroup) {
+          meshes.push(...gatherMeshes(mesh));
+        }
+      }
+      return meshes;
+    }
+
+    const meshes = gatherMeshes(this);
+
+    for (const mesh of meshes) {
+      mesh.vertexOffset = this.mergedVertices.length / 3;
+      this.mergedVertices.push(...mesh.vertices);
+      this.mergedNormals.push(...mesh.normals);
+      this.mergedUVs.push(...mesh.uvs);
+    }
+
+    this.linesOffset = this.mergedVertices.length / 3;
+    for (const mesh of meshes) {
+      // First, collect unique vertices
+      let uniqueVertices: number[] = [];
+
+      for (let i = 0; i < mesh.vertices.length; i += 3) {
+        const v = mesh.vertices.slice(i, i + 3) as V3;
+
+        let exists = false;
+        for (let j = 0; j < uniqueVertices.length; j += 3) {
+          const uv = uniqueVertices.slice(j, j + 3) as V3;
+          if (uv[0] === v[0] && uv[1] === v[1] && uv[2] === v[2]) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) continue;
+        uniqueVertices.push(...v);
+      }
+
+      // Create edges between vertices that share coordinates
+      // This creates both horizontal and vertical lines for the grid
+      for (let i = 0; i < uniqueVertices.length; i += 3) {
+        for (let j = i + 3; j < uniqueVertices.length; j += 3) {
+          const v1 = uniqueVertices.slice(i, i + 3) as V3;
+          const v2 = uniqueVertices.slice(j, j + 3) as V3;
+
+          // If two vertices share two coordinates (meaning they're adjacent in a grid)
+          // Create a line between them
+
+          // Count how many coordinates are the same
+          const sameCoords =
+            (v1[0] === v2[0] ? 1 : 0) +
+            (v1[1] === v2[1] ? 1 : 0) +
+            (v1[2] === v2[2] ? 1 : 0);
+
+          // If exactly two coordinates are the same, these vertices should be connected
+          if (sameCoords === 2) {
+            // Add the line segment (both vertices)
+            this.mergedVertices.push(...v1, ...v2);
+          }
+        }
       }
     }
 
@@ -583,8 +641,9 @@ export class MinecraftPart extends MeshGroup {
     name: string,
     parent: MeshGroup | null,
     transformMatrix?: M44,
+    metadata?: MeshMetadata,
   ) {
-    return new MinecraftPart(
+    const part = new MinecraftPart(
       size,
       position,
       textureSize,
@@ -593,5 +652,7 @@ export class MinecraftPart extends MeshGroup {
       parent,
       transformMatrix,
     );
+    part.metadata = { ...part.metadata, ...metadata };
+    return part;
   }
 }

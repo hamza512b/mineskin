@@ -1,5 +1,8 @@
+import IconButton from "@/components/IconButton/IconButton";
 import { FormValues } from "@/hooks/useRendererState";
 import { cn } from "@/lib/utils";
+import { GridIcon } from "@radix-ui/react-icons";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import clsx from "clsx";
 import React from "react";
 import { PartButton } from "./PartButton";
@@ -10,19 +13,23 @@ type PartsComponentProps = {
   baseheadVisible: boolean;
   basebodyVisible: boolean;
   baseleftArmVisible: boolean;
-  baserightArmVisible: boolean,
-  baseleftLegVisible: boolean,
-  baserightLegVisible: boolean,
-  overlayheadVisible: boolean,
-  overlaybodyVisible: boolean,
-  overlayleftArmVisible: boolean,
-  overlayrightArmVisible: boolean,
-  overlayleftLegVisible: boolean,
-  overlayrightLegVisible: boolean,
+  baserightArmVisible: boolean;
+  baseleftLegVisible: boolean;
+  baserightLegVisible: boolean;
+  overlayheadVisible: boolean;
+  overlaybodyVisible: boolean;
+  overlayleftArmVisible: boolean;
+  overlayrightArmVisible: boolean;
+  overlayleftLegVisible: boolean;
+  overlayrightLegVisible: boolean;
   setValues: (
     key: keyof FormValues,
     value: FormValues[keyof FormValues],
   ) => void;
+  toggleGrid: (layer: "base" | "overlay") => void;
+  baseGridVisible: boolean;
+  overlayGridVisible: boolean;
+  mode: "Editing" | "Preview";
 };
 
 const DesktopPartFilter: React.FC<PartsComponentProps> = ({
@@ -41,10 +48,12 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   overlayleftLegVisible,
   overlayrightLegVisible,
   setValues,
+  toggleGrid,
+  baseGridVisible,
+  overlayGridVisible,
+  mode,
 }) => {
-  const containerStyle = {
-
-  } as React.CSSProperties;
+  const containerStyle = {} as React.CSSProperties;
 
   const partBgStyle = {
     backgroundColor: "hsla(0, 10%, 45%, 1)",
@@ -102,143 +111,231 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
     }
   };
 
-
   return (
     <div
       className={clsx("relative flex gap-2", className)}
       style={containerStyle}
     >
       {/* Body */}
-      <div style={{
-        width: `${scale * 32}px`,
-        height: `${scale * 64}px`,
-        overflow: "hidden",
-      }}>
+      <div className="flex flex-col gap-2">
         <div
-          className="relative inline-block w-[32px] h-[64px] box-border"
           style={{
-            transform: `translate(4px, 6px) scale(${scale})`,
+            width: `${scale * 32}px`,
+            height: `${scale * 64}px`,
+            overflow: "hidden",
           }}
         >
-          {/* Head */}
-          <PartButton
-            className={cn("absolute left-[8px] top-0 w-[16px] h-[16px] opacity-100", !values.baseheadVisible && "opacity-65")}
-            onClick={() => toggleVisibility("base", "head")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle head"
+          <div
+            className="relative inline-block w-[32px] h-[64px] box-border"
+            style={{
+              transform: `translate(4px, 6px) scale(${scale})`,
+            }}
           >
-            <span className="sr-only">Toggle head</span>
-          </PartButton>
-          {/* Body */}
-          <PartButton
-            className={cn("absolute left-[8px] top-[16px] w-[16px] h-[24px] [background-position:-16px_0] opacity-100", !values.basebodyVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle body"
-            onClick={() => toggleVisibility("base", "body")}
-          >
-            <span className="sr-only">Toggle body</span>
-          </PartButton>
-          {/* Right Arm */}
-          <PartButton
-            className={cn("absolute left-[24px] top-[16px] w-[8px] h-[24px] [background-position:-32px_0] opacity-100", !values.baserightArmVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle right arm"
-            onClick={() => toggleVisibility("base", "rightArm")}
-          >
-            <span className="sr-only">Toggle right arm</span>
-          </PartButton>
-          {/* Right Leg */}
-          <PartButton
-            className={cn("absolute left-[16px] top-[40px] w-[8px] h-[24px] [background-position:-40px_0] opacity-100", !values.baserightLegVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle right leg"
-            onClick={() => toggleVisibility("base", "rightLeg")}
-          >
-            <span className="sr-only">Toggle right leg</span>
-          </PartButton>
-          {/* Left Arm */}
-          <PartButton
-            className={cn("absolute left-0 top-[16px] w-[8px] h-[24px] [background-position:-48px_0] opacity-100", !values.baseleftArmVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle left arm"
-            onClick={() => toggleVisibility("base", "leftArm")}
-          >
-            <span className="sr-only">Toggle left arm</span>
-          </PartButton>
-          {/* Left Leg */}
-          <PartButton
-            className={cn("absolute left-[8px] top-[40px] w-[8px] h-[24px] [background-position:-56px_0] opacity-100", !values.baseleftLegVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle left leg"
-            onClick={() => toggleVisibility("base", "leftLeg")}
-          >
-            <span className="sr-only">Toggle left leg</span>
-          </PartButton>
+            {/* Head */}
+            <PartButton
+              className={cn(
+                "absolute left-[8px] top-0 w-[16px] h-[16px] opacity-100",
+                !values.baseheadVisible && "opacity-65",
+              )}
+              onClick={() => toggleVisibility("base", "head")}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle head"
+            >
+              <span className="sr-only">Toggle head</span>
+            </PartButton>
+            {/* Body */}
+            <PartButton
+              className={cn(
+                "absolute left-[8px] top-[16px] w-[16px] h-[24px] [background-position:-16px_0] opacity-100",
+                !values.basebodyVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle body"
+              onClick={() => toggleVisibility("base", "body")}
+            >
+              <span className="sr-only">Toggle body</span>
+            </PartButton>
+            {/* Right Arm */}
+            <PartButton
+              className={cn(
+                "absolute left-[24px] top-[16px] w-[8px] h-[24px] [background-position:-32px_0] opacity-100",
+                !values.baserightArmVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle right arm"
+              onClick={() => toggleVisibility("base", "rightArm")}
+            >
+              <span className="sr-only">Toggle right arm</span>
+            </PartButton>
+            {/* Right Leg */}
+            <PartButton
+              className={cn(
+                "absolute left-[16px] top-[40px] w-[8px] h-[24px] [background-position:-40px_0] opacity-100",
+                !values.baserightLegVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle right leg"
+              onClick={() => toggleVisibility("base", "rightLeg")}
+            >
+              <span className="sr-only">Toggle right leg</span>
+            </PartButton>
+            {/* Left Arm */}
+            <PartButton
+              className={cn(
+                "absolute left-0 top-[16px] w-[8px] h-[24px] [background-position:-48px_0] opacity-100",
+                !values.baseleftArmVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle left arm"
+              onClick={() => toggleVisibility("base", "leftArm")}
+            >
+              <span className="sr-only">Toggle left arm</span>
+            </PartButton>
+            {/* Left Leg */}
+            <PartButton
+              className={cn(
+                "absolute left-[8px] top-[40px] w-[8px] h-[24px] [background-position:-56px_0] opacity-100",
+                !values.baseleftLegVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle left leg"
+              onClick={() => toggleVisibility("base", "leftLeg")}
+            >
+              <span className="sr-only">Toggle left leg</span>
+            </PartButton>
+          </div>
         </div>
+        {mode === "Editing" && (
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <IconButton
+                  aria-label="Toggle first layer grid"
+                  label="Toggle first layer grid"
+                  onClick={() => toggleGrid("base")}
+                  active={baseGridVisible}
+                  className="pointer-events-auto bg-blue-50/20 dark:bg-blue-800/20"
+                >
+                  <GridIcon className="w-full h-full dark:text-white" />
+                </IconButton>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <Tooltip.Arrow />
+                Toggle first layer grid
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        )}
       </div>
       {/* Armor */}
-      <div style={{
-        width: `${scale * 32}px`,
-        height: `${scale * 64}px`,
-      }}>
-        <div className="relative inline-block w-[32px] h-[64px] box-border" style={{
-          transform: `translate(4px, 6px) scale(${scale})`,
-        }}>
-          {/* Helmet */}
-          <PartButton
-            className={cn("absolute [background-position:0_-16px] w-[16px] h-[16px] left-[8px] top-0 opacity-100", !values.overlayheadVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle helmet"
-            onClick={() => toggleVisibility("overlay", "head")}
+      <div className="flex flex-col gap-2">
+        <div
+          style={{
+            width: `${scale * 32}px`,
+            height: `${scale * 64}px`,
+          }}
+        >
+          <div
+            className="relative inline-block w-[32px] h-[64px] box-border"
+            style={{
+              transform: `translate(4px, 6px) scale(${scale})`,
+            }}
           >
-            <span className="sr-only">Toggle helmet</span>
-          </PartButton>
-          {/* Jacket */}
-          <PartButton
-            className={cn("absolute [background-position:-16px_-24px] w-[16px] h-[24px] left-[8px] top-[16px] opacity-100", !values.overlaybodyVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle jacket"
-            onClick={() => toggleVisibility("overlay", "body")}
-          >
-            <span className="sr-only">Toggle jacket</span>
-          </PartButton>
-          {/* Right Sleeve */}
-          <PartButton
-            className={cn("absolute [background-position:-32px_-24px] w-[8px] h-[24px] left-[24px] top-[16px] opacity-100", !values.overlayrightArmVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle right sleeve"
-            onClick={() => toggleVisibility("overlay", "rightArm")}
-          >
-            <span className="sr-only">Toggle right sleeve</span>
-          </PartButton>
-          {/* Right Pants */}
-          <PartButton
-            className={cn("absolute [background-position:-40px_-24px] w-[8px] h-[24px] left-[16px] top-[40px] opacity-100", !values.overlayrightLegVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle right pants"
-            onClick={() => toggleVisibility("overlay", "rightLeg")}
-          >
-            <span className="sr-only">Toggle right pants</span>
-          </PartButton>
-          {/* Left Sleeve*/}
-          <PartButton
-            className={cn("absolute [background-position:-48px_-24px] w-[8px] h-[24px] left-0 top-[16px] opacity-100", !values.overlayleftArmVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle left sleeve"
-            onClick={() => toggleVisibility("overlay", "leftArm")}
-          >
-            <span className="sr-only">Toggle left sleeve</span>
-          </PartButton>
-          {/* Left Pants */}
-          <PartButton
-            className={cn("absolute [background-position:-56px_-24px] w-[8px] h-[24px] left-[8px] top-[40px] opacity-100", !values.overlayleftLegVisible && "opacity-65")}
-            style={{ ...partBgStyle }}
-            tooltip="Toggle left pants"
-            onClick={() => toggleVisibility("overlay", "leftLeg")}
-          >
-            <span className="sr-only">Toggle left pants</span>
-          </PartButton>
+            {/* Helmet */}
+            <PartButton
+              className={cn(
+                "absolute [background-position:0_-16px] w-[16px] h-[16px] left-[8px] top-0 opacity-100",
+                !values.overlayheadVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle helmet"
+              onClick={() => toggleVisibility("overlay", "head")}
+            >
+              <span className="sr-only">Toggle helmet</span>
+            </PartButton>
+            {/* Jacket */}
+            <PartButton
+              className={cn(
+                "absolute [background-position:-16px_-24px] w-[16px] h-[24px] left-[8px] top-[16px] opacity-100",
+                !values.overlaybodyVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle jacket"
+              onClick={() => toggleVisibility("overlay", "body")}
+            >
+              <span className="sr-only">Toggle jacket</span>
+            </PartButton>
+            {/* Right Sleeve */}
+            <PartButton
+              className={cn(
+                "absolute [background-position:-32px_-24px] w-[8px] h-[24px] left-[24px] top-[16px] opacity-100",
+                !values.overlayrightArmVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle right sleeve"
+              onClick={() => toggleVisibility("overlay", "rightArm")}
+            >
+              <span className="sr-only">Toggle right sleeve</span>
+            </PartButton>
+            {/* Right Pants */}
+            <PartButton
+              className={cn(
+                "absolute [background-position:-40px_-24px] w-[8px] h-[24px] left-[16px] top-[40px] opacity-100",
+                !values.overlayrightLegVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle right pants"
+              onClick={() => toggleVisibility("overlay", "rightLeg")}
+            >
+              <span className="sr-only">Toggle right pants</span>
+            </PartButton>
+            {/* Left Sleeve*/}
+            <PartButton
+              className={cn(
+                "absolute [background-position:-48px_-24px] w-[8px] h-[24px] left-0 top-[16px] opacity-100",
+                !values.overlayleftArmVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle left sleeve"
+              onClick={() => toggleVisibility("overlay", "leftArm")}
+            >
+              <span className="sr-only">Toggle left sleeve</span>
+            </PartButton>
+            {/* Left Pants */}
+            <PartButton
+              className={cn(
+                "absolute [background-position:-56px_-24px] w-[8px] h-[24px] left-[8px] top-[40px] opacity-100",
+                !values.overlayleftLegVisible && "opacity-65",
+              )}
+              style={{ ...partBgStyle }}
+              tooltip="Toggle left pants"
+              onClick={() => toggleVisibility("overlay", "leftLeg")}
+            >
+              <span className="sr-only">Toggle left pants</span>
+            </PartButton>
+          </div>
         </div>
+        {mode === "Editing" && (
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <IconButton
+                  aria-label="Toggle second layer grid"
+                  label="Toggle second layer grid"
+                  onClick={() => toggleGrid("overlay")}
+                  active={overlayGridVisible}
+                  className="pointer-events-auto bg-blue-50/20 dark:bg-blue-800/20"
+                >
+                  <GridIcon className="w-full h-full dark:text-white" />
+                </IconButton>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <Tooltip.Arrow />
+                Toggle second layer grid
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        )}
       </div>
     </div>
   );
