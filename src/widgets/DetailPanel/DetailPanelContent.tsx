@@ -217,7 +217,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Speed"
+          label="Control Speed"
           value={cameraSpeed}
           onChange={(value) => handleChange("cameraSpeed", value)}
           max={0.5}

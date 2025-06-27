@@ -40,13 +40,13 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
 
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <div>
-                Need help? File an issue on{" "}
+                Need help? Join our discord server on{" "}
                 <a
-                  href="https://github.com/hamza512b/minskin/issues"
+                  href="https://discord.gg/2egvhmqdza"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  GitHub
+                  Discord
                 </a>
               </div>
               <div
