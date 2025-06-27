@@ -126,8 +126,7 @@ const formSchema = z.object({
     invalid_type_error: "Please enter a valid number",
   }),
   mode: z.enum(["Preview", "Editing"]),
-  baseGridVisible: z.boolean(),
-  overlayGridVisible: z.boolean(),
+  gridVisible: z.boolean(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;

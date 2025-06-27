@@ -13,6 +13,7 @@ import {
   PartsFilterIcon,
   PenToolIcon,
   VariationIcon,
+  GridIcon,
 } from "../../components/Icons/Icons";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import { Mode } from "../ActionBar/ActionBar";
@@ -53,6 +54,8 @@ interface FloatingToolbarProps {
   overlayrightArmVisible: boolean;
   overlayleftLegVisible: boolean;
   overlayrightLegVisible: boolean;
+  gridVisible: boolean;
+  toggleGrid: () => void;
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -82,6 +85,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   overlayrightArmVisible,
   overlayleftLegVisible,
   overlayrightLegVisible,
+  gridVisible,
+  toggleGrid,
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -344,6 +349,32 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       sideOffset={5}
                     >
                       Parts Filter
+                      <Tooltip.Arrow className="fill-gray-800" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <div>
+                      <IconButton
+                        label="Grid"
+                        onClick={() => toggleGrid()}
+                        active={gridVisible}
+                      >
+                        <GridIcon className="w-full h-full dark:text-white" />
+                      </IconButton>
+                    </div>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                      side="right"
+                      sideOffset={5}
+                    >
+                      Grid
                       <Tooltip.Arrow className="fill-gray-800" />
                     </Tooltip.Content>
                   </Tooltip.Portal>

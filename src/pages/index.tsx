@@ -34,16 +34,9 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
     [handleChange],
   );
 
-  const toggleGrid = useCallback(
-    (layer: "base" | "overlay") => {
-      if (layer === "base") {
-        handleChange("baseGridVisible", !values.baseGridVisible);
-      } else {
-        handleChange("overlayGridVisible", !values.overlayGridVisible);
-      }
-    },
-    [handleChange, values.baseGridVisible, values.overlayGridVisible],
-  );
+  const toggleGrid = useCallback(() => {
+    handleChange("gridVisible", !values.gridVisible);
+  }, [handleChange, values.gridVisible]);
 
   const setSettingsOpen = useCallback(
     (open: boolean) => {
@@ -129,10 +122,6 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
                 overlayrightLegVisible={values.overlayrightLegVisible}
                 setValues={handleChange}
                 className="hidden md:flex"
-                baseGridVisible={values.baseGridVisible}
-                overlayGridVisible={values.overlayGridVisible}
-                toggleGrid={toggleGrid}
-                mode={values.mode}
               />
             </div>
           </div>
@@ -164,6 +153,8 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
             overlayrightArmVisible={values.overlayrightArmVisible}
             overlayleftLegVisible={values.overlayleftLegVisible}
             overlayrightLegVisible={values.overlayrightLegVisible}
+            gridVisible={values.gridVisible}
+            toggleGrid={toggleGrid}
           />
           <ActionBar
             className={"absolute bottom-0 left-0 right-0"}

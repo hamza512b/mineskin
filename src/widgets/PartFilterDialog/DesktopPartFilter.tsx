@@ -1,8 +1,5 @@
-import IconButton from "@/components/IconButton/IconButton";
 import { FormValues } from "@/hooks/useRendererState";
 import { cn } from "@/lib/utils";
-import { GridIcon } from "@radix-ui/react-icons";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import clsx from "clsx";
 import React from "react";
 import { PartButton } from "./PartButton";
@@ -26,10 +23,6 @@ type PartsComponentProps = {
     key: keyof FormValues,
     value: FormValues[keyof FormValues],
   ) => void;
-  toggleGrid: (layer: "base" | "overlay") => void;
-  baseGridVisible: boolean;
-  overlayGridVisible: boolean;
-  mode: "Editing" | "Preview";
 };
 
 const DesktopPartFilter: React.FC<PartsComponentProps> = ({
@@ -48,10 +41,6 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   overlayleftLegVisible,
   overlayrightLegVisible,
   setValues,
-  toggleGrid,
-  baseGridVisible,
-  overlayGridVisible,
-  mode,
 }) => {
   const containerStyle = {} as React.CSSProperties;
 
@@ -135,7 +124,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-0 w-[16px] h-[16px] opacity-100",
-                !values.baseheadVisible && "opacity-65",
+                !values.baseheadVisible && "opacity-40",
               )}
               onClick={() => toggleVisibility("base", "head")}
               style={{ ...partBgStyle }}
@@ -147,7 +136,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-[16px] w-[16px] h-[24px] [background-position:-16px_0] opacity-100",
-                !values.basebodyVisible && "opacity-65",
+                !values.basebodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle body"
@@ -159,7 +148,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[24px] top-[16px] w-[8px] h-[24px] [background-position:-32px_0] opacity-100",
-                !values.baserightArmVisible && "opacity-65",
+                !values.baserightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right arm"
@@ -171,7 +160,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[16px] top-[40px] w-[8px] h-[24px] [background-position:-40px_0] opacity-100",
-                !values.baserightLegVisible && "opacity-65",
+                !values.baserightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right leg"
@@ -183,7 +172,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-0 top-[16px] w-[8px] h-[24px] [background-position:-48px_0] opacity-100",
-                !values.baseleftArmVisible && "opacity-65",
+                !values.baseleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left arm"
@@ -195,7 +184,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-[40px] w-[8px] h-[24px] [background-position:-56px_0] opacity-100",
-                !values.baseleftLegVisible && "opacity-65",
+                !values.baseleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left leg"
@@ -205,27 +194,6 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             </PartButton>
           </div>
         </div>
-        {mode === "Editing" && (
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <IconButton
-                  aria-label="Toggle first layer grid"
-                  label="Toggle first layer grid"
-                  onClick={() => toggleGrid("base")}
-                  active={baseGridVisible}
-                  className="pointer-events-auto bg-blue-50/20 dark:bg-blue-800/20"
-                >
-                  <GridIcon className="w-full h-full dark:text-white" />
-                </IconButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                <Tooltip.Arrow />
-                Toggle first layer grid
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-        )}
       </div>
       {/* Armor */}
       <div className="flex flex-col gap-2">
@@ -245,7 +213,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:0_-16px] w-[16px] h-[16px] left-[8px] top-0 opacity-100",
-                !values.overlayheadVisible && "opacity-65",
+                !values.overlayheadVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle helmet"
@@ -257,7 +225,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-16px_-24px] w-[16px] h-[24px] left-[8px] top-[16px] opacity-100",
-                !values.overlaybodyVisible && "opacity-65",
+                !values.overlaybodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle jacket"
@@ -269,7 +237,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-32px_-24px] w-[8px] h-[24px] left-[24px] top-[16px] opacity-100",
-                !values.overlayrightArmVisible && "opacity-65",
+                !values.overlayrightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right sleeve"
@@ -281,7 +249,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-40px_-24px] w-[8px] h-[24px] left-[16px] top-[40px] opacity-100",
-                !values.overlayrightLegVisible && "opacity-65",
+                !values.overlayrightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right pants"
@@ -293,7 +261,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-48px_-24px] w-[8px] h-[24px] left-0 top-[16px] opacity-100",
-                !values.overlayleftArmVisible && "opacity-65",
+                !values.overlayleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left sleeve"
@@ -305,7 +273,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-56px_-24px] w-[8px] h-[24px] left-[8px] top-[40px] opacity-100",
-                !values.overlayleftLegVisible && "opacity-65",
+                !values.overlayleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left pants"
@@ -315,27 +283,6 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             </PartButton>
           </div>
         </div>
-        {mode === "Editing" && (
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <IconButton
-                  aria-label="Toggle second layer grid"
-                  label="Toggle second layer grid"
-                  onClick={() => toggleGrid("overlay")}
-                  active={overlayGridVisible}
-                  className="pointer-events-auto bg-blue-50/20 dark:bg-blue-800/20"
-                >
-                  <GridIcon className="w-full h-full dark:text-white" />
-                </IconButton>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                <Tooltip.Arrow />
-                Toggle second layer grid
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-        )}
       </div>
     </div>
   );

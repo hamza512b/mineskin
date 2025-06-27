@@ -47,8 +47,7 @@ export interface StateShape {
   variationIntensity: number;
   directionalLightIntensity: number;
   mode: "Preview" | "Editing";
-  baseGridVisible: boolean;
-  overlayGridVisible: boolean;
+  gridVisible: boolean;
 }
 const old_localstorage_string = "rendererConfig_editor";
 const current_localstorage_string = "rendererConfig_1";
@@ -219,8 +218,7 @@ export class State {
   private overlayleftLegVisible = true;
   private overlayrightLegVisible = true;
   private mode = "Preview" as "Preview" | "Editing";
-  private baseGridVisible = false;
-  private overlayGridVisible = false;
+  private gridVisible = true;
 
   private listeners: ((
     constants: State,
@@ -319,11 +317,8 @@ export class State {
   public getDirectionalLightIntensity() {
     return this.directionalLightIntensity;
   }
-  public getBaseGridVisible() {
-    return this.baseGridVisible;
-  }
-  public getOverlayGridVisible() {
-    return this.overlayGridVisible;
+  public getGridVisible() {
+    return this.gridVisible;
   }
   public getPaintOverlay(): boolean {
     const layers = [
@@ -680,8 +675,7 @@ export class State {
       paintMode: this.paintMode as "pixel" | "bulk" | "eraser" | "variation",
       directionalLightIntensity: this.directionalLightIntensity,
       mode: this.mode as "Preview" | "Editing",
-      baseGridVisible: this.baseGridVisible,
-      overlayGridVisible: this.overlayGridVisible,
+      gridVisible: this.gridVisible,
     };
   }
 
@@ -726,8 +720,7 @@ export class State {
     this.overlayleftLegVisible = config.overlayleftLegVisible;
     this.overlayrightLegVisible = config.overlayrightLegVisible;
     this.mode = config.mode;
-    this.baseGridVisible = config.baseGridVisible;
-    this.overlayGridVisible = config.overlayGridVisible;
+    this.gridVisible = config.gridVisible;
 
     this.colorPickerActive = config.colorPickerActive;
     this.paintMode = config.paintMode;

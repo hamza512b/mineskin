@@ -113,7 +113,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       {mode === "Editing" && (
         <Accordion label="Paint">
           <Slider
-            label="Variation Intensity"
+            label="Variation Tool Intensity"
             value={variationIntensity}
             onChange={(value) => handleChange("variationIntensity", value)}
             max={1}
