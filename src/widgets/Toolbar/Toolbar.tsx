@@ -355,31 +355,33 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                 </Tooltip.Root>
               </Tooltip.Provider>
 
-              <Tooltip.Provider>
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <div>
-                      <IconButton
-                        label="Grid"
-                        onClick={() => toggleGrid()}
-                        active={gridVisible}
+              {mode === "Editing" && (
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div>
+                        <IconButton
+                          label="Grid"
+                          onClick={() => toggleGrid()}
+                          active={gridVisible}
+                        >
+                          <GridIcon className="w-full h-full dark:text-white" />
+                        </IconButton>
+                      </div>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                        side="right"
+                        sideOffset={5}
                       >
-                        <GridIcon className="w-full h-full dark:text-white" />
-                      </IconButton>
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side="right"
-                      sideOffset={5}
-                    >
-                      Grid
-                      <Tooltip.Arrow className="fill-gray-800" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </Tooltip.Provider>
+                        Grid
+                        <Tooltip.Arrow className="fill-gray-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              )}
 
               <Tooltip.Provider>
                 <Tooltip.Root>
