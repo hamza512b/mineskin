@@ -34,9 +34,7 @@ export default class Webgl2Backend implements Backend {
 
   constructor(canvas: HTMLCanvasElement) {
     this.attachedCanvas = canvas;
-    const gl = canvas.getContext("webgl2", {
-      premultipliedAlpha: false,
-    });
+    const gl = canvas.getContext("webgl2");
     if (!gl) throw new Error("Could not retrieve WebGL 2 context.");
     this.gl = gl;
     this.mainProgram = new MainProgram(this.gl);
@@ -115,8 +113,9 @@ export default class Webgl2Backend implements Backend {
     if (meshGroup.vao) {
       this.gl.bindVertexArray(meshGroup.vao);
       if (
-        (meshGroup.metadata?.overlay && this.state?.getGridVisible()) ||
-        (!meshGroup.metadata?.overlay && this.state?.getGridVisible())
+        meshGroup.metadata?.overlay &&
+        this.state?.getGridVisible() &&
+        this.state.getMode() === "Editing"
       ) {
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
@@ -135,18 +134,7 @@ export default class Webgl2Backend implements Backend {
         );
       }
 
-      if (transparent) {
-        this.gl.enable(this.gl.BLEND);
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        this.gl.depthMask(true);
-      }
-
       this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);
-
-      if (transparent) {
-        this.gl.disable(this.gl.BLEND);
-        this.gl.depthMask(false);
-      }
 
       this.gl.bindVertexArray(null);
     } else {
@@ -169,6 +157,9 @@ export default class Webgl2Backend implements Backend {
     const transparentGroup = this.meshes.findMeshes(
       (g) => g.name === "transparent",
     )[0] as MeshGroup;
+
+    this.gl.depthMask(true);
+    this.gl.disable(this.gl.CULL_FACE);
 
     const lightPosition: V3 = [
       -this.state.getDiffuseLightPositionX(),

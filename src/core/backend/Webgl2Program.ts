@@ -54,6 +54,9 @@ void main() {
   float specular = pow(max(dot(viewDir, reflectDir), 0.0), 50.0);
   
   vec4 texelColor = u_useFloorTexture ? vec4(u_floorColor, 1.0) : texture(u_skinTexture, v_texcoord);
+  if (texelColor.a < 1.0) {
+    discard;
+  }
   float objectDiffuse = u_useFloorTexture ? u_floorDiffuse : u_diffuseStrength;
   float objectSpecular = u_useFloorTexture ? u_floorSpecular : u_specularStrength;
 
@@ -125,7 +128,7 @@ export class MainProgram extends RendererProgram {
       "u_gridLines",
       gl.getUniformLocation(this.getProgram(), "u_gridLines")!,
     );
-    
+
     this.setLocation(
       "u_matrix",
       gl.getUniformLocation(this.getProgram(), "u_matrix")!,
