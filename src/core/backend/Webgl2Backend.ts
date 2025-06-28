@@ -138,14 +138,14 @@ export default class Webgl2Backend implements Backend {
       if (transparent) {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        this.gl.depthMask(false);
+        this.gl.depthMask(true);
       }
 
       this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);
 
       if (transparent) {
         this.gl.disable(this.gl.BLEND);
-        this.gl.depthMask(true);
+        this.gl.depthMask(false);
       }
 
       this.gl.bindVertexArray(null);
@@ -169,8 +169,6 @@ export default class Webgl2Backend implements Backend {
     const transparentGroup = this.meshes.findMeshes(
       (g) => g.name === "transparent",
     )[0] as MeshGroup;
-
-    this.gl.disable(this.gl.CULL_FACE);
 
     const lightPosition: V3 = [
       -this.state.getDiffuseLightPositionX(),

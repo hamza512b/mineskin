@@ -161,7 +161,7 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(0, 0, 0),
-        scaleM44(9 / 8, 13 / 12, 5 / 4),
+        scaleM44(9 / 8, 13.5 / 12, 4.5 / 4),
         translateM44(0, 0, 0),
       ),
       {
@@ -179,7 +179,7 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(-2, -12, 0),
-        scaleM44(5 / 4, 13 / 12, 5 / 4),
+        scaleM44(4.5 / 4, 13.5 / 12, 5 / 4),
         translateM44(2, 12, 0),
       ),
       {
