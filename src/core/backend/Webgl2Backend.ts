@@ -117,21 +117,41 @@ export default class Webgl2Backend implements Backend {
         this.state?.getGridVisible() &&
         this.state.getMode() === "Editing"
       ) {
+        // Save current depth state
+        const currentDepthFunc = this.gl.getParameter(this.gl.DEPTH_FUNC);
+        const currentDepthMask = this.gl.getParameter(this.gl.DEPTH_WRITEMASK);
+        
+        // Adjust depth testing for grid lines to prevent z-fighting
+        this.gl.depthFunc(this.gl.LEQUAL); // Allow grid lines to render at same depth
+        this.gl.depthMask(false); // Don't write to depth buffer for grid lines
+        
+        // Enable polygon offset to push grid lines slightly forward
+        this.gl.enable(this.gl.POLYGON_OFFSET_FILL);
+        this.gl.polygonOffset(-1.0, -1.0);
+
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
           1,
         );
 
+        const lineVertexCount =
+          meshGroup.mergedVertices.length / 3 - meshGroup.linesOffset;
+
         this.gl.drawArrays(
-          this.gl.LINES,
+          this.gl.TRIANGLES,
           meshGroup.linesOffset,
-          meshGroup.mergedVertices.length / 3 - meshGroup.linesOffset,
+          lineVertexCount,
         );
 
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
           0,
         );
+        
+        // Restore previous WebGL state
+        this.gl.disable(this.gl.POLYGON_OFFSET_FILL);
+        this.gl.depthFunc(currentDepthFunc);
+        this.gl.depthMask(currentDepthMask);
       }
 
       this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);

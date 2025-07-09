@@ -3,11 +3,14 @@ import { v4 as uuidv4 } from "uuid";
 import { MainProgram } from "./backend/Webgl2Program";
 import {
   addV3,
+  cross,
+  subtractV3,
   identityM44,
   M44,
   multiplyM3V3,
   multiplyM44,
   multiplyM4V3,
+  normalize,
   rotateM33,
   scaleVector,
   V2,
@@ -23,6 +26,195 @@ interface BaseMesh {
   readonly uuid: string;
   calculateCentroid(): V3;
   visible: boolean;
+}
+
+// Helper function to create triangle-based line rendering visible from all angles
+function createTriangleLine(
+  v1: V3,
+  v2: V3,
+  lineWidth: number = 0.01,
+): { vertices: number[]; normals: number[]; uvs: number[] } {
+  const direction: V3 = [v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]];
+  const length = Math.sqrt(
+    direction[0] * direction[0] +
+      direction[1] * direction[1] +
+      direction[2] * direction[2],
+  );
+
+  if (length === 0) {
+    return { vertices: [], normals: [], uvs: [] };
+  }
+
+  // Normalize direction
+  const normalizedDir: V3 = normalize(direction);
+
+  // Create two perpendicular vectors to make the line visible from all angles
+  let perp: V3;
+
+  // Choose initial perpendicular vector
+  if (Math.abs(normalizedDir[0]) < 0.9) {
+    perp = [1, 0, 0];
+  } else {
+    perp = [0, 1, 0];
+  }
+
+  const cross1: V3 = cross(normalizedDir, perp);
+
+  const normalizedCross1: V3 = normalize(cross1);
+
+  // Second perpendicular (cross of direction and first perpendicular)
+  const cross2: V3 = cross(normalizedDir, normalizedCross1);
+
+  const normalizedCross2: V3 = normalize(cross2);
+
+  const halfWidth = lineWidth * 0.5;
+
+  // Create 4 vertices around the line using both perpendicular vectors
+  const offset1: V3 = scaleVector(normalizedCross1, halfWidth);
+  const offset2: V3 = scaleVector(normalizedCross2, halfWidth);
+
+  // Create vertices for both ends of the line
+  const v1_p1: V3 = addV3(v1, offset1);
+  const v1_n1: V3 = subtractV3(v1, offset1);
+  const v1_p2: V3 = addV3(v1, offset2);
+  const v1_n2: V3 = subtractV3(v1, offset2);
+
+  const v2_p1: V3 = addV3(v2, offset1);
+  const v2_n1: V3 = subtractV3(v2, offset1);
+  const v2_p2: V3 = addV3(v2, offset2);
+  const v2_n2: V3 = subtractV3(v2, offset2);
+
+  // Create 4 triangular faces to form a rectangular tube
+  const vertices = [
+    // Face 1: +perp1 side
+    ...v1_p1,
+    ...v2_p1,
+    ...v1_p2,
+    ...v2_p1,
+    ...v2_p2,
+    ...v1_p2,
+
+    // Face 2: -perp1 side
+    ...v1_n1,
+    ...v1_n2,
+    ...v2_n1,
+    ...v2_n1,
+    ...v1_n2,
+    ...v2_n2,
+
+    // Face 3: +perp2 side
+    ...v1_p2,
+    ...v2_p2,
+    ...v1_n1,
+    ...v2_p2,
+    ...v2_n1,
+    ...v1_n1,
+
+    // Face 4: -perp2 side
+    ...v1_p1,
+    ...v1_n2,
+    ...v2_p1,
+    ...v2_p1,
+    ...v1_n2,
+    ...v2_n2,
+  ];
+
+  // Create normals for each face
+  const normals = [
+    // Face 1 normals
+    ...normalizedCross1,
+    ...normalizedCross1,
+    ...normalizedCross1,
+    ...normalizedCross1,
+    ...normalizedCross1,
+    ...normalizedCross1,
+
+    // Face 2 normals
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+    ...([
+      -normalizedCross1[0],
+      -normalizedCross1[1],
+      -normalizedCross1[2],
+    ] as V3),
+
+    // Face 3 normals
+    ...normalizedCross2,
+    ...normalizedCross2,
+    ...normalizedCross2,
+    ...normalizedCross2,
+    ...normalizedCross2,
+    ...normalizedCross2,
+
+    // Face 4 normals
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+    ...([
+      -normalizedCross2[0],
+      -normalizedCross2[1],
+      -normalizedCross2[2],
+    ] as V3),
+  ];
+
+  // Simple UV coordinates for all faces
+  const uvs = [
+    // Face 1 UVs
+    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
+    // Face 2 UVs
+    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
+    // Face 3 UVs
+    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
+    // Face 4 UVs
+    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
+  ];
+
+  return { vertices, normals, uvs };
 }
 
 export class Mesh implements BaseMesh {
@@ -330,8 +522,10 @@ export class MeshGroup implements BaseMesh {
 
           // If exactly two coordinates are the same, these vertices should be connected
           if (sameCoords === 2) {
-            // Add the line segment (both vertices)
-            this.mergedVertices.push(...v1, ...v2);
+            const triangleLine = createTriangleLine(v1, v2, 0.04);
+            this.mergedVertices.push(...triangleLine.vertices);
+            this.mergedNormals.push(...triangleLine.normals);
+            this.mergedUVs.push(...triangleLine.uvs);
           }
         }
       }
