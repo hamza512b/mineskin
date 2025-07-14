@@ -113,7 +113,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       {mode === "Editing" && (
         <Accordion label="Paint">
           <Slider
-            label="Variation Intensity"
+            label="Variation Tool Intensity"
             value={variationIntensity}
             onChange={(value) => handleChange("variationIntensity", value)}
             max={1}
@@ -217,7 +217,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Speed"
+          label="Control Speed"
           value={cameraSpeed}
           onChange={(value) => handleChange("cameraSpeed", value)}
           max={0.5}

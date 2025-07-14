@@ -1,15 +1,15 @@
 import { sortBy } from "lodash";
 import {
+  cross,
+  dot,
   inverse,
+  M44,
   multiplyM44,
   multiplyM4V3,
   multiplyV4,
-  subtractV3,
-  dot,
-  cross,
   normalize,
-  V3,
-  M44,
+  subtractV3,
+  V3
 } from "./maths";
 import { Mesh, MeshGroup } from "./mesh";
 
@@ -185,10 +185,10 @@ export function getMeshsAtRay(
   const boundingBox = group.calculateBoundingBox();
   const boxIntersection = rayBoxIntersect(ray, boundingBox);
   if (boxIntersection === null) {
-    return hits; // No intersection with bounding box, return empty array
+    return [];
   }
 
-  for (const child of group.getMeshes()) {
+  for (const child of group.getChildren()) {
     if (child instanceof MeshGroup) {
       const candidate = getMeshsAtRay(child, ray);
       if (candidate) {

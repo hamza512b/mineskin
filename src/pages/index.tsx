@@ -34,6 +34,10 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
     [handleChange],
   );
 
+  const toggleGrid = useCallback(() => {
+    handleChange("gridVisible", !values.gridVisible);
+  }, [handleChange, values.gridVisible]);
+
   const setSettingsOpen = useCallback(
     (open: boolean) => {
       setControlPanelOpen(open);
@@ -149,6 +153,8 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
             overlayrightArmVisible={values.overlayrightArmVisible}
             overlayleftLegVisible={values.overlayleftLegVisible}
             overlayrightLegVisible={values.overlayrightLegVisible}
+            gridVisible={values.gridVisible}
+            toggleGrid={toggleGrid}
           />
           <ActionBar
             className={"absolute bottom-0 left-0 right-0"}

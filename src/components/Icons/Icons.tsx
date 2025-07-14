@@ -179,3 +179,17 @@ export const Close = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+export const GridIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 100 100"
+    {...props}
+  >
+    <path
+      fill="currentColor"
+      d="M36.451 8v23.033h25.742V8h5.42v23.033H92v5.418H67.613v25.742H92v5.42H67.613V92h-5.42V67.613H36.451V92h-5.418V67.613H8v-5.42h23.033V36.451H8v-5.418h23.033V8h5.418Zm0 54.193h25.742V36.451H36.451v25.742Z"
+    />
+  </svg>
+);

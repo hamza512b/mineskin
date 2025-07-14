@@ -38,8 +38,13 @@ uniform float u_floorDiffuse;
 uniform float u_floorSpecular;
 uniform float u_directionalLightIntensity;
 out vec4 outColor;
+uniform bool u_gridLines;
 
-void main() {  
+void main() {
+  if (u_gridLines) {
+    outColor = vec4(0.5, 0.5, 0.5, 1.0);
+    return;
+  }
   vec3 normal = normalize(v_normal);
   vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
   
@@ -49,6 +54,9 @@ void main() {
   float specular = pow(max(dot(viewDir, reflectDir), 0.0), 50.0);
   
   vec4 texelColor = u_useFloorTexture ? vec4(u_floorColor, 1.0) : texture(u_skinTexture, v_texcoord);
+  if (texelColor.a < 1.0) {
+    discard;
+  }
   float objectDiffuse = u_useFloorTexture ? u_floorDiffuse : u_diffuseStrength;
   float objectSpecular = u_useFloorTexture ? u_floorSpecular : u_specularStrength;
 
@@ -115,6 +123,11 @@ export class MainProgram extends RendererProgram {
     gl.compileShader(fragmentShader);
 
     super(gl, vertexShader, fragmentShader);
+
+    this.setLocation(
+      "u_gridLines",
+      gl.getUniformLocation(this.getProgram(), "u_gridLines")!,
+    );
 
     this.setLocation(
       "u_matrix",

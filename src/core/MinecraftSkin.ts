@@ -49,7 +49,6 @@ export class MinecraftSkin extends MeshGroup {
       material = await MinecraftSkinMaterial.creatFromUrl(texture);
     }
     const mesh = new MinecraftSkin(name, parent, material, transformMatrix);
-    const overlayScale = scaleM44(1.02, 1.02, 1.02);
     const isPocket = mesh.material.version === "slim";
     const opaqueGroup = new MeshGroup("opaque", mesh);
     const transparentGroup = new MeshGroup("transparent", mesh);
@@ -144,9 +143,12 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(0, 10, 0),
-        overlayScale,
+        scaleM44(9 / 8, 9 / 8, 9 / 8),
         translateM44(0, -10, 0),
       ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayHead);
 
@@ -157,7 +159,14 @@ export class MinecraftSkin extends MeshGroup {
       [16, 32],
       "body",
       transparentGroup,
-      multiplyM44(translateM44(0, 0, 0), overlayScale, translateM44(0, 0, 0)),
+      multiplyM44(
+        translateM44(0, 0, 0),
+        scaleM44(9 / 8, 13.5 / 12, 4.51 / 4),
+        translateM44(0, 0, 0),
+      ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayBody);
 
@@ -170,9 +179,12 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(-2, -12, 0),
-        overlayScale,
+        scaleM44(4.5 / 4, 13.5 / 12, 4.54 / 4),
         translateM44(2, 12, 0),
       ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayLeftLeg);
 
@@ -185,9 +197,12 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(2, -12, 0),
-        overlayScale,
+        scaleM44(4.5 / 4, 13.5 / 12, 4.55 / 4),
         translateM44(-2, 12, 0),
       ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayRightLeg);
 
@@ -200,9 +215,12 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(-5.5, 0, 0),
-        overlayScale,
+        scaleM44(3.5 / 3, 12.5 / 12, 3.5 / 3),
         translateM44(5.5, 0, 0),
       ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayLeftSlimArm);
 
@@ -215,9 +233,12 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(5.5, 0, 0),
-        overlayScale,
+        scaleM44(3.5 / 3, 12.5 / 12, 3.5 / 3),
         translateM44(-5.5, 0, 0),
       ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayRightSlimArm);
     mesh.overlayLeftArm = MinecraftPart.create(
@@ -227,7 +248,14 @@ export class MinecraftSkin extends MeshGroup {
       [40, 32],
       "leftArm",
       transparentGroup,
-      multiplyM44(translateM44(-6, 0, 0), overlayScale, translateM44(6, 0, 0)),
+      multiplyM44(
+        translateM44(-6, 0, 0),
+        scaleM44(4.5 / 4, 12.5 / 12, 4.5 / 4),
+        translateM44(6, 0, 0),
+      ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayLeftArm);
 
@@ -238,7 +266,14 @@ export class MinecraftSkin extends MeshGroup {
       [48, 48],
       "rightArm",
       transparentGroup,
-      multiplyM44(translateM44(6, 0, 0), overlayScale, translateM44(-6, 0, 0)),
+      multiplyM44(
+        translateM44(6, 0, 0),
+        scaleM44(4.5 / 4, 12.5 / 12, 4.5 / 4),
+        translateM44(-6, 0, 0),
+      ),
+      {
+        overlay: true,
+      },
     );
     transparentGroup.addMesh(mesh.overlayRightArm);
 
@@ -287,6 +322,4 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.visible = state.getPartVisibility(layer, part);
   }
-
-
 }
