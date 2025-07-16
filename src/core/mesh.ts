@@ -522,7 +522,7 @@ export class MeshGroup implements BaseMesh {
 
           // If exactly two coordinates are the same, these vertices should be connected
           if (sameCoords === 2) {
-            const triangleLine = createTriangleLine(v1, v2, 0.02);
+            const triangleLine = createTriangleLine(v1, v2, 0.025);
             this.mergedVertices.push(...triangleLine.vertices);
             this.mergedNormals.push(...triangleLine.normals);
             this.mergedUVs.push(...triangleLine.uvs);
