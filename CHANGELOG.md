@@ -1,3 +1,9 @@
+## 2025-7-16
+
+- Fix grid where it is not showing on all browsers and on mobile.
+- Improvement in color picker.
+
+
 ## 2025-06-28
 
 - Extruded the second layer to look more like the game.
