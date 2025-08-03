@@ -42,29 +42,9 @@ uniform bool u_gridLines;
 
 void main() {
   if (u_gridLines) {
-    // Enhanced grid line rendering with better visibility
-    vec3 normal = normalize(v_normal);
-    vec3 viewDir = normalize(u_cameraPosition - v_position.xyz);
-    
-    // Add some lighting to grid lines for better depth perception
-    vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
-    float lightFactor = max(dot(normal, lightDir), 0.3); // Minimum 0.3 to keep lines visible
-    
-    // Calculate view-dependent brightness (fresnel-like effect)
-    float viewFactor = 1.0 - abs(dot(normal, viewDir));
-    viewFactor = pow(viewFactor, 2.0) * 0.5 + 0.5; // Enhance edge visibility
-    
-    // Use a more visible color that adapts to lighting
-    vec3 gridColor = vec3(0.8, 0.8, 0.8); // Brighter base color
-    gridColor *= lightFactor * viewFactor;
-    
-    // Ensure minimum visibility
-    gridColor = max(gridColor, vec3(0.4, 0.4, 0.4));
-    
-    outColor = vec4(gridColor, 1.0);
+    outColor = vec4(vec3(0.8, 0.8, 0.8), 1.0);
     return;
   }
-  
   vec3 normal = normalize(v_normal);
   vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
   

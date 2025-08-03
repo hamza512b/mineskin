@@ -128,14 +128,6 @@ export class Renderer {
     }
 
     let cursor = hit ? "crosshair" : "grab";
-    if (
-      !!hitOpaque &&
-      !hitTransparent &&
-      hit == hitOpaque &&
-      this.state.getPaintMode() === "eraser"
-    ) {
-      cursor = "not-allowed";
-    }
     this.backend.attachedCanvas.style.cursor = cursor;
   }
 
@@ -402,7 +394,7 @@ export class Renderer {
   }
 
   public eraseAt(x: number, y: number): void {
-    const hit = this.getMeshHitAt(x, y, "transparent");
+    const hit = this.getMeshHitAt(x, y);
     if (!hit) return;
     this.getMainSkin().material.clearPixel(
       hit.mesh.metadata.u as number,

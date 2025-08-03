@@ -16,6 +16,7 @@ import {
 } from "../maths";
 import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
+import { MinecraftSkin } from "../MinecraftSkin";
 import { State } from "../State";
 import { resizeCanvasToDisplaySize } from "../utils";
 import { Backend } from "./Backend";
@@ -62,7 +63,7 @@ export default class Webgl2Backend implements Backend {
     this.state = state;
     this.compileMinecraftParts(meshes);
   }
-  private renderMeshGroup(meshGroup: MeshGroup, transparent: boolean): void {
+  private renderMeshGroup(meshGroup: MeshGroup, skin: MinecraftSkin): void {
     if (!meshGroup.visible) return;
     const material = meshGroup.getMaterial();
     if (material instanceof MeshImageMaterial) {
@@ -112,22 +113,18 @@ export default class Webgl2Backend implements Backend {
 
     if (meshGroup.vao) {
       this.gl.bindVertexArray(meshGroup.vao);
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);
+
       if (
-        meshGroup.metadata?.overlay &&
         this.state?.getGridVisible() &&
-        this.state.getMode() === "Editing"
+        this.state.getMode() === "Editing" &&
+        this.shouldRenderGrid(meshGroup, skin)
       ) {
         // Save current depth state
         const currentDepthFunc = this.gl.getParameter(this.gl.DEPTH_FUNC);
         const currentDepthMask = this.gl.getParameter(this.gl.DEPTH_WRITEMASK);
-        
-        // Adjust depth testing for grid lines to prevent z-fighting
-        this.gl.depthFunc(this.gl.LEQUAL); // Allow grid lines to render at same depth
+
         this.gl.depthMask(false); // Don't write to depth buffer for grid lines
-        
-        // Enable polygon offset to push grid lines slightly forward
-        this.gl.enable(this.gl.POLYGON_OFFSET_FILL);
-        this.gl.polygonOffset(-1.0, -1.0);
 
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
@@ -147,7 +144,7 @@ export default class Webgl2Backend implements Backend {
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
           0,
         );
-        
+
         // Restore previous WebGL state
         this.gl.disable(this.gl.POLYGON_OFFSET_FILL);
         this.gl.depthFunc(currentDepthFunc);
@@ -160,10 +157,29 @@ export default class Webgl2Backend implements Backend {
     } else {
       meshGroup.getChildren().forEach((child) => {
         if (child instanceof MeshGroup) {
-          this.renderMeshGroup(child, transparent);
+          this.renderMeshGroup(child, skin);
         }
       });
     }
+  }
+  shouldRenderGrid(part: MeshGroup, skin: MinecraftSkin) {
+    if (part.metadata?.overlay) return true;
+    switch (part.name) {
+      case "head":
+        return !skin.overlayHead?.visible;
+      case "body":
+        return !skin.overlayBody?.visible;
+      case "leftLeg":
+        return !skin.overlayLeftLeg?.visible;
+      case "rightLeg":
+        return !skin.overlayRightLeg?.visible;
+      case "leftArm":
+        return !skin.overlayLeftArm?.visible;
+      case "rightArm":
+        return !skin.overlayRightArm?.visible;
+    }
+
+    return true;
   }
   public onRenderFrame() {
     if (!this.attachedCanvas || !this.meshes || !this.state) return;
@@ -171,6 +187,7 @@ export default class Webgl2Backend implements Backend {
     const canvas = this.attachedCanvas;
     resizeCanvasToDisplaySize(canvas);
 
+    const skin = this.meshes.getChildren()[0] as MinecraftSkin;
     const opaqueGroup = this.meshes.findMeshes(
       (g) => g.name === "opaque",
     )[0] as MeshGroup;
@@ -196,7 +213,7 @@ export default class Webgl2Backend implements Backend {
       aspect,
       this.state.getCameraFieldOfView(),
       0.1,
-      2000,
+      100,
     );
     const cameraRotation = multiplyM33(
       rotateYM33(-this.state.getCameraTheta()),
@@ -253,7 +270,7 @@ export default class Webgl2Backend implements Backend {
       cameraPosition,
     );
 
-    this.renderMeshGroup(opaqueGroup, false);
+    this.renderMeshGroup(opaqueGroup, skin);
 
     this.gl.uniform1f(
       this.mainProgram.getLocation(
@@ -261,12 +278,8 @@ export default class Webgl2Backend implements Backend {
       ) as WebGLUniformLocation,
       this.state.getDirectionalLightIntensity(),
     );
-    this.gl.uniform1i(
-      this.mainProgram.getLocation("u_useFloorTexture") as WebGLUniformLocation,
-      0,
-    );
 
-    this.renderMeshGroup(transparentGroup, true);
+    this.renderMeshGroup(transparentGroup, skin);
   }
   public onEnd() {
     if (this.mainProgram) {
