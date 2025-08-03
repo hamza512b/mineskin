@@ -89,7 +89,7 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
         />
       </IndexSEO>
 
-      <div className="relative flex justify-between h-dvh w-full overflow-hidden">
+      <div className="relative flex justify-between h-dvh w-full overflow-hidden bg-grid">
         <div className="relative flex-1">
           <canvas ref={canvasRef} className="w-full h-full select-none" />
 
