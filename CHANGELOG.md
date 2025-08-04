@@ -1,8 +1,11 @@
+## 2025-08-04
+
+- Add ability to remove pixels from the first layer.
+
 ## 2025-7-16
 
 - Fix grid where it is not showing on all browsers and on mobile.
 - Improvement in color picker.
-
 
 ## 2025-06-28
 

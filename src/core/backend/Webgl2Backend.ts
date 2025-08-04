@@ -213,7 +213,7 @@ export default class Webgl2Backend implements Backend {
       aspect,
       this.state.getCameraFieldOfView(),
       0.1,
-      100,
+      2000,
     );
     const cameraRotation = multiplyM33(
       rotateYM33(-this.state.getCameraTheta()),
