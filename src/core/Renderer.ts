@@ -127,8 +127,7 @@ export class Renderer {
       }
     }
 
-    let cursor = hit ? "crosshair" : "grab";
-    this.backend.attachedCanvas.style.cursor = cursor;
+    this.backend.attachedCanvas.style.cursor = hit ? "crosshair" : "grab";
   }
 
   public getMeshHitAt(
