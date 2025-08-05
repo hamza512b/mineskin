@@ -1,22 +1,24 @@
 import range from "lodash/range";
 import { v4 as uuidv4 } from "uuid";
+import { MeshMaterial } from "./MeshMaterial";
 import { MainProgram } from "./backend/Webgl2Program";
 import {
+  M44,
+  V2,
+  V3,
   addV3,
   cross,
-  subtractV3,
   identityM44,
-  M44,
   multiplyM3V3,
   multiplyM44,
   multiplyM4V3,
   normalize,
   rotateM33,
+  scaleM44,
   scaleVector,
-  V2,
-  V3,
+  subtractV3,
+  translateM44,
 } from "./maths";
-import { MeshMaterial } from "./MeshMaterial";
 
 type MeshMetadata = {
   [key: string]: string | number | boolean | Record<string, string | number>;
@@ -457,6 +459,80 @@ export class MeshGroup implements BaseMesh {
     );
   }
 
+  public getParent(): MeshGroup | null {
+    return this.parent as MeshGroup | null;
+  }
+
+  /**
+   * Gets the material from the mesh hierarchy, checking ancestors if needed
+   * @returns The first material found in the hierarchy, or undefined if no material exists
+   */
+  public getMaterial(): MeshMaterial | undefined {
+    // First check if this group has a material
+    if (this.material) {
+      return this.material;
+    }
+
+    // If not, check the parent hierarchy
+    if (this.parent instanceof MeshGroup) {
+      return this.parent.getMaterial();
+    }
+
+    // If parent is a Mesh or null, no material is available
+    return undefined;
+  }
+
+  /**
+   * Finds meshes matching the provided condition by traversing the hierarchy
+   */
+  public findMeshes(
+    callback: (mesh: Mesh | MeshGroup) => boolean,
+    results: (Mesh | MeshGroup)[] = [],
+  ): (Mesh | MeshGroup)[] {
+    if (callback(this)) {
+      results.push(this);
+    }
+
+    for (const mesh of this.meshes) {
+      if (mesh instanceof MeshGroup) {
+        mesh.findMeshes(callback, results);
+      } else if (callback(mesh)) {
+        results.push(mesh);
+      }
+    }
+
+    return results;
+  }
+
+  cleanup(gl: WebGL2RenderingContext) {
+    if (
+      !this.mergedNormals.length ||
+      !this.mergedUVs.length ||
+      !this.mergedVertices.length
+    ) {
+      return;
+    }
+
+    if (this.mergedVerticesBuffer) gl.deleteBuffer(this.mergedVerticesBuffer);
+    if (this.mergedNormalsBuffer) gl.deleteBuffer(this.mergedNormalsBuffer);
+    if (this.mergedUVsBuffer) gl.deleteBuffer(this.mergedUVsBuffer);
+    if (this.vao) gl.deleteVertexArray(this.vao);
+    this.meshes.forEach((child) => {
+      if (child instanceof MeshGroup) child.cleanup(gl);
+    });
+
+    this.mergedNormals = [];
+    this.mergedUVs = [];
+    this.mergedVertices = [];
+    this.mergedVerticesBuffer = null;
+    this.mergedNormalsBuffer = null;
+    this.mergedUVsBuffer = null;
+    this.vao = null;
+  }
+}
+
+export class MinecraftPart extends MeshGroup {
+  readonly cubeCenter: V3;
   public compileBuffers(gl: WebGL2RenderingContext, mainProgram: MainProgram) {
     // Reset merged arrays
     this.mergedVertices = [];
@@ -485,6 +561,14 @@ export class MeshGroup implements BaseMesh {
     }
 
     this.linesOffset = this.mergedVertices.length / 3;
+    const cubeCenter = this.cubeCenter;
+
+    // Render lines outside of the cube
+    const moveMatrix = multiplyM44(
+      translateM44(cubeCenter[0], cubeCenter[1], cubeCenter[2]),
+      scaleM44(1.01, 1.01, 1.01),
+      translateM44(-cubeCenter[0], -cubeCenter[1], -cubeCenter[2]),
+    );
     for (const mesh of meshes) {
       // First, collect unique vertices
       const uniqueVertices: number[] = [];
@@ -501,11 +585,12 @@ export class MeshGroup implements BaseMesh {
           }
         }
         if (exists) continue;
-        uniqueVertices.push(...v);
+        uniqueVertices.push(...multiplyM4V3(moveMatrix, v));
       }
 
       // Create edges between vertices that share coordinates
       // This creates both horizontal and vertical lines for the grid
+
       for (let i = 0; i < uniqueVertices.length; i += 3) {
         for (let j = i + 3; j < uniqueVertices.length; j += 3) {
           const v1 = uniqueVertices.slice(i, i + 3) as V3;
@@ -598,80 +683,6 @@ export class MeshGroup implements BaseMesh {
 
     gl.bindVertexArray(null);
   }
-
-  public getParent(): MeshGroup | null {
-    return this.parent as MeshGroup | null;
-  }
-
-  /**
-   * Gets the material from the mesh hierarchy, checking ancestors if needed
-   * @returns The first material found in the hierarchy, or undefined if no material exists
-   */
-  public getMaterial(): MeshMaterial | undefined {
-    // First check if this group has a material
-    if (this.material) {
-      return this.material;
-    }
-
-    // If not, check the parent hierarchy
-    if (this.parent instanceof MeshGroup) {
-      return this.parent.getMaterial();
-    }
-
-    // If parent is a Mesh or null, no material is available
-    return undefined;
-  }
-
-  /**
-   * Finds meshes matching the provided condition by traversing the hierarchy
-   */
-  public findMeshes(
-    callback: (mesh: Mesh | MeshGroup) => boolean,
-    results: (Mesh | MeshGroup)[] = [],
-  ): (Mesh | MeshGroup)[] {
-    if (callback(this)) {
-      results.push(this);
-    }
-
-    for (const mesh of this.meshes) {
-      if (mesh instanceof MeshGroup) {
-        mesh.findMeshes(callback, results);
-      } else if (callback(mesh)) {
-        results.push(mesh);
-      }
-    }
-
-    return results;
-  }
-
-  cleanup(gl: WebGL2RenderingContext) {
-    if (
-      !this.mergedNormals.length ||
-      !this.mergedUVs.length ||
-      !this.mergedVertices.length
-    ) {
-      return;
-    }
-
-    if (this.mergedVerticesBuffer) gl.deleteBuffer(this.mergedVerticesBuffer);
-    if (this.mergedNormalsBuffer) gl.deleteBuffer(this.mergedNormalsBuffer);
-    if (this.mergedUVsBuffer) gl.deleteBuffer(this.mergedUVsBuffer);
-    if (this.vao) gl.deleteVertexArray(this.vao);
-    this.meshes.forEach((child) => {
-      if (child instanceof MeshGroup) child.cleanup(gl);
-    });
-
-    this.mergedNormals = [];
-    this.mergedUVs = [];
-    this.mergedVertices = [];
-    this.mergedVerticesBuffer = null;
-    this.mergedNormalsBuffer = null;
-    this.mergedUVsBuffer = null;
-    this.vao = null;
-  }
-}
-
-export class MinecraftPart extends MeshGroup {
   constructor(
     size: V3,
     position: V3,
@@ -683,7 +694,7 @@ export class MinecraftPart extends MeshGroup {
   ) {
     super(name, parent);
     const [width, height, depth] = size;
-    const cubeCenter: V3 = position;
+    this.cubeCenter = position;
 
     type Face = {
       label: string;
@@ -699,7 +710,7 @@ export class MinecraftPart extends MeshGroup {
     const faces: Face[] = [
       {
         label: "Front",
-        faceCenter: addV3(cubeCenter, [0, 0, depth / 2]),
+        faceCenter: addV3(this.cubeCenter, [0, 0, depth / 2]),
         uAxis: [1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -709,7 +720,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Back",
-        faceCenter: addV3(cubeCenter, [0, 0, -depth / 2]),
+        faceCenter: addV3(this.cubeCenter, [0, 0, -depth / 2]),
         uAxis: [-1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -719,7 +730,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Right",
-        faceCenter: addV3(cubeCenter, [-width / 2, 0, 0]),
+        faceCenter: addV3(this.cubeCenter, [-width / 2, 0, 0]),
         uAxis: [0, 0, 1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -729,7 +740,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Left",
-        faceCenter: addV3(cubeCenter, [width / 2, 0, 0]),
+        faceCenter: addV3(this.cubeCenter, [width / 2, 0, 0]),
         uAxis: [0, 0, -1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -739,7 +750,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Top",
-        faceCenter: addV3(cubeCenter, [0, height / 2, 0]),
+        faceCenter: addV3(this.cubeCenter, [0, height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -749,7 +760,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Bottom",
-        faceCenter: addV3(cubeCenter, [0, -height / 2, 0]),
+        faceCenter: addV3(this.cubeCenter, [0, -height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,

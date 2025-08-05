@@ -3,6 +3,7 @@ import { MeshGroup, MinecraftPart } from "./mesh";
 import { MinecraftSkinMaterial } from "./MeshMaterial";
 import { Layers, Parts, State } from "./State";
 
+const Z_FIGHTING_OFFSET = 0.01;
 export class MinecraftSkin extends MeshGroup {
   material: MinecraftSkinMaterial;
 
@@ -56,7 +57,7 @@ export class MinecraftSkin extends MeshGroup {
     // Create and store base layer parts
     mesh.baseHead = MinecraftPart.create(
       [8, 8, 8],
-      [0, 10, 0],
+      [0, 10 + Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [0, 0],
       "head",
@@ -76,7 +77,7 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.baseLeftLeg = MinecraftPart.create(
       [4, 12, 4],
-      [-2, -12, 0],
+      [-2 - Z_FIGHTING_OFFSET, -12 - Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [0, 16],
       "leftLeg",
@@ -86,7 +87,7 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.baseRightLeg = MinecraftPart.create(
       [4, 12, 4],
-      [2, -12, 0],
+      [2 + Z_FIGHTING_OFFSET, -12 + Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [16, 48],
       "rightLeg",
@@ -96,7 +97,7 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.baseLeftSlimArm = MinecraftPart.create(
       [3, 12, 4],
-      [-5.5, 0, 0],
+      [-5.5 - Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [40, 16],
       "leftArm",
@@ -106,7 +107,7 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.baseRightSlimArm = MinecraftPart.create(
       [3, 12, 4],
-      [5.5, 0, 0],
+      [5.5 + Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [32, 48],
       "rightArm",
@@ -115,7 +116,7 @@ export class MinecraftSkin extends MeshGroup {
     opaqueGroup.addMesh(mesh.baseRightSlimArm);
     mesh.baseLeftArm = MinecraftPart.create(
       [4, 12, 4],
-      [-6, 0, 0],
+      [-6 - Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [40, 16],
       "leftArm",
@@ -125,7 +126,7 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.baseRightArm = MinecraftPart.create(
       [4, 12, 4],
-      [6, 0, 0],
+      [6 + Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [32, 48],
       "rightArm",
@@ -136,15 +137,15 @@ export class MinecraftSkin extends MeshGroup {
     // Create and store overlay layer parts
     mesh.overlayHead = MinecraftPart.create(
       [8, 8, 8],
-      [0, 10, 0],
+      [0, 10 + Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [32, 0],
       "head",
       transparentGroup,
       multiplyM44(
-        translateM44(0, 10, 0),
+        translateM44(0, 10 + Z_FIGHTING_OFFSET, 0),
         scaleM44(9 / 8, 9 / 8, 9 / 8),
-        translateM44(0, -10, 0),
+        translateM44(0, -10 - Z_FIGHTING_OFFSET, 0),
       ),
       {
         overlay: true,
@@ -172,15 +173,15 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.overlayLeftLeg = MinecraftPart.create(
       [4, 12, 4],
-      [-2, -12, 0],
+      [-2 - Z_FIGHTING_OFFSET, -12 - Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [0, 32],
       "leftLeg",
       transparentGroup,
       multiplyM44(
-        translateM44(-2, -12, 0),
+        translateM44(-2 - Z_FIGHTING_OFFSET, -12 - Z_FIGHTING_OFFSET, 0),
         scaleM44(4.5 / 4, 13.5 / 12, 4.54 / 4),
-        translateM44(2, 12, 0),
+        translateM44(2 + Z_FIGHTING_OFFSET, 12 + Z_FIGHTING_OFFSET, 0),
       ),
       {
         overlay: true,
@@ -190,15 +191,15 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.overlayRightLeg = MinecraftPart.create(
       [4, 12, 4],
-      [2, -12, 0],
+      [2 + Z_FIGHTING_OFFSET, -12 - Z_FIGHTING_OFFSET, 0],
       [64, 64],
       [0, 48],
       "rightLeg",
       transparentGroup,
       multiplyM44(
-        translateM44(2, -12, 0),
+        translateM44(2 + Z_FIGHTING_OFFSET, -12 - Z_FIGHTING_OFFSET, 0),
         scaleM44(4.5 / 4, 13.5 / 12, 4.55 / 4),
-        translateM44(-2, 12, 0),
+        translateM44(-2 - Z_FIGHTING_OFFSET, 12 + Z_FIGHTING_OFFSET, 0),
       ),
       {
         overlay: true,
@@ -208,15 +209,15 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.overlayLeftSlimArm = MinecraftPart.create(
       [3, 12, 4],
-      [-5.5, 0, 0],
+      [-5.5 - Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [40, 32],
       "leftArm",
       transparentGroup,
       multiplyM44(
-        translateM44(-5.5, 0, 0),
+        translateM44(-5.5 - Z_FIGHTING_OFFSET, 0, 0),
         scaleM44(3.5 / 3, 12.5 / 12, 3.5 / 3),
-        translateM44(5.5, 0, 0),
+        translateM44(5.5 + Z_FIGHTING_OFFSET, 0, 0),
       ),
       {
         overlay: true,
@@ -226,15 +227,15 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.overlayRightSlimArm = MinecraftPart.create(
       [3, 12, 4],
-      [5.5, 0, 0],
+      [5.5 + Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [48, 48],
       "rightArm",
       transparentGroup,
       multiplyM44(
-        translateM44(5.5, 0, 0),
+        translateM44(5.5 + Z_FIGHTING_OFFSET, 0, 0),
         scaleM44(3.5 / 3, 12.5 / 12, 3.5 / 3),
-        translateM44(-5.5, 0, 0),
+        translateM44(-5.5 - Z_FIGHTING_OFFSET, 0, 0),
       ),
       {
         overlay: true,
@@ -243,15 +244,15 @@ export class MinecraftSkin extends MeshGroup {
     transparentGroup.addMesh(mesh.overlayRightSlimArm);
     mesh.overlayLeftArm = MinecraftPart.create(
       [4, 12, 4],
-      [-6, 0, 0],
+      [-6 - Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [40, 32],
       "leftArm",
       transparentGroup,
       multiplyM44(
-        translateM44(-6, 0, 0),
+        translateM44(-6 - Z_FIGHTING_OFFSET, 0, 0),
         scaleM44(4.5 / 4, 12.5 / 12, 4.5 / 4),
-        translateM44(6, 0, 0),
+        translateM44(6 + Z_FIGHTING_OFFSET, 0, 0),
       ),
       {
         overlay: true,
@@ -261,15 +262,15 @@ export class MinecraftSkin extends MeshGroup {
 
     mesh.overlayRightArm = MinecraftPart.create(
       [4, 12, 4],
-      [6, 0, 0],
+      [6 + Z_FIGHTING_OFFSET, 0, 0],
       [64, 64],
       [48, 48],
       "rightArm",
       transparentGroup,
       multiplyM44(
-        translateM44(6, 0, 0),
+        translateM44(6 + Z_FIGHTING_OFFSET, 0, 0),
         scaleM44(4.5 / 4, 12.5 / 12, 4.5 / 4),
-        translateM44(-6, 0, 0),
+        translateM44(-6 - Z_FIGHTING_OFFSET, 0, 0),
       ),
       {
         overlay: true,
