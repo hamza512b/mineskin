@@ -1,6 +1,7 @@
 ## 2025-08-15
 
 - Fix the display artifact around the skin and rendering issue.
+- Add reset function on individual inputs. Improve the readability of settings labels.
 
 ## 2025-08-04
 

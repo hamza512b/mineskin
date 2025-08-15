@@ -52,20 +52,20 @@ const formSchema = z.object({
     .number({
       invalid_type_error: "Please enter a valid number",
     })
-    .min(-200, "The value cannot be less than -200")
-    .max(200, "The value cannot be greater than 200"),
+    .min(-10, "The value cannot be less than -10")
+    .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionY: z
     .number({
       invalid_type_error: "Please enter a valid number",
     })
-    .min(-200, "The value cannot be less than -200")
-    .max(200, "The value cannot be greater than 200"),
+    .min(-10, "The value cannot be less than -10")
+    .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionZ: z
     .number({
       invalid_type_error: "Please enter a valid number",
     })
-    .min(0, "The value cannot be less than 0")
-    .max(200, "The value cannot be greater than 200"),
+    .min(-10, "The value cannot be less than -10")
+    .max(10, "The value cannot be greater than 10"),
   cameraFieldOfView: z
     .number({
       invalid_type_error: "Please enter a valid number",

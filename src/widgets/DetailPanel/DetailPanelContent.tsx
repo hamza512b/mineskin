@@ -1,13 +1,12 @@
 import Accordion from "@/components/Accordion/Accordion";
 import Button from "@/components/Button";
-import Input from "@/components/Input/Input";
 import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { FieldErrors, FormValues } from "@/hooks/useRendererState";
 import clsx from "clsx";
 import React from "react";
-import { useConfirmation } from "../Confirmation/Confirmation";
 import GitHubButton from "react-github-btn";
+import { useConfirmation } from "../Confirmation/Confirmation";
 
 export interface DetailPanelProps {
   handleChange: (
@@ -84,7 +83,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold dark:text-slate-100 text-slate-900">
-          Advanced Settings
+          Settings
         </h3>
         {exitButton}
       </div>
@@ -120,87 +119,100 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
             min={0.05}
             step={0.01}
             error={errors.variationIntensity}
+            editKey="variationIntensity"
           />
         </Accordion>
       )}
 
       <Accordion label="Skin">
         <Slider
-          label="Diffuse Strength"
+          label="Surface Brightness"
           value={diffuseStrength}
           onChange={(value) => handleChange("diffuseStrength", value)}
           max={1}
           min={0}
           step={0.01}
           error={errors.diffuseStrength}
+          editKey="diffuseStrength"
         />
 
         <Slider
-          label="Specular Strength"
+          label="Shine/Glossiness"
           value={specularStrength}
           onChange={(value) => handleChange("specularStrength", value)}
           max={1}
           min={0}
           step={0.01}
           error={errors.specularStrength}
-        />
-
-        <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
-
-        <Input
-          label="Translation X"
-          type="number"
-          onChange={(e) => handleChange("objectTranslationX", e.target.value)}
-          error={errors.objectTranslationX}
-          value={objectTranslationX}
-          step="any"
-          max={100}
-          min={-100}
-        />
-        <Input
-          label="Translation Y"
-          type="number"
-          onChange={(e) => handleChange("objectTranslationZ", e.target.value)}
-          error={errors.objectTranslationZ}
-          value={objectTranslationZ}
-          step="any"
-        />
-        <Input
-          label="Translation Z"
-          type="number"
-          onChange={(e) => handleChange("objectTranslationY", e.target.value)}
-          error={errors.objectTranslationY}
-          value={objectTranslationY}
-          step="any"
+          editKey="specularStrength"
         />
 
         <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
 
         <Slider
-          label="Rotation X"
+          label="Move Left/Right"
+          value={objectTranslationX}
+          onChange={(value) => handleChange("objectTranslationX", value)}
+          error={errors.objectTranslationX}
+          max={100}
+          min={-100}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="objectTranslationX"
+        />
+        <Slider
+          label="Move Forward/Back"
+          value={objectTranslationZ}
+          onChange={(value) => handleChange("objectTranslationZ", value)}
+          error={errors.objectTranslationZ}
+          max={100}
+          min={-100}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="objectTranslationZ"
+        />
+        <Slider
+          label="Move Up/Down"
+          onChange={(value) => handleChange("objectTranslationY", value)}
+          error={errors.objectTranslationY}
+          value={objectTranslationY}
+          max={100}
+          min={-100}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="objectTranslationY"
+        />
+
+        <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
+
+        <Slider
+          label="Tilt Up/Down"
           value={objectRotationX}
           onChange={(value) => handleChange("objectRotationX", value)}
           max={Math.PI}
           min={-Math.PI}
           step={0.001}
+          editKey="objectRotationX"
         />
 
         <Slider
-          label="Rotation Y"
+          label="Turn Left/Right"
           value={objectRotationY}
           onChange={(value) => handleChange("objectRotationY", value)}
           max={Math.PI}
           min={-Math.PI}
           step={0.001}
+          editKey="objectRotationY"
         />
 
         <Slider
-          label="Rotation Z"
+          label="Roll"
           value={objectRotationZ}
           onChange={(value) => handleChange("objectRotationZ", value)}
           max={Math.PI}
           min={-Math.PI}
           step={0.001}
+          editKey="objectRotationZ"
         />
       </Accordion>
 
@@ -214,16 +226,18 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           step={0.001}
           error={errors.cameraFieldOfView}
           formatValue={(v) => `${v.toFixed(1)}°`}
+          editKey="cameraFieldOfView"
         />
 
         <Slider
-          label="Control Speed"
+          label="Movement Speed"
           value={cameraSpeed}
           onChange={(value) => handleChange("cameraSpeed", value)}
           max={0.5}
           min={0}
           step={0.001}
           error={errors.cameraSpeed}
+          editKey="cameraSpeed"
         />
         <Slider
           label="Damping"
@@ -233,6 +247,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           min={0}
           step={0.001}
           error={errors.cameraDampingFactor}
+          editKey="cameraDampingFactor"
         />
 
         {/* <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" /> */}
@@ -271,53 +286,57 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
       <Accordion label="Light">
         <Slider
-          label="Directional Light"
+          label="Main Light"
           value={directionalLightIntensity}
           onChange={(value) => handleChange("directionalLightIntensity", value)}
           max={1}
           min={0}
           step={0.01}
           error={errors.directionalLightIntensity}
+          editKey="directionalLightIntensity"
+        />
+
+        <Slider
+          label="Light Left/Right"
+          value={diffuseLightPositionX}
+          onChange={(value) => handleChange("diffuseLightPositionX", value)}
+          max={10}
+          min={-10}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="diffuseLightPositionX"
         />
         <Slider
-          label="Ambient Light"
+          label="Light Up/Down"
+          value={diffuseLightPositionY}
+          onChange={(value) => handleChange("diffuseLightPositionY", value)}
+          max={10}
+          min={-10}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="diffuseLightPositionY"
+        />
+        <Slider
+          label="Light Forward/Back"
+          value={diffuseLightPositionZ}
+          onChange={(value) => handleChange("diffuseLightPositionZ", value)}
+          error={errors.diffuseLightPositionZ}
+          max={10}
+          min={-10}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}`}
+          editKey="diffuseLightPositionZ"
+        />
+
+        <Slider
+          label="Overall Brightness (Ambient Light)"
           value={ambientLight}
           onChange={(value) => handleChange("ambientLight", value)}
           max={1}
           min={0}
           step={0.01}
           error={errors.ambientLight}
-        />
-
-        <Input
-          label="Diffuse Light X"
-          type="number"
-          onChange={(e) =>
-            handleChange("diffuseLightPositionX", e.target.value)
-          }
-          error={errors.diffuseLightPositionX}
-          value={diffuseLightPositionX}
-          step="any"
-        />
-        <Input
-          label="Diffuse Light Y"
-          type="number"
-          onChange={(e) =>
-            handleChange("diffuseLightPositionZ", e.target.value)
-          }
-          error={errors.diffuseLightPositionZ}
-          value={diffuseLightPositionZ}
-          step="any"
-        />
-        <Input
-          label="Diffuse Light Z"
-          type="number"
-          onChange={(e) =>
-            handleChange("diffuseLightPositionY", e.target.value)
-          }
-          error={errors.diffuseLightPositionY}
-          value={diffuseLightPositionY}
-          step="any"
+          editKey="ambientLight"
         />
       </Accordion>
 

@@ -1,5 +1,6 @@
 import React from "react";
 import * as RadixSlider from "@radix-ui/react-slider";
+import { initialState } from "@/core/State";
 
 interface SliderProps {
   label: string;
@@ -11,6 +12,7 @@ interface SliderProps {
   error?: string;
   formatValue?: (value: number) => string;
   loop?: boolean;
+  editKey: string;
 }
 
 export default function Slider({
@@ -23,6 +25,7 @@ export default function Slider({
   error,
   loop = false,
   formatValue = (v) => v.toFixed(2),
+  editKey: key,
 }: SliderProps) {
   return (
     <div className="mb-4">
@@ -67,6 +70,17 @@ export default function Slider({
         </RadixSlider.Root>
       </div>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {initialState[key as keyof typeof initialState] !== undefined &&
+        initialState[key as keyof typeof initialState] !== value && (
+          <button
+            className="mt-1 text-sm text-blue-500 cursor-pointer"
+            onClick={() =>
+              onChange(initialState[key as keyof typeof initialState] as number)
+            }
+          >
+            Reset
+          </button>
+        )}
     </div>
   );
 }
