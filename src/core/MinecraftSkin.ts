@@ -154,7 +154,7 @@ export class MinecraftSkin extends MeshGroup {
     transparentGroup.addMesh(mesh.overlayHead);
 
     mesh.overlayBody = MinecraftPart.create(
-      [8, 12, 4],
+      [8 + Z_FIGHTING_OFFSET, 12, 4],
       [0, 0, 0],
       [64, 64],
       [16, 32],
