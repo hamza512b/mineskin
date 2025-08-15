@@ -1,4 +1,4 @@
-# 2025-08-15
+## 2025-08-15
 
 - Fix the display artifact around the skin and rendering issue.
 
