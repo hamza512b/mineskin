@@ -771,7 +771,7 @@ export class MinecraftPart extends MeshGroup {
     ];
 
     const meshes: MeshGroup[] = [];
-    const tweakNumber = 0.2;
+    const tweakNumber = 0.5; // this prevent rendering on the edges
     const textureWidth = textureSize[0];
     const textureHeight = textureSize[1];
 

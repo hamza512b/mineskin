@@ -151,8 +151,6 @@ export default class Webgl2Backend implements Backend {
         this.gl.depthMask(currentDepthMask);
       }
 
-      this.gl.drawArrays(this.gl.TRIANGLES, 0, meshGroup.linesOffset);
-
       this.gl.bindVertexArray(null);
     } else {
       meshGroup.getChildren().forEach((child) => {

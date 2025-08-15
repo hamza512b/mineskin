@@ -1,3 +1,7 @@
+# 2025-08-15
+
+- Fix the display artifact around the skin and rendering issue.
+
 ## 2025-08-04
 
 - Add ability to remove pixels from the first layer.

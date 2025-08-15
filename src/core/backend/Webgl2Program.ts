@@ -30,7 +30,6 @@ uniform float u_ambientLight;
 uniform float u_specularStrength;
 uniform float u_diffuseStrength;
 uniform sampler2D u_skinTexture;
-uniform bool u_useFloorTexture;
 uniform bool u_highlight;
 uniform vec4 u_tint;
 uniform vec3 u_floorColor;
@@ -44,7 +43,7 @@ void main() {
   if (u_gridLines) {
     outColor = vec4(vec3(0.8, 0.8, 0.8), 1.0);
     return;
-  }
+  }  
   vec3 normal = normalize(v_normal);
   vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
   
@@ -53,12 +52,12 @@ void main() {
   vec3 reflectDir = reflect(-lightDir, normal);
   float specular = pow(max(dot(viewDir, reflectDir), 0.0), 50.0);
   
-  vec4 texelColor = u_useFloorTexture ? vec4(u_floorColor, 1.0) : texture(u_skinTexture, v_texcoord);
+  vec4 texelColor = texture(u_skinTexture, v_texcoord);
   if (texelColor.a < 1.0) {
     discard;
   }
-  float objectDiffuse = u_useFloorTexture ? u_floorDiffuse : u_diffuseStrength;
-  float objectSpecular = u_useFloorTexture ? u_floorSpecular : u_specularStrength;
+  float objectDiffuse = u_diffuseStrength;
+  float objectSpecular = u_specularStrength;
 
   float totalDiffuse = diffuse * u_directionalLightIntensity * objectDiffuse;
   float totalSpecular = specular * objectSpecular;
@@ -172,11 +171,6 @@ export class MainProgram extends RendererProgram {
     this.setLocation(
       "u_skinTexture",
       gl.getUniformLocation(this.getProgram(), "u_skinTexture")!,
-    );
-
-    this.setLocation(
-      "u_useFloorTexture",
-      gl.getUniformLocation(this.getProgram(), "u_useFloorTexture")!,
     );
 
     this.setLocation(
