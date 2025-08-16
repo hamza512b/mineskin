@@ -124,7 +124,6 @@ export default class Webgl2Backend implements Backend {
         const currentDepthFunc = this.gl.getParameter(this.gl.DEPTH_FUNC);
         const currentDepthMask = this.gl.getParameter(this.gl.DEPTH_WRITEMASK);
 
-        this.gl.depthMask(false); // Don't write to depth buffer for grid lines
 
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,

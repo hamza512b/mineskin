@@ -218,7 +218,7 @@ export class State {
   private overlayleftLegVisible = true;
   private overlayrightLegVisible = true;
   private mode = "Preview" as "Preview" | "Editing";
-  private gridVisible = false;
+  private gridVisible = true;
 
   private listeners: ((
     constants: State,
