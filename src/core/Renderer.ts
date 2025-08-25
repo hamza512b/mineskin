@@ -34,28 +34,31 @@ export class Renderer {
     this.inputManager = new InputManager(this);
   }
 
-  static async create(backend: Backend, state: State) {
+  static async create(backend: Backend, state: State, url?: string) {
     const renderer = new Renderer(backend, state);
     await state.initializeIndexDB();
     const old_skin_base64URL = localStorage.getItem("skin_editor");
     const texture = await state.readSkinImageData("main_skin");
 
     let skin: MinecraftSkin;
-    if (old_skin_base64URL && !texture) {
+
+    if (url) {
+      skin = await MinecraftSkin.create("MainSkin", renderer.world, url);
+    } else if (old_skin_base64URL && !texture) {
       skin = await MinecraftSkin.create(
         "MainSkin",
         renderer.world,
         old_skin_base64URL,
       );
-      state.setSkinIsPocket(skin.material.version === "slim", true, "App");
     } else {
       skin = await MinecraftSkin.create(
         "MainSkin",
         renderer.world,
         texture || DEFAULT_SKIN,
       );
-      state.setSkinIsPocket(skin.material.version === "slim", true, "App");
     }
+    state.setSkinIsPocket(skin.material.version === "slim", true, "classic");
+    document.body.setAttribute("data-skin-version", skin.material.version);
     renderer.world.addMesh(skin);
     return renderer;
   }
@@ -130,23 +133,12 @@ export class Renderer {
     this.backend.attachedCanvas.style.cursor = hit ? "crosshair" : "grab";
   }
 
-  public getMeshHitAt(
-    x: number,
-    y: number,
-    include: "transparent" | "opaque" | "all" = "all",
-  ) {
+  public getMeshHitAt(x: number, y: number) {
     if (!this.backend.attachedCanvas) return;
     if (this.state.getMode() === "Preview") {
       return;
     }
     const skinObject = this.getMainSkin();
-    const directChildren = skinObject.getChildren();
-    const opaqueGroup = directChildren.find(
-      (g: MeshGroup | Mesh) => g.name === "opaque",
-    ) as MeshGroup;
-    const transparentGroup = directChildren.find(
-      (g: MeshGroup | Mesh) => g.name === "transparent",
-    ) as MeshGroup;
 
     const ray = computeRay(
       x,
@@ -157,23 +149,10 @@ export class Renderer {
       this.backend.getViewTransformation(),
       this.backend.getGlobalTransformation(),
     );
-    const hitTransparent = transparentGroup
-      ? getMeshAtRay(transparentGroup, ray)
-      : null;
-    const hitOpaque = opaqueGroup ? getMeshAtRay(opaqueGroup, ray) : null;
-    if (
-      (include === "transparent" || include === "all") &&
-      hitTransparent &&
-      hitTransparent.mesh.metadata.type === "skinPixel"
-    ) {
-      if (hitTransparent.mesh.visible) return hitTransparent;
-    }
-    if (
-      (include === "opaque" || include === "all") &&
-      hitOpaque &&
-      hitOpaque.mesh.metadata.type === "skinPixel"
-    ) {
-      if (hitOpaque.mesh.visible) return hitOpaque;
+    const hit = getMeshAtRay(skinObject, ray);
+    if (!hit) return;
+    if (hit.mesh.metadata.type === "skinPixel") {
+      return hit;
     }
     return null;
   }
@@ -315,6 +294,7 @@ export class Renderer {
       img.onerror = () => {
         rej(undefined);
       };
+      img.crossOrigin = "";
       img.src = url;
     });
   }
@@ -339,7 +319,7 @@ export class Renderer {
     if (!pixel) return;
     const alpha = pixel[3];
     if (alpha === 0) {
-      const opaqueHit = this.getMeshHitAt(x, y, "opaque");
+      const opaqueHit = this.getMeshHitAt(x, y);
       if (opaqueHit) {
         pixel = this.getMainSkin().material.getPixel(
           opaqueHit.mesh.metadata.u as number,
