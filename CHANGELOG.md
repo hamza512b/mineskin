@@ -1,3 +1,7 @@
+## 2025-09-15
+
+- Fix "flickering" issue.
+
 ## 2025-08-15
 
 - Fix the display artifact around the skin and rendering issue.

@@ -162,7 +162,7 @@ export class MinecraftSkin extends MeshGroup {
       transparentGroup,
       multiplyM44(
         translateM44(0, 0, 0),
-        scaleM44(1, 1, 4.51 / 4),
+        scaleM44(1 + Z_FIGHTING_OFFSET, 1 + Z_FIGHTING_OFFSET, 4.51 / 4),
         translateM44(0, 0, 0),
       ),
       {
