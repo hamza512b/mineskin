@@ -1,6 +1,8 @@
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
+import Tutorial from "@/components/Tutorial/Tutorial";
 import { useRenderer } from "@/hooks/useRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
+import { useTutorialState } from "@/hooks/useTutorialState";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
@@ -15,6 +17,7 @@ export default function Home() {
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
   const { values, errors, handleChange, redoCount, undoCount } =
     useRendererState(renderer);
+  const { hasCompletedTutorial } = useTutorialState();
 
   const setColorPickerActive = useCallback(
     (active: boolean) => {
@@ -86,8 +89,10 @@ export default function Home() {
       </IndexSEO>
 
       <div className="relative flex justify-between h-dvh w-full overflow-hidden bg-grid">
-        <div className="relative flex-1">
+        <div className="relative flex-1" data-tutorial-id="main">
           <canvas ref={canvasRef} className="w-full h-full select-none" />
+
+          {values.mode === "Editing" && !hasCompletedTutorial && <Tutorial />}
 
           <div className="absolute top-0 right-0 p-2 pointer-events-none z-0 flex gap-2">
             {/* <ChangelogPopover
@@ -268,4 +273,3 @@ export const IndexSEO = React.memo(
 );
 
 IndexSEO.displayName = "IndexSEO";
-

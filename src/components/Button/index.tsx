@@ -23,7 +23,7 @@ const buttonVariants = cva(
           "border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-gray-400",
         ghost:
           "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-gray-400",
-        danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+        danger: "bg-rose-900 hover:bg-rose-800 text-white focus:ring-red-500",
       },
       size: {
         sm: "px-3 py-1.5 text-sm",

@@ -102,8 +102,9 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
 
   return (
     <div
-      className={clsx("relative flex gap-2", className)}
+      className={clsx("relative flex justify-around gap-2", className)}
       style={containerStyle}
+      data-tutorial-id="desktop-part-filter"
     >
       {/* Body */}
       <div className="flex flex-col gap-2">
