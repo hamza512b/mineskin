@@ -342,44 +342,64 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
 
       <div className="flex flex-col gap-4">
         <div className="text-sm text-slate-600 dark:text-slate-400">
-          Need help? File an issue on{" "}
-          <a
-            href="https://github.com/hamza512b/minskin/issues"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub
-          </a>
-        </div>
-
-        <div className="flex justify-between gap-2 items-center">
-          <GitHubButton
-            href="https://github.com/hamza512b/mineskin"
-            data-color-scheme="no-preference: light; light: light; dark: dark;"
-            data-size="large"
-            aria-label="Star hamza512b/mineskin on GitHub"
-          >
-            Star
-          </GitHubButton>
-          <Button
-            variant={"outlined"}
-            // disabled={!isDirty}
-            onClick={async () => {
-              const confirmed = await getConfirmation({
-                title: "Reset to defaults",
-                description:
-                  "Are you sure you want to reset the settings? This will even reset back to the default skin.",
-                confirmText: "Confirm",
-                cancelText: "Cancel",
-              });
-              if (confirmed) {
-                reset?.();
-              }
-            }}
-          >
-            Reset
-          </Button>
+          <div className="flex gap-2 items-center justify-end">
+            <Button
+              variant={"outlined"}
+              // disabled={!isDirty}
+              onClick={async () => {
+                const confirmed = await getConfirmation({
+                  title: "Reset to defaults",
+                  description:
+                    "Are you sure you want to reset the settings? This will even reset back to the default skin.",
+                  confirmText: "Confirm",
+                  cancelText: "Cancel",
+                });
+                if (confirmed) {
+                  reset?.();
+                }
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+          <p className="mb-2 font-medium">Info:</p>
+          <ul className="">
+            <li className="mb-1">
+              If you want to report a bug, you can file an issue on the{" "}
+              <a
+                href="https://github.com/hamza512b/minskin/issues"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub Repository
+              </a>
+              .
+            </li>
+            <li className="mb-1">
+              Or if you prefer, you can join the{" "}
+              <a
+                href="https://discord.gg/2egvhmqdza"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Discord server
+              </a>
+              .
+            </li>
+          </ul>
+          <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+            Made with ❤️ by{" "}
+            <a
+              href="https://hamza.se"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Hamza
+            </a>
+          </p>
         </div>
       </div>
     </div>

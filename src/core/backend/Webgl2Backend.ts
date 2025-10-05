@@ -193,7 +193,11 @@ export default class Webgl2Backend implements Backend {
     )[0] as MeshGroup;
 
     this.gl.depthMask(true);
-    this.gl.disable(this.gl.CULL_FACE);
+    if (this.state.getMode() === "Editing") {
+      this.gl.enable(this.gl.CULL_FACE);
+    } else {
+      this.gl.disable(this.gl.CULL_FACE);
+    }
 
     const lightPosition: V3 = [
       -this.state.getDiffuseLightPositionX(),

@@ -94,10 +94,10 @@ export default function Home({ changeloghtml }: { changeloghtml: string }) {
           <canvas ref={canvasRef} className="w-full h-full select-none" />
 
           <div className="absolute top-0 right-0 p-2 pointer-events-none z-0 flex gap-2">
-            <ChangelogPopover
+            {/* <ChangelogPopover
               content={changeloghtml}
               className={"pointer-events-auto"}
-            />
+            /> */}
             <div className="flex flex-col gap-6 p-2">
               <GlobalRotationGizmo
                 rotation={[values.cameraPhi, values.cameraTheta, 0]}

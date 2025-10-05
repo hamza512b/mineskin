@@ -1,3 +1,7 @@
+## 2025-10-05
+
+- Add 3d culling in editing mode
+
 ## 2025-09-30
 
 - Fix "flickering" issue.
