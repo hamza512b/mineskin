@@ -5,7 +5,6 @@ import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { FieldErrors, FormValues } from "@/hooks/useRendererState";
 import clsx from "clsx";
 import React from "react";
-import GitHubButton from "react-github-btn";
 import { useConfirmation } from "../Confirmation/Confirmation";
 
 export interface DetailPanelProps {

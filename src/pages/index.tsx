@@ -1,19 +1,15 @@
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
 import { useRenderer } from "@/hooks/useRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
-import { markdownFileToHtml } from "@/utils/markdonwToHtml";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
-import { ChangelogPopover } from "@/widgets/ChangelogPopover/ChangelogPopover";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
-import { GetStaticProps } from "next";
 import Head from "next/head";
-import path from "path";
 import React, { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function Home({ changeloghtml }: { changeloghtml: string }) {
+export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderer = useRenderer(canvasRef);
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
@@ -273,12 +269,3 @@ export const IndexSEO = React.memo(
 
 IndexSEO.displayName = "IndexSEO";
 
-export const getStaticProps: GetStaticProps = async () => {
-  const html = await markdownFileToHtml(path.resolve("./CHANGELOG.md"));
-
-  return {
-    props: {
-      changeloghtml: html,
-    },
-  };
-};
