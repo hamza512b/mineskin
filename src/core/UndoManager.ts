@@ -41,14 +41,16 @@ export class UndoRedoManager {
   private batching: boolean = false;
   private batchBaseline: Snapshot | null = null;
   private boundOnKeyDown = (e: KeyboardEvent) => {
-    if (e.ctrlKey && e.key.toLowerCase() === "z") {
+    const isMod = e.ctrlKey || e.metaKey; // support Ctrl (Windows/Linux) and Cmd (macOS)
+    if (isMod && e.key.toLowerCase() === "z") {
       e.preventDefault();
       if (e.shiftKey) {
         this.redo();
       } else {
         this.undo();
       }
-    } else if (e.ctrlKey && e.key.toLowerCase() === "y") {
+    } else if (isMod && e.key.toLowerCase() === "y") {
+      e.preventDefault();
       this.redo();
     }
   };

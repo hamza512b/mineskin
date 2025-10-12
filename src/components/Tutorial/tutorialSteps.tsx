@@ -59,7 +59,7 @@ export const steps: TutorialStep[] = [
           here.{" "}
           {isMobile
             ? ""
-            : ` You can also use the keyboard shortcuts (${isMac ? "⌘ + Shift + z or  ⌘ + z" : "Ctrl + y or Ctrl + z"})`}
+            : ` You can also use the keyboard shortcuts (${isMac ? "⌘ + Shift + Z or  ⌘ + Z" : "Ctrl + Y or Ctrl + Z"})`}
         </p>
         <p className="mt-2 text-sm text-gray-400">
           Note: The undo/redo actions are not persistent after reload.

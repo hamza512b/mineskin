@@ -1,5 +1,6 @@
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useTutorialState } from "@/hooks/useTutorialState";
+import { useConfirmation } from "@/widgets/Confirmation/Confirmation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion, MotionStyle } from "framer-motion";
@@ -13,7 +14,6 @@ import React, {
 import Button from "../Button";
 import IconButton from "../IconButton/IconButton";
 import { steps as tutorialSteps } from "./tutorialSteps";
-import { useConfirmation } from "@/widgets/Confirmation/Confirmation";
 
 const Tutorial: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -158,7 +158,6 @@ const Tutorial: React.FC = () => {
   const isFirstStep = currentStep == 0;
   const isLastStep = currentStep == filteredSteps.length - 1;
 
-  console.log(position);
   return (
     <AnimatePresence mode="wait">
       <Dialog.Root open={true}>
@@ -230,19 +229,22 @@ const Tutorial: React.FC = () => {
                 {step.content}
               </Dialog.Description>
               <div className="flex justify-between gap-2 mt-4">
+                <span>
+                  {currentStep + 1} / {filteredSteps.length}
+                </span>
                 {isFirstStep ? (
                   <Button
                     onClick={handleSkip}
-                    variant={"ghost"}
-                    className="mr-auto"
+                    variant={"outlined"}
+                    className="ml-auto"
                   >
                     Skip tutorial
                   </Button>
                 ) : (
                   <Button
                     onClick={handlePrev}
-                    variant={"ghost"}
-                    className="mr-auto"
+                    variant={"outlined"}
+                    className="ml-auto"
                   >
                     Previous
                   </Button>
