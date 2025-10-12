@@ -4,7 +4,7 @@
   "type": "module",
   "author": "Hamza512b",
   "scripts": {
-    "dev": "next dev --turbopack --hostname=localhost",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "preview": "next dev --turbopack --port 3001",

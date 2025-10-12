@@ -4,23 +4,21 @@ export interface TutorialStep {
   id: string;
   title: string;
   content: React.ReactNode;
-  target: string;
+  target?: string;
   placement?: "top" | "bottom" | "left" | "right";
 }
 
 const isMac =
   typeof window !== "undefined" &&
   window.navigator.userAgent.includes("Macintosh");
-const cmdKey = isMac ? "⌘" : "Ctrl";
+const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
 export const steps: TutorialStep[] = [
   {
     id: "intro",
-    title: "Welcome to the Editor!",
+    title: "Welcome to the Mineskin.pro Editing Mode!",
     content:
-      "This quick tutorial will walk you through the basic editing features.",
-    target: '[data-tutorial-id="main"]',
-    placement: "bottom",
+      "This quick tutorial will walk you through the basic editing features of Mineskin.pro.",
   },
   {
     id: "pen-tool",
@@ -54,7 +52,20 @@ export const steps: TutorialStep[] = [
   {
     id: "undo-redo",
     title: "Undo and Redo",
-    content: `Made a mistake? No worries! You can easily undo and redo your actions. You can use the buttons or keyboard shortcuts (${cmdKey}+Z for undo, ${cmdKey}+Shift+Z for redo).`,
+    content: (
+      <>
+        <p>
+          Made a mistake? No worries! You can easily undo and redo your actions
+          here.{" "}
+          {isMobile
+            ? ""
+            : ` You can also use the keyboard shortcuts (${isMac ? "⌘ + Shift + z or  ⌘ + z" : "Ctrl + y or Ctrl + z"})`}
+        </p>
+        <p className="mt-2 text-sm text-gray-400">
+          Note: The undo/redo actions are not persistent after reload.
+        </p>
+      </>
+    ),
     target: '[data-tutorial-id="undo-redo-tools"]',
     placement: "right",
   },
@@ -62,7 +73,7 @@ export const steps: TutorialStep[] = [
     id: "color-picker",
     title: "Color Picker",
     content:
-      "Click on the color swatch to open the color picker. You can choose any color you want from the picker, or select from the palette of colors already used in your skin.",
+      "You can choose any color you want from the picker, or select from the palette of colors already used in your skin.",
     target: '[data-tutorial-id="color-picker-tools"]',
     placement: "right",
   },
@@ -72,7 +83,7 @@ export const steps: TutorialStep[] = [
     content:
       "Here you can toggle the visibility of different body parts for both layers. This is useful for editing parts that are hard to reach.",
     target: '[data-tutorial-id="desktop-part-filter"]',
-    placement: "bottom",
+    placement: "left",
   },
   {
     id: "part-filter-mobile",
@@ -84,10 +95,9 @@ export const steps: TutorialStep[] = [
   },
   {
     id: "finish",
-    title: "You're all set!",
+    title: "You're all set 🎉!",
     content:
-      "That's it for the basics! For more advanced features and information, please refer to our manuals. Happy skin editing!",
-    target: '[data-tutorial-id="main"]',
-    placement: "bottom",
+      "That's it for the basics! For more advanced features and information, please refer to our manual. Happy skin editing!",
+    // target: '[data-tutorial-id="main"]',
   },
 ];

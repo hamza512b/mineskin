@@ -6,6 +6,7 @@ import { FieldErrors, FormValues } from "@/hooks/useRendererState";
 import clsx from "clsx";
 import React from "react";
 import { useConfirmation } from "../Confirmation/Confirmation";
+import { useTutorialState } from "@/hooks/useTutorialState";
 
 export interface DetailPanelProps {
   handleChange: (
@@ -47,7 +48,6 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   handleChange,
   className,
   exitButton,
-  reset,
   mode,
   skinIsPocket,
   diffuseStrength,
@@ -70,8 +70,10 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   diffuseLightPositionZ,
   diffuseLightPositionY,
   variationIntensity,
+  setOpen,
 }) => {
   const { getConfirmation } = useConfirmation();
+  const { setHasCompletedTutorial } = useTutorialState();
 
   return (
     <div
@@ -339,30 +341,26 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
       </Accordion>
 
+      <Accordion label="Tutorial">
+        <div className="flex flex-col gap-2 -mt-3">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Restart the tutorial to see the onboarding instructions again.
+          </p>
+          <Button
+            variant={"outlined"}
+            onClick={async () => {
+              setOpen(false);
+              setHasCompletedTutorial(false);
+            }}
+          >
+            Restart Tutorial
+          </Button>
+        </div>
+      </Accordion>
+
       <div className="flex flex-col gap-4">
         <div className="text-sm text-slate-600 dark:text-slate-400">
-          <div className="flex gap-2 items-center justify-end">
-            <Button
-              variant={"outlined"}
-              // disabled={!isDirty}
-              onClick={async () => {
-                const confirmed = await getConfirmation({
-                  title: "Reset to defaults",
-                  description:
-                    "Are you sure you want to reset the settings? This will even reset back to the default skin.",
-                  confirmText: "Confirm",
-                  cancelText: "Cancel",
-                });
-                if (confirmed) {
-                  reset?.();
-                }
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-          <p className="mb-2 font-medium">Info:</p>
-          <ul className="">
+          <ul className="mt-4">
             <li className="mb-1">
               If you want to report a bug, you can file an issue on the{" "}
               <a
