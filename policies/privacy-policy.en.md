@@ -2,9 +2,9 @@
 title: "Privacy Policy"
 ---
 
-_Last updated: April 17, 2025_
+_Last updated: October 18, 2025_
 
-This Privacy Policy outlines the policies and procedures regarding the collection, use, and disclosure of your personal information when you use our services. In this policy, \"We,\" \"Us,\" or \"The Company\" refers to mineskin.pro.
+This Privacy Policy outlines the policies and procedures regarding the collection, use, and disclosure of your personal information when you use our services. In this policy, \"We,\" \"Us,\" \"Our\" refers to mineskin.pro.
 
 **By using the Service, you consent to the collection and use of information as described in this Privacy Policy. If you disagree, please discontinue use of our Services immediately.**
 
@@ -26,7 +26,7 @@ When using our Services, we may collect:
 
 ### Automatically Collected Information
 
-During your interactions with our Services, we automatically collect:
+During your interactions with our Services, we may automatically collect:
 
 - Your device's IP address
 - Browser type and version
@@ -70,7 +70,7 @@ Your Information is retained only as long as necessary for the purposes outlined
 
 Your data is stored on secure servers hosted by our cloud providers. Information may be transferred to and maintained in regions outside your jurisdiction. By using our Service, you consent to such transfers.
 
-We implement reasonable security measures, but cannot guarantee absolute security of data transmissions over the internet.
+We implement reasonable security measures, all data is encrypted in transit.
 
 ## Your Rights
 
@@ -97,7 +97,7 @@ Our Services are not intended for children under the age of 18. We do not knowin
 
 ## Links to Other Websites
 
-Our Service may contain external links. We advise reviewing the privacy policies of these third-party sites, as we hold no responsibility for their practices.
+Our Service may contain external links. We advise reviewing the privacy policies of these third-party sites, as we do not hold any responsibility for their practices.
 
 ## Changes to This Policy
 

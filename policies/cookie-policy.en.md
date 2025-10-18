@@ -2,7 +2,7 @@
 title: "Cookie Policy"
 ---
 
-_Last updated: April 17, 2025_
+_Last updated: October 18, 2025_
 
 This Cookie Policy explains what cookies are, how we use them, the types of cookies we use, and how information collected using cookies is used.
 
@@ -12,7 +12,7 @@ We do not store sensitive personal information such as mailing addresses or pass
 
 ## Definitions
 
-- **Company** (referred to as "the Company," "We," "Us," or "Our") refers to mineskin.pro.
+- **We** (referred to as "We," "Us," or "Our") refers to mineskin.pro.
 - **Cookies** are small text files placed on your computer, mobile device, or any other device by websites, storing details of your browsing activities on that website.
 - **Website** refers to mineskin.pro and its related domains and subdomains.
 
