@@ -103,7 +103,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
           <div className="p-2">
             {mode === "Editing" && (
               <>
-                <div className="space-y-2">
+                <div className="space-y-2" data-tutorial-id="color-picker-tools">
                   <ColorPicker
                     value={paintColor}
                     onChange={(color) => setValues("paintColor", color)}
@@ -146,7 +146,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Provider>
                     <Tooltip.Root>
                       <Tooltip.Trigger asChild>
-                        <div>
+                        <div data-tutorial-id="pen-tool">
                           <IconButton
                             label="Pen tool"
                             onClick={() => {
@@ -206,7 +206,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Provider>
                     <Tooltip.Root>
                       <Tooltip.Trigger asChild>
-                        <div>
+                        <div data-tutorial-id="eraser-tool">
                           <IconButton
                             label="Eraser"
                             onClick={() => {
@@ -268,7 +268,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   </Tooltip.Provider>
                 </div>
                 <hr className="w-full h-px bg-gray-200 dark:bg-gray-700 rounded-full my-2 opacity-10"></hr>
-                <div className="space-y-2">
+                <div className="space-y-2" data-tutorial-id="undo-redo-tools">
                   <Tooltip.Provider>
                     <Tooltip.Root>
                       <Tooltip.Trigger asChild>
@@ -332,7 +332,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
               <Tooltip.Provider>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
-                    <div>
+                    <div data-tutorial-id="mobile-part-filter">
                       <IconButton
                         label="Parts Filter"
                         onClick={() => setDialogOpen(true)}

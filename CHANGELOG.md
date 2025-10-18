@@ -1,3 +1,8 @@
+## 2025-10-12
+- Remove th ability to reset the editor.
+- Correct undo and redo shortcut in mac.
+- Onboarding tutorial
+
 ## 2025-10-05
 
 - Add 3d culling in editing mode
