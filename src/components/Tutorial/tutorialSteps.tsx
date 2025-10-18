@@ -98,7 +98,7 @@ export const steps: TutorialStep[] = [
     title: "You're all set 🎉!",
     content: (
       <p>
-        "That's it for the basics! For more advanced features and information,
+        That&apos;s it for the basics! For more advanced features and information,
         you can refer to the{" "}
         <a
           href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
@@ -108,7 +108,7 @@ export const steps: TutorialStep[] = [
         >
           usage guide
         </a>
-        . Happy skin editing!",
+        . Happy skin editing!
       </p>
     ),
   },
