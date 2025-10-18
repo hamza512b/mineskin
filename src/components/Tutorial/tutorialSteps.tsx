@@ -16,7 +16,7 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 export const steps: TutorialStep[] = [
   {
     id: "intro",
-    title: "Welcome to the Mineskin.pro Editing Mode!",
+    title: "Welcome to the Mineskin.pro editor!",
     content:
       "This quick tutorial will walk you through the basic editing features of Mineskin.pro.",
   },
@@ -41,8 +41,8 @@ export const steps: TutorialStep[] = [
           Use the <strong>Eraser</strong> to remove pixels from your skin.
         </p>
         <p className="mt-2 text-sm text-gray-400">
-          Note: The eraser will erase from both layers of the skin at once if
-          they are visible.
+          Note: The eraser will erase the top layer of the skin if both are
+          active.
         </p>
       </>
     ),
@@ -96,8 +96,20 @@ export const steps: TutorialStep[] = [
   {
     id: "finish",
     title: "You're all set 🎉!",
-    content:
-      "That's it for the basics! For more advanced features and information, please refer to our manual. Happy skin editing!",
-    // target: '[data-tutorial-id="main"]',
+    content: (
+      <p>
+        "That's it for the basics! For more advanced features and information,
+        you can refer to the{" "}
+        <a
+          href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          usage guide
+        </a>
+        . Happy skin editing!",
+      </p>
+    ),
   },
 ];

@@ -341,7 +341,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
       </Accordion>
 
-      <Accordion label="Tutorial">
+      <Accordion label="Interactive Tutorial">
         <div className="flex flex-col gap-2 -mt-3">
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Restart the tutorial to see the onboarding instructions again.
@@ -386,6 +386,19 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
               .
             </li>
           </ul>
+          <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+            You can refer to the{" "}
+            <a
+              href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
+              target="_blank"
+              title="Usage Guide"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              usage guide
+            </a>{" "}
+            for more information.
+          </p>
           <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
             Made with ❤️ by{" "}
             <a
