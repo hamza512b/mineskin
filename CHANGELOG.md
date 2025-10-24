@@ -1,4 +1,9 @@
+## 2025-10-24
+
+- Always show the exit button on settings panel/dialog
+
 ## 2025-10-12
+
 - Remove th ability to reset the editor.
 - Correct undo and redo shortcut in mac.
 - Onboarding tutorial

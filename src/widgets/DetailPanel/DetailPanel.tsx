@@ -1,3 +1,4 @@
+import IconButton from "@/components/IconButton/IconButton";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
@@ -68,7 +69,18 @@ const DetailPanel: React.FC<DetailPanelProps> = (props) => {
             }}
             transition={{ duration: 0.3 }}
           >
-            <DetailPanelContent {...props} />
+            <DetailPanelContent
+              {...props}
+              exitButton={
+                <IconButton
+                  label="Close setting"
+                  onClick={() => props.setOpen(false)}
+                  className="absolute top-4 right-4"
+                >
+                  <Cross1Icon className="w-4 h-4 m-1" />
+                </IconButton>
+              }
+            />
           </motion.div>
         </motion.div>
       )}
