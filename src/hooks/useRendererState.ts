@@ -1,7 +1,7 @@
 import { omit } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { z, ZodError } from "zod";
-import { Renderer } from "../core/Renderer";
+import { MineSkinRenderer } from "../core/Renderer";
 import { State, StateShape } from "../core/State";
 
 /**
@@ -135,7 +135,7 @@ export type FieldErrors = {
   [K in keyof FormValues]?: string;
 };
 
-export function useRendererState(renderer: Renderer | null) {
+export function useRendererState(renderer: MineSkinRenderer | null) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [values, setValues] = useState<FormValues>(
     (renderer?.state.toObject() || {}) as FormValues,

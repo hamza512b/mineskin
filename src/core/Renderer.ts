@@ -15,7 +15,7 @@ import { UndoRedoManager } from "./UndoManager";
 import { randomInRange } from "@/lib/utils";
 
 const DEFAULT_SKIN = "/steve.png";
-export class Renderer {
+export class MineSkinRenderer {
   public world: MeshGroup;
   backend: Backend;
   private inputManager: InputManager;
@@ -35,7 +35,7 @@ export class Renderer {
   }
 
   static async create(backend: Backend, state: State, url?: string) {
-    const renderer = new Renderer(backend, state);
+    const renderer = new MineSkinRenderer(backend, state);
     await state.initializeIndexDB();
     const old_skin_base64URL = localStorage.getItem("skin_editor");
     const texture = await state.readSkinImageData("main_skin");

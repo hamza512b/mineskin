@@ -1,10 +1,10 @@
 import Webgl2Backend from "@/core/backend/Webgl2Backend";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Renderer } from "../core/Renderer";
+import { MineSkinRenderer } from "../core/Renderer";
 import { State } from "../core/State";
 
 export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
-  const rendererRef = useRef<Renderer>(null);
+  const rendererRef = useRef<MineSkinRenderer>(null);
   const stateRef = useRef<State | null>(null);
 
   // UseEffect is guaranteed to run after the DOM is painted, but after it runs, we need to render.
@@ -18,7 +18,7 @@ export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
 
     const state = State.load();
     const backend = new Webgl2Backend(canvasRef.current);
-    Renderer.create(backend, state).then((renderer) => {
+    MineSkinRenderer.create(backend, state).then((renderer) => {
       rendererRef.current = renderer;
       stateRef.current = state;
       rendererRef.current?.mount();
