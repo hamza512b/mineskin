@@ -1,5 +1,5 @@
 import { MinecraftSkinMaterial } from "./MeshMaterial";
-import { MineSkinRenderer } from "./Renderer";
+import { MineSkinRenderer } from "./MineSkinRenderer";
 
 interface Snapshot {
   material: MinecraftSkinMaterial;
@@ -55,7 +55,7 @@ export class UndoRedoManager {
     }
   };
 
-  constructor(private renderer: MineSkinRenderer) {
+  constructor(public renderer: MineSkinRenderer) {
     this.undoStack = new Stack<Snapshot>((count: number) => {
       this.renderer.state.setUndoCount(count - 1);
     });

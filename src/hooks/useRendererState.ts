@@ -1,7 +1,7 @@
 import { omit } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { z, ZodError } from "zod";
-import { MineSkinRenderer } from "../core/Renderer";
+import { MineSkinRenderer } from "../core/MineSkinRenderer";
 import { State, StateShape } from "../core/State";
 
 /**

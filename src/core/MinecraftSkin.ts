@@ -33,7 +33,8 @@ export class MinecraftSkin extends MeshGroup {
     material: MinecraftSkinMaterial,
     transformMatrix?: M44,
   ) {
-    super(name, parent, transformMatrix);
+    super(name, transformMatrix);
+    this.setParent(parent);
     this.material = material;
   }
 
@@ -51,8 +52,10 @@ export class MinecraftSkin extends MeshGroup {
     }
     const mesh = new MinecraftSkin(name, parent, material, transformMatrix);
     const isPocket = mesh.material.version === "slim";
-    const opaqueGroup = new MeshGroup("opaque", mesh);
-    const transparentGroup = new MeshGroup("transparent", mesh);
+    const opaqueGroup = new MeshGroup("opaque");
+    opaqueGroup.setParent(mesh);
+    const transparentGroup = new MeshGroup("transparent");
+    transparentGroup.setParent(mesh);
 
     // Create and store base layer parts
     mesh.baseHead = MinecraftPart.create(

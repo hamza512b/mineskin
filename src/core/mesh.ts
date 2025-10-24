@@ -23,14 +23,25 @@ type MeshMetadata = {
   [key: string]: string | number | boolean | Record<string, string | number>;
 };
 
-interface BaseMesh {
+class Base {
   readonly uuid: string;
-  calculateCentroid(): V3;
-  visible: boolean;
+  protected parent: MeshGroup | null;
+
+  constructor() {
+    this.uuid = uuidv4();
+    this.parent = null;
+  }
+
+  public getParent(): MeshGroup | null {
+    return this.parent;
+  }
+
+  public setParent(parent: MeshGroup | null) {
+    this.parent = parent;
+  }
 }
 
-export class Mesh implements BaseMesh {
-  readonly uuid: string;
+export class Mesh extends Base {
   readonly name: string;
   public vertices: number[];
   public normals: number[];
@@ -40,11 +51,10 @@ export class Mesh implements BaseMesh {
   public vertexOffset: number = 0;
   readonly metadata: MeshMetadata;
   private transformMatrix = identityM44();
-  private parent: MeshGroup;
   public query: WebGLQuery | null = null;
   private _visible = true;
   get visible() {
-    return this.parent.visible && this._visible;
+    return !!this.parent?.visible && this._visible;
   }
 
   set visible(arg: boolean) {
@@ -59,7 +69,7 @@ export class Mesh implements BaseMesh {
     name: string,
     metadata?: MeshMetadata,
   ) {
-    this.uuid = uuidv4();
+    super();
     this.vertices = vertices;
     this.normals = normals;
     this.uvs = uvs;
@@ -124,14 +134,18 @@ export class Mesh implements BaseMesh {
     return (
       this.cachedTransformMatrix ||
       (this.cachedTransformMatrix = multiplyM44(
-        this.parent.getTransformMatrix() || identityM44(),
+        this.parent?.getTransformMatrix() || identityM44(),
         this.transformMatrix,
       ))
     );
   }
 
-  public getParent(): MeshGroup {
+  public getParent(): MeshGroup | null {
     return this.parent;
+  }
+
+  public setParent(parent: MeshGroup | null) {
+    this.parent = parent;
   }
 
   /**
@@ -144,11 +158,9 @@ export class Mesh implements BaseMesh {
   }
 }
 
-export class MeshGroup implements BaseMesh {
+export class MeshGroup extends Base {
   material?: MeshMaterial;
-  readonly uuid: string;
   readonly name: string;
-  private parent: Mesh | MeshGroup | null;
   private transformMatrix: M44 = identityM44();
   private meshes: (Mesh | MeshGroup)[] = [];
   public metadata?: MeshMetadata;
@@ -171,12 +183,12 @@ export class MeshGroup implements BaseMesh {
   // Cached bounding box
   private cachedBoundingBox: { min: V3; max: V3 } | null = null;
 
-  constructor(name: string, parent: MeshGroup | null, transformMatrix?: M44) {
-    this.uuid = uuidv4();
-    this.parent = parent || null;
+  constructor(name: string, transformMatrix?: M44) {
+    super();
     this.setTransformMatrix(transformMatrix);
     this.name = name;
   }
+
   private _visible = true;
   get visible() {
     return !!(this.parent?.visible ?? true) && this._visible;
@@ -247,7 +259,7 @@ export class MeshGroup implements BaseMesh {
     this.meshes.push(mesh);
   }
 
-  public removeMesh(mesh: Mesh) {
+  public removeMesh(mesh: Mesh | MeshGroup) {
     this.meshes = this.meshes.filter((m) => m.uuid !== mesh.uuid);
   }
 
@@ -562,10 +574,9 @@ export class MinecraftPart extends MeshGroup {
     textureSize: V2,
     uvs: V2,
     name: string,
-    parent: MeshGroup | null,
     transformMatrix?: M44,
   ) {
-    super(name, parent);
+    super(name);
     const [width, height, depth] = size;
     this.cubeCenter = position;
 
@@ -649,7 +660,8 @@ export class MinecraftPart extends MeshGroup {
     const textureHeight = textureSize[1];
 
     faces.forEach((face) => {
-      const faceGroup = new MeshGroup(face.label, this);
+      const faceGroup = new MeshGroup(face.label);
+      faceGroup.setParent(this);
 
       // Store metadata including UV bounds
       faceGroup.metadata = {
@@ -727,9 +739,9 @@ export class MinecraftPart extends MeshGroup {
       textureSize,
       uvs,
       name,
-      parent,
       transformMatrix,
     );
+    part.setParent(parent);
     part.metadata = { ...part.metadata, ...metadata };
     return part;
   }

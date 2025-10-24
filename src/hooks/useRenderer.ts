@@ -1,6 +1,6 @@
 import Webgl2Backend from "@/core/backend/Webgl2Backend";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { MineSkinRenderer } from "../core/Renderer";
+import { MineSkinRenderer, createSkinRenderer } from "../core/MineSkinRenderer";
 import { State } from "../core/State";
 
 export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
@@ -18,7 +18,7 @@ export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
 
     const state = State.load();
     const backend = new Webgl2Backend(canvasRef.current);
-    MineSkinRenderer.create(backend, state).then((renderer) => {
+    createSkinRenderer(backend, state).then((renderer) => {
       rendererRef.current = renderer;
       stateRef.current = state;
       rendererRef.current?.mount();

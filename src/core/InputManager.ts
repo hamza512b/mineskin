@@ -1,4 +1,4 @@
-import { MineSkinRenderer } from "./Renderer";
+import { MineSkinRenderer } from "./MineSkinRenderer";
 
 export class InputManager {
   private isDrawing = false;
@@ -10,7 +10,7 @@ export class InputManager {
     if (document.hidden) this.onWindowBlur();
   }
 
-  constructor(private renderer: MineSkinRenderer) {}
+  constructor(public renderer: MineSkinRenderer) {}
 
   public mountListeners() {
     this.renderer.backend.attachedCanvas?.addEventListener(

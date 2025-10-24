@@ -1,5 +1,5 @@
 import { DebouncedFunc, throttle } from "lodash";
-import { MineSkinRenderer } from "./Renderer";
+import { Renderer } from "./Renderer";
 import { State } from "./State";
 
 export class OrbitControl {
@@ -24,7 +24,7 @@ export class OrbitControl {
   private boundOnWindowBlur = this.onWindowBlur.bind(this);
   private constantsListener = this.onConstantsChange.bind(this);
 
-  constructor(private renderer: MineSkinRenderer) {}
+  constructor(private renderer: Renderer) {}
 
   /** Returns true if the orbit control is currently active and responding to user input. */
   public get isControlling() {
