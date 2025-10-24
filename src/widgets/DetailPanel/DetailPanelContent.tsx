@@ -341,22 +341,24 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
       </Accordion>
 
-      <Accordion label="Interactive Tutorial">
-        <div className="flex flex-col gap-2 -mt-3">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Restart the tutorial to see the onboarding instructions again.
-          </p>
-          <Button
-            variant={"outlined"}
-            onClick={async () => {
-              setOpen(false);
-              setHasCompletedTutorial(false);
-            }}
-          >
-            Restart Tutorial
-          </Button>
-        </div>
-      </Accordion>
+      {mode == "Editing" && (
+        <Accordion label="Interactive Tutorial">
+          <div className="flex flex-col gap-2 -mt-3">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Restart the tutorial to see the onboarding instructions again.
+            </p>
+            <Button
+              variant={"outlined"}
+              onClick={async () => {
+                setOpen(false);
+                setHasCompletedTutorial(false);
+              }}
+            >
+              Restart Tutorial
+            </Button>
+          </div>
+        </Accordion>
+      )}
 
       <div className="flex flex-col gap-4">
         <div className="text-sm text-slate-600 dark:text-slate-400">
