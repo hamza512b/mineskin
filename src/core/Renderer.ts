@@ -1,18 +1,19 @@
 import {
   hsvToRgb,
+  rgbToHex,
   rgbToHsv,
   sortColors,
 } from "@/components/ColorPicker/colorUtils";
-import { Backend } from "./backend/Backend";
+import { randomInRange } from "@/lib/utils";
 import { InputManager } from "./InputManager";
-import { Mesh, MeshGroup } from "./mesh";
 import { MeshImageMaterial, MinecraftSkinMaterial } from "./MeshMaterial";
 import { MinecraftSkin } from "./MinecraftSkin";
-import { OrbitControl } from "./orbitControl";
-import { computeRay, getMeshAtRay } from "./rayTracing";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
-import { randomInRange } from "@/lib/utils";
+import { Backend } from "./backend/Backend";
+import { Mesh, MeshGroup } from "./mesh";
+import { OrbitControl } from "./orbitControl";
+import { computeRay, getMeshAtRay } from "./rayTracing";
 
 const DEFAULT_SKIN = "/steve.png";
 export class MineSkinRenderer {
@@ -438,15 +439,8 @@ export class MineSkinRenderer {
 
       // Only include non-transparent colors
       if (a > 0) {
-        const hex =
-          "#" +
-          [r, g, b]
-            .map((x) => {
-              const hex = x.toString(16);
-              return hex.length === 1 ? "0" + hex : hex;
-            })
-            .join("");
-        colors.add(hex.toUpperCase());
+        const hex = rgbToHex(r, g, b);
+        colors.add(hex);
       }
     }
 
