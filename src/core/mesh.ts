@@ -1,7 +1,6 @@
 import range from "lodash/range";
 import { v4 as uuidv4 } from "uuid";
 import { MeshMaterial } from "./MeshMaterial";
-import { MainProgram } from "./backend/Webgl2Program";
 import {
   M44,
   V2,
@@ -82,11 +81,15 @@ export class Mesh extends Base {
     this.visible = arg;
   }
 
+  public getNumVertices(): number {
+    return this.vertices.length / 3;
+  }
+
   public calculateCentroid(): V3 {
     let x = 0,
       y = 0,
       z = 0;
-    const n = this.vertices.length / 3;
+    const n = this.getNumVertices(); // Reuse!
     for (let i = 0; i < this.vertices.length; i += 3) {
       x += this.vertices[i];
       y += this.vertices[i + 1];
@@ -94,7 +97,6 @@ export class Mesh extends Base {
     }
     return [x / n, y / n, z / n];
   }
-
   static createPlane(
     position: V3,
     size: V2,
@@ -267,14 +269,27 @@ export class MeshGroup extends Base {
     return this.meshes;
   }
 
+  public getNumVertices(): number {
+    return this.meshes.reduce((acc, mesh) => acc + mesh.getNumVertices(), 0);
+  }
+
   public calculateCentroid(): V3 {
-    return this.meshes.reduce(
-      (acc, mesh) => {
-        const c = mesh.calculateCentroid();
-        return acc.map((v, i) => v + c[i]);
-      },
-      [0, 0, 0],
-    ) as unknown as V3;
+    let sumX = 0,
+      sumY = 0,
+      sumZ = 0;
+    let totalVerts = 0;
+
+    for (const mesh of this.meshes) {
+      const c = mesh.calculateCentroid(); // Recursive!
+      const verts = mesh.getNumVertices();
+      sumX += c[0] * verts;
+      sumY += c[1] * verts;
+      sumZ += c[2] * verts;
+      totalVerts += verts;
+    }
+
+    if (totalVerts === 0) return [0, 0, 0]; // Edge case
+    return [sumX / totalVerts, sumY / totalVerts, sumZ / totalVerts];
   }
 
   public calculateBoundingBox(): { min: V3; max: V3 } {
@@ -389,8 +404,9 @@ export class MeshGroup extends Base {
     return results;
   }
 
-  cleanup(gl: WebGL2RenderingContext) {
+  cleanup(gl: WebGL2RenderingContext | null) {
     if (
+      !gl ||
       !this.mergedNormals.length ||
       !this.mergedUVs.length ||
       !this.mergedVertices.length
@@ -414,11 +430,8 @@ export class MeshGroup extends Base {
     this.mergedUVsBuffer = null;
     this.vao = null;
   }
-}
 
-export class MinecraftPart extends MeshGroup {
-  readonly cubeCenter: V3;
-  public compileBuffers(gl: WebGL2RenderingContext, mainProgram: MainProgram) {
+  public compileData() {
     // Reset merged arrays
     this.mergedVertices = [];
     this.mergedNormals = [];
@@ -446,7 +459,7 @@ export class MinecraftPart extends MeshGroup {
     }
 
     this.linesOffset = this.mergedVertices.length / 3;
-    const cubeCenter = this.cubeCenter;
+    const cubeCenter = this.calculateCentroid();
 
     // Render lines outside of the cube
     const moveMatrix = multiplyM44(
@@ -473,9 +486,9 @@ export class MinecraftPart extends MeshGroup {
         uniqueVertices.push(...multiplyM4V3(moveMatrix, v));
       }
 
+      // TODO this part should overloaded and moved to minecraft part
       // Create edges between vertices that share coordinates
       // This creates both horizontal and vertical lines for the grid
-
       for (let i = 0; i < uniqueVertices.length; i += 3) {
         for (let j = i + 3; j < uniqueVertices.length; j += 3) {
           const v1 = uniqueVertices.slice(i, i + 3) as V3;
@@ -500,74 +513,12 @@ export class MinecraftPart extends MeshGroup {
         }
       }
     }
-
-    // Create merged buffers
-    this.mergedVerticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedVerticesBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedVertices),
-      gl.STATIC_DRAW,
-    );
-
-    this.mergedNormalsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedNormalsBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedNormals),
-      gl.STATIC_DRAW,
-    );
-
-    this.mergedUVsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedUVsBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedUVs),
-      gl.STATIC_DRAW,
-    );
-
-    // Create and set up a VAO for this group
-    this.vao = gl.createVertexArray();
-    gl.bindVertexArray(this.vao);
-
-    // Bind position buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedVerticesBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_position") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_position") as number,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    // Bind uv buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedUVsBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_texcoord") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_texcoord") as number,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    // Bind normal buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedNormalsBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_normal") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_normal") as number,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    gl.bindVertexArray(null);
   }
+}
+
+export class MinecraftPart extends MeshGroup {
+  readonly cubeCenter: V3;
+
   constructor(
     size: V3,
     position: V3,

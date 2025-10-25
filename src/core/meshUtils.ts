@@ -102,7 +102,7 @@ export function imageDataToDataURL(
 
   // Convert to data URL
   return canvas.toDataURL(type, quality);
-}/**
+} /**
  * Creates a 3D "tube" representation of a line using triangles, visible from all angles.
  * @param v1 Given start point in 3D space.
  * @param v2 Ending point in 3D space.
@@ -112,12 +112,13 @@ export function imageDataToDataURL(
 export function createTriangleLine(
   v1: V3,
   v2: V3,
-  lineWidth: number = 0.01): { vertices: number[]; normals: number[]; uvs: number[]; } {
+  lineWidth: number = 0.01,
+): { vertices: number[]; normals: number[]; uvs: number[] } {
   const direction: V3 = [v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]];
   const length = Math.sqrt(
     direction[0] * direction[0] +
-    direction[1] * direction[1] +
-    direction[2] * direction[2]
+      direction[1] * direction[1] +
+      direction[2] * direction[2],
   );
 
   if (length === 0) {
@@ -295,4 +296,3 @@ export function createTriangleLine(
 
   return { vertices, normals, uvs };
 }
-

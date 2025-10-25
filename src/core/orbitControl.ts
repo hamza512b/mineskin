@@ -36,42 +36,42 @@ export class OrbitControl {
       this.renderer.state.save();
     }, 500);
 
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "touchstart",
       this.boundOnTouchStart,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "touchmove",
       this.boundOnTouchMove,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "touchend",
       this.boundOnTouchEnd,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "mousedown",
       this.boundOnMouseDown,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "mousemove",
       this.boundOnMouseMove,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "mouseup",
       this.boundOnMouseUp,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "mouseout",
       this.boundOnMouseOut,
       false,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "wheel",
       this.boundOnMouseWheel,
       false,
@@ -82,35 +82,35 @@ export class OrbitControl {
 
   public unmountListeners() {
     {
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "touchstart",
         this.boundOnTouchStart,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "touchmove",
         this.boundOnTouchMove,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "touchend",
         this.boundOnTouchEnd,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "mousedown",
         this.boundOnMouseDown,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "mousemove",
         this.boundOnMouseMove,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "mouseup",
         this.boundOnMouseUp,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "mouseout",
         this.boundOnMouseOut,
       );
-      this.renderer.backend.attachedCanvas?.removeEventListener(
+      this.renderer.backend.canvas?.removeEventListener(
         "wheel",
         this.boundOnMouseWheel,
       );
@@ -261,7 +261,7 @@ export class OrbitControl {
       Math.abs(this.rotateVelocity[1]) > 0.001 ||
       Math.abs(this.zoomVelocity) > 0.001
     ) {
-      if (!this.renderer.backend.attachedCanvas) return;
+      if (!this.renderer.backend.canvas) return;
       this.rotateVelocity[0] *=
         1 - this.renderer.state.getCameraDampingFactor();
       this.rotateVelocity[1] *=
@@ -269,12 +269,12 @@ export class OrbitControl {
       this.zoomVelocity *= 1 - this.renderer.state.getCameraDampingFactor();
       this.rotateLeft(
         ((2 * Math.PI * this.rotateVelocity[0]) /
-          this.renderer.backend.attachedCanvas.clientWidth) *
+          this.renderer.backend.canvas.clientWidth) *
           this.renderer.state.getCameraSpeed(),
       );
       this.rotateTop(
         ((2 * Math.PI * this.rotateVelocity[1]) /
-          this.renderer.backend.attachedCanvas.clientHeight) *
+          this.renderer.backend.canvas.clientHeight) *
           this.renderer.state.getCameraSpeed(),
       );
       this.zoom(this.zoomVelocity * this.renderer.state.getCameraSpeed() * 0.1);

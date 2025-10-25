@@ -428,9 +428,6 @@ export class State {
 
     throw new Error("Invalid layer or part");
   }
-  public getMode() {
-    return this.mode;
-  }
 
   // Setters with an optional notify flag (defaults to true)
   public setObjectTranslationX(

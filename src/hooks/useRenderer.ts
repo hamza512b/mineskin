@@ -1,36 +1,76 @@
-import Webgl2Backend from "@/core/backend/Webgl2Backend";
-import { RefObject, useEffect, useRef, useState } from "react";
-import { MineSkinRenderer, createSkinRenderer } from "../core/MineSkinRenderer";
+import { MinecraftSkin } from "@/core/MinecraftSkin";
+import { useEffect, useRef, useState } from "react";
+import { MineSkinRenderer } from "../core/MineSkinRenderer";
 import { State } from "../core/State";
 
-export function useRenderer(canvasRef: RefObject<HTMLCanvasElement | null>) {
-  const rendererRef = useRef<MineSkinRenderer>(null);
-  const stateRef = useRef<State | null>(null);
+const DEFAULT_SKIN = "/steve.png";
+
+export async function setup<T extends MineSkinRenderer>(renderer: T) {
+  await renderer.state.initializeIndexDB();
+  const old_skin_base64URL = localStorage.getItem("skin_editor");
+  const texture = await renderer.state.readSkinImageData("main_skin");
+
+  let skin: MinecraftSkin;
+  if (old_skin_base64URL && !texture) {
+    skin = await MinecraftSkin.create(
+      "MainSkin",
+      renderer.world,
+      old_skin_base64URL,
+    );
+  } else {
+    skin = await MinecraftSkin.create(
+      "MainSkin",
+      renderer.world,
+      texture || DEFAULT_SKIN,
+    );
+  }
+  renderer.state.setSkinIsPocket(
+    skin.material.version === "slim",
+    true,
+    "classic",
+  );
+  document.body.setAttribute("data-skin-version", skin.material.version);
+  renderer.addMesh(skin);
+  renderer.backend.bindMeshGroup(skin);
+}
+
+export function useRenderer<T extends MineSkinRenderer>(
+  rendererClass: new (state: State) => T,
+): [T, (c: HTMLCanvasElement | null) => void] {
+  const rendererRef = useRef<T | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // UseEffect is guaranteed to run after the DOM is painted, but after it runs, we need to render.
   const [, setGeneration] = useState(0);
 
+  // Cleanup function to save state and unmount renderer when component unmounts
   useEffect(() => {
-    if (!canvasRef.current) {
-      console.error("Canvas ref is null");
-      return () => {};
-    }
-
-    const state = State.load();
-    const backend = new Webgl2Backend(canvasRef.current);
-    createSkinRenderer(backend, state).then((renderer) => {
-      rendererRef.current = renderer;
-      stateRef.current = state;
-      rendererRef.current?.mount();
-      rendererRef.current?.start("parallaxEffect");
-      setGeneration((generation) => generation + 1);
-    });
-
     return () => {
-      rendererRef.current?.stop();
-      rendererRef.current?.unmount();
+      if (rendererRef.current) {
+        // Save state before unmounting
+        rendererRef.current.state.save();
+        // Stop animation loop
+        rendererRef.current.stop();
+        // Unmount listeners
+        rendererRef.current.unmount();
+      }
     };
   }, []);
 
-  return rendererRef.current;
+  return [
+    rendererRef.current!,
+    (canvas: HTMLCanvasElement | null) => {
+      if (!rendererRef.current?.backend.canvas && !!canvas) {
+        canvasRef.current = canvas;
+        const state = State.load();
+        rendererRef.current = new rendererClass(state);
+        rendererRef.current?.backend.setCanvas(canvas);
+        setup(rendererRef.current!).then(() => {
+          rendererRef.current?.mount();
+          rendererRef.current?.start("parallaxEffect");
+          setGeneration((generation) => generation + 1);
+        });
+      }
+    },
+  ];
 }

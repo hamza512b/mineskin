@@ -111,7 +111,7 @@ export class UndoRedoManager {
   }
 
   public undo() {
-    if (this.renderer.state.getMode() === "Preview") {
+    if (this.renderer.getMode() === "Preview") {
       return;
     }
     if (this.undoStack.count > 1) {
@@ -129,7 +129,7 @@ export class UndoRedoManager {
   }
 
   public redo() {
-    if (this.renderer.state.getMode() === "Preview") {
+    if (this.renderer.getMode() === "Preview") {
       return;
     }
     if (this.redoStack.count > 0) {

@@ -5,24 +5,19 @@ import {
   sortColors,
 } from "@/components/ColorPicker/colorUtils";
 import { randomInRange } from "@/lib/utils";
-import { InputManager } from "./InputManager";
+import { EditInputManager } from "./EditInputManager";
 import { MeshImageMaterial, MinecraftSkinMaterial } from "./MeshMaterial";
 import { MinecraftSkin } from "./MinecraftSkin";
+import { Renderer } from "./Renderer";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
-import { Backend } from "./backend/Backend";
 import { Mesh, MeshGroup } from "./mesh";
 import { computeRay, getMeshAtRay } from "./rayTracing";
-import { Renderer } from "./Renderer";
-
-const DEFAULT_SKIN = "/steve.png";
 
 export class MineSkinRenderer extends Renderer {
-  public inputManager: InputManager;
   public undoRedoManager: UndoRedoManager;
-  constructor(backend: Backend, state: State) {
-    super(backend, state);
-    this.inputManager = new InputManager(this);
+  constructor(state: State) {
+    super(state);
     this.undoRedoManager = new UndoRedoManager(this);
   }
 
@@ -30,7 +25,6 @@ export class MineSkinRenderer extends Renderer {
     super.mount();
     this.state.addListener(this.onVisibilityChange.bind(this));
     this.state.addListener(this.onPocketChange.bind(this));
-    this.inputManager.mountListeners();
     this.undoRedoManager.mountListeners();
   }
 
@@ -38,7 +32,6 @@ export class MineSkinRenderer extends Renderer {
     super.unmount();
     this.state.removeListener(this.onVisibilityChange.bind(this));
     this.state.removeListener(this.onPocketChange.bind(this));
-    this.inputManager.unmountListeners();
     this.undoRedoManager.unmountListeners();
   }
 
@@ -50,77 +43,11 @@ export class MineSkinRenderer extends Renderer {
     return s;
   }
 
-  public updateCursor(x: number, y: number): void {
-    if (!this.backend.attachedCanvas) return;
-    if (this.state.getMode() === "Preview") {
-      return;
-    }
-    const ray = computeRay(
-      x,
-      y,
-      this.backend.attachedCanvas.width,
-      this.backend.attachedCanvas.height,
-      this.backend.getProjectTransformation(),
-      this.backend.getViewTransformation(),
-      this.backend.getGlobalTransformation(),
-    );
-    const skinObject = this.getMainSkin();
-    const opaqueGroup = skinObject
-      .getChildren()
-      .find((g: MeshGroup | Mesh) => g.name === "opaque") as MeshGroup;
-    const transparentGroup = skinObject
-      .getChildren()
-      .find((g: MeshGroup | Mesh) => g.name === "transparent") as MeshGroup;
-    const hitTransparent = transparentGroup
-      ? getMeshAtRay(transparentGroup, ray)
-      : null;
-    const hitOpaque = opaqueGroup ? getMeshAtRay(opaqueGroup, ray) : null;
-    let hit = null;
-    if (hitTransparent && hitTransparent.mesh.metadata.type === "skinPixel") {
-      const part = hitTransparent.mesh;
-      if (part.visible) {
-        hit = hitTransparent;
-      }
-    }
-    if (!hit && hitOpaque && hitOpaque.mesh.metadata.type === "skinPixel") {
-      const part = hitOpaque.mesh;
-      if (part.visible) {
-        hit = hitOpaque;
-      }
-    }
-
-    this.backend.attachedCanvas.style.cursor = hit ? "crosshair" : "grab";
-  }
-
-  public getMeshHitAt(x: number, y: number) {
-    if (!this.backend.attachedCanvas) return;
-    if (this.state.getMode() === "Preview") {
-      return;
-    }
-    const skinObject = this.getMainSkin();
-
-    const ray = computeRay(
-      x,
-      y,
-      this.backend.attachedCanvas.width,
-      this.backend.attachedCanvas.height,
-      this.backend.getProjectTransformation(),
-      this.backend.getViewTransformation(),
-      this.backend.getGlobalTransformation(),
-    );
-    const hit = getMeshAtRay(skinObject, ray);
-    if (!hit) return;
-    if (hit.mesh.metadata.type === "skinPixel") {
-      return hit;
-    }
-    return null;
-  }
-
   public start(effect?: "parallaxEffect"): void {
-    super.start();
     if (effect === "parallaxEffect") {
       this.createParallaxEffect();
     }
+    super.start();
   }
 
   private createParallaxEffect(): void {
@@ -246,17 +173,123 @@ export class MineSkinRenderer extends Renderer {
   }
 
   public redo() {
-    if (!this.undoRedoManager)
-      throw new Error("UndoRedoManager not initialized");
     this.undoRedoManager.redo();
   }
 
   public undo() {
-    if (!this.undoRedoManager)
-      throw new Error("UndoRedoManager not initialized");
     this.undoRedoManager.undo();
   }
 
+  reset(): void {
+    this.state.reset();
+    this.undoRedoManager.reset();
+  }
+
+  private onPocketChange(constants: State, origin: string | undefined): void {
+    if (origin !== "PocketSwitch") return;
+
+    const skin = this.getMainSkin();
+    if (constants.getSkinIsPocket()) {
+      this.undoRedoManager.beginBatch();
+      skin.material = skin.material.convertToSlim();
+      this.state.setSkinIsPocket(true, true, "App");
+      this.undoRedoManager.endBatch();
+    } else {
+      this.undoRedoManager.beginBatch();
+      skin.material = skin.material.convertToClassic();
+      this.state.setSkinIsPocket(false, true, "App");
+      this.undoRedoManager.endBatch();
+    }
+  }
+
+  private onVisibilityChange(
+    constants: State,
+    origin: string | undefined,
+  ): void {
+    if (origin !== "App") return;
+
+    const mainSkinInstance = this.getMainSkin();
+    // Reset all arms
+    if (mainSkinInstance.baseLeftArm)
+      mainSkinInstance.baseLeftArm.visible = false;
+    if (mainSkinInstance.baseLeftSlimArm)
+      mainSkinInstance.baseLeftSlimArm.visible = false;
+    if (mainSkinInstance.baseRightArm)
+      mainSkinInstance.baseRightArm.visible = false;
+    if (mainSkinInstance.baseRightSlimArm)
+      mainSkinInstance.baseRightSlimArm.visible = false;
+    if (mainSkinInstance.overlayLeftArm)
+      mainSkinInstance.overlayLeftArm.visible = false;
+    if (mainSkinInstance.overlayLeftSlimArm)
+      mainSkinInstance.overlayLeftSlimArm.visible = false;
+    if (mainSkinInstance.overlayRightArm)
+      mainSkinInstance.overlayRightArm.visible = false;
+    if (mainSkinInstance.overlayRightSlimArm)
+      mainSkinInstance.overlayRightSlimArm.visible = false;
+
+    // Get every part visibility
+    (
+      [
+        ["overlay", "head"],
+        ["overlay", "body"],
+        ["overlay", "leftLeg"],
+        ["overlay", "rightLeg"],
+        ["overlay", "leftArm"],
+        ["overlay", "rightArm"],
+        ["base", "head"],
+        ["base", "body"],
+        ["base", "leftLeg"],
+        ["base", "rightLeg"],
+        ["base", "leftArm"],
+        ["base", "rightArm"],
+      ] as [Layers, Parts][]
+    ).forEach(([layer, part]) => {
+      mainSkinInstance.onVisibilityChange(layer, part, constants);
+    });
+  }
+
+  public getMeshHitAt(x: number, y: number) {
+    if (!this.backend.canvas) return;
+    const skinObject = this.getMainSkin();
+
+    const ray = computeRay(
+      x,
+      y,
+      this.backend.canvas.width,
+      this.backend.canvas.height,
+      this.backend.getProjectTransformation(),
+      this.backend.getViewTransformation(),
+      this.backend.getGlobalTransformation(),
+    );
+    const hit = getMeshAtRay(skinObject, ray);
+    if (!hit) return;
+    if (hit.mesh.metadata.type === "skinPixel") {
+      return hit;
+    }
+    return null;
+  }
+
+  public getMode() {
+    return this instanceof MiSkEditingRenderer ? "Editing" : "Preview";
+  }
+}
+
+export class MiSkEditingRenderer extends MineSkinRenderer {
+  public inputManager: EditInputManager;
+  constructor(state: State) {
+    super(state);
+    this.inputManager = new EditInputManager(this);
+  }
+
+  public override mount() {
+    super.mount();
+    this.inputManager.mountListeners();
+  }
+
+  public override unmount() {
+    super.unmount();
+    this.inputManager.unmountListeners();
+  }
   public pickColor(x: number, y: number) {
     const hit = this.getMeshHitAt(x, y);
     if (!hit) return false;
@@ -391,106 +424,48 @@ export class MineSkinRenderer extends Renderer {
 
     return sortColors(Array.from(colors));
   }
-
-  reset(): void {
-    this.state.reset();
-    this.uploadTextureUrl(DEFAULT_SKIN);
-    this.undoRedoManager.reset();
-  }
-
-  private onPocketChange(constants: State, origin: string | undefined): void {
-    if (origin !== "PocketSwitch") return;
-
-    const skin = this.getMainSkin();
-    if (constants.getSkinIsPocket()) {
-      this.undoRedoManager.beginBatch();
-      skin.material = skin.material.convertToSlim();
-      this.state.setSkinIsPocket(true, true, "App");
-      this.undoRedoManager.endBatch();
-    } else {
-      this.undoRedoManager.beginBatch();
-      skin.material = skin.material.convertToClassic();
-      this.state.setSkinIsPocket(false, true, "App");
-      this.undoRedoManager.endBatch();
+  public updateCursor(x: number, y: number): void {
+    if (!this.backend.canvas) return;
+    const ray = computeRay(
+      x,
+      y,
+      this.backend.canvas.width,
+      this.backend.canvas.height,
+      this.backend.getProjectTransformation(),
+      this.backend.getViewTransformation(),
+      this.backend.getGlobalTransformation(),
+    );
+    const skinObject = this.getMainSkin();
+    const opaqueGroup = skinObject
+      .getChildren()
+      .find((g: MeshGroup | Mesh) => g.name === "opaque") as MeshGroup;
+    const transparentGroup = skinObject
+      .getChildren()
+      .find((g: MeshGroup | Mesh) => g.name === "transparent") as MeshGroup;
+    const hitTransparent = transparentGroup
+      ? getMeshAtRay(transparentGroup, ray)
+      : null;
+    const hitOpaque = opaqueGroup ? getMeshAtRay(opaqueGroup, ray) : null;
+    let hit = null;
+    if (hitTransparent && hitTransparent.mesh.metadata.type === "skinPixel") {
+      const part = hitTransparent.mesh;
+      if (part.visible) {
+        hit = hitTransparent;
+      }
     }
-  }
+    if (!hit && hitOpaque && hitOpaque.mesh.metadata.type === "skinPixel") {
+      const part = hitOpaque.mesh;
+      if (part.visible) {
+        hit = hitOpaque;
+      }
+    }
 
-  private onVisibilityChange(
-    constants: State,
-    origin: string | undefined,
-  ): void {
-    if (origin !== "App") return;
-
-    const mainSkinInstance = this.getMainSkin();
-    // Reset all arms
-    if (mainSkinInstance.baseLeftArm)
-      mainSkinInstance.baseLeftArm.visible = false;
-    if (mainSkinInstance.baseLeftSlimArm)
-      mainSkinInstance.baseLeftSlimArm.visible = false;
-    if (mainSkinInstance.baseRightArm)
-      mainSkinInstance.baseRightArm.visible = false;
-    if (mainSkinInstance.baseRightSlimArm)
-      mainSkinInstance.baseRightSlimArm.visible = false;
-    if (mainSkinInstance.overlayLeftArm)
-      mainSkinInstance.overlayLeftArm.visible = false;
-    if (mainSkinInstance.overlayLeftSlimArm)
-      mainSkinInstance.overlayLeftSlimArm.visible = false;
-    if (mainSkinInstance.overlayRightArm)
-      mainSkinInstance.overlayRightArm.visible = false;
-    if (mainSkinInstance.overlayRightSlimArm)
-      mainSkinInstance.overlayRightSlimArm.visible = false;
-
-    // Get every part visibility
-    (
-      [
-        ["overlay", "head"],
-        ["overlay", "body"],
-        ["overlay", "leftLeg"],
-        ["overlay", "rightLeg"],
-        ["overlay", "leftArm"],
-        ["overlay", "rightArm"],
-        ["base", "head"],
-        ["base", "body"],
-        ["base", "leftLeg"],
-        ["base", "rightLeg"],
-        ["base", "leftArm"],
-        ["base", "rightArm"],
-      ] as [Layers, Parts][]
-    ).forEach(([layer, part]) => {
-      mainSkinInstance.onVisibilityChange(layer, part, constants);
-    });
+    this.backend.canvas.style.cursor = hit ? "crosshair" : "grab";
   }
 }
 
-export async function createSkinRenderer(
-  backend: Backend,
-  state: State,
-  url?: string,
-) {
-  const renderer = new MineSkinRenderer(backend, state);
-  await state.initializeIndexDB();
-  const old_skin_base64URL = localStorage.getItem("skin_editor");
-  const texture = await state.readSkinImageData("main_skin");
-
-  let skin: MinecraftSkin;
-
-  if (url) {
-    skin = await MinecraftSkin.create("MainSkin", renderer.world, url);
-  } else if (old_skin_base64URL && !texture) {
-    skin = await MinecraftSkin.create(
-      "MainSkin",
-      renderer.world,
-      old_skin_base64URL,
-    );
-  } else {
-    skin = await MinecraftSkin.create(
-      "MainSkin",
-      renderer.world,
-      texture || DEFAULT_SKIN,
-    );
+export class MiSkPreviewRenderer extends MineSkinRenderer {
+  constructor(state: State) {
+    super(state);
   }
-  state.setSkinIsPocket(skin.material.version === "slim", true, "classic");
-  document.body.setAttribute("data-skin-version", skin.material.version);
-  renderer.world.addMesh(skin);
-  return renderer;
 }

@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 
 const dropdownContentVariants = cva(
-  "min-w-[220px] bg-white dark:bg-gray-800 rounded-md p-1.5 shadow-md border border-gray-200 dark:border-gray-700 animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 z-50",
+  "mx-2 min-w-[220px] bg-white dark:bg-gray-800 rounded-md p-1.5 shadow-md border border-gray-200 dark:border-gray-700 animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 z-50",
   {
     variants: {
       size: {

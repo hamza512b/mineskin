@@ -1,8 +1,8 @@
 import { State } from "./State";
 import { Backend } from "./backend/Backend";
+import Webgl2Backend from "./backend/Webgl2Backend";
 import { Mesh, MeshGroup } from "./mesh";
 import { OrbitControl } from "./orbitControl";
-
 
 export class Renderer {
   public world: MeshGroup;
@@ -12,17 +12,16 @@ export class Renderer {
   private animationFrame: number | null = null;
   public state: State;
 
-  constructor(backend: Backend, state: State) {
-    this.backend = backend;
+  constructor(state: State) {
+    this.backend = new Webgl2Backend(this);
     this.state = state;
     this.world = new MeshGroup("World");
     this.orbitControl = new OrbitControl(this);
   }
 
   public mount() {
-    this.orbitControl.mountListeners();
-
     this.backend.onStart(this.world, this.state);
+    this.orbitControl.mountListeners();
   }
 
   public unmount() {

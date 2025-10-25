@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import Button from "@/components/Button";
 import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import { EditorIcon, PreviewIcon } from "@/components/Icons/Icons";
-import { SelectBox } from "@/components/Select";
+import Link from "next/link";
 import {
   DotsVerticalIcon,
   DownloadIcon,
@@ -24,7 +24,6 @@ function ActionBar({
   downlodTexture,
   uploadTexture,
   mode,
-  setMode,
 }: TopBarProps) {
   const modeOptions = [
     {
@@ -50,12 +49,9 @@ function ActionBar({
     },
   ];
 
-  const handleUploadTexture = useCallback(
-    () => {
-      uploadTexture?.();
-    },
-    [uploadTexture],
-  );
+  const handleUploadTexture = useCallback(() => {
+    uploadTexture?.();
+  }, [uploadTexture]);
 
   const handleDownloadTexture = useCallback(() => {
     downlodTexture?.();
@@ -68,15 +64,26 @@ function ActionBar({
         className,
       )}
     >
-      <SelectBox
-        leftIcon={
-          modeOptions.find((option) => option.value === mode)?.icon ||
-          modeOptions[0].icon
+      <Dropdown
+        trigger={
+          <Button variant={"secondary"}>
+            {modeOptions.find((option) => option.value === mode)?.icon ||
+              modeOptions[0].icon}
+            <span className="ml-2">{mode || "Preview"}</span>
+          </Button>
         }
-        options={modeOptions}
-        value={mode || "Preview"}
-        onValueChange={(mode: Mode) => setMode(mode)}
-      />
+      >
+        <Link href="/preview">
+          <DropdownItem leftIcon={<PreviewIcon className="h-4 w-4" />}>
+            Preview
+          </DropdownItem>
+        </Link>
+        <Link href="/editor">
+          <DropdownItem leftIcon={<EditorIcon className="h-4 w-4" />}>
+            Editor
+          </DropdownItem>
+        </Link>
+      </Dropdown>
       <div className="flex gap-2">
         <div className="hidden md:flex gap-2 ">
           {/* Desktop buttons */}

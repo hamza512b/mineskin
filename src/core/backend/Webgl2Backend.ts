@@ -17,28 +17,37 @@ import {
 import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
 import { MinecraftSkin } from "../MinecraftSkin";
+import { MiSkEditingRenderer } from "../MineSkinRenderer";
+import { Renderer } from "../Renderer";
 import { State } from "../State";
 import { resizeCanvasToDisplaySize } from "../utils";
 import { Backend } from "./Backend";
 import { MainProgram } from "./Webgl2Program";
 
 export default class Webgl2Backend implements Backend {
-  private gl: WebGL2RenderingContext;
-  private mainProgram: MainProgram;
+  private _canvasRef: { current: HTMLCanvasElement | null } = { current: null };
+  private gl: WebGL2RenderingContext | null = null;
+  private mainProgram: MainProgram | null = null;
   private globalTransformation = identityM44();
   private viewTransformation = identityM44();
   private projectTransformation = identityM44();
   private state?: State;
   private meshes?: MeshGroup;
-  attachedCanvas: HTMLCanvasElement;
   private materialTextureCache: Map<string, WebGLTexture> = new Map();
+  public renderer: Renderer;
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.attachedCanvas = canvas;
-    const gl = canvas.getContext("webgl2");
-    if (!gl) throw new Error("Could not retrieve WebGL 2 context.");
-    this.gl = gl;
-    this.mainProgram = new MainProgram(this.gl);
+  public setCanvas(canvas: HTMLCanvasElement | null) {
+    this._canvasRef.current = canvas;
+    this.gl = canvas?.getContext("webgl2") ?? null;
+    this.mainProgram = this.gl ? new MainProgram(this.gl) : null;
+  }
+
+  public get canvas() {
+    return this._canvasRef.current;
+  }
+
+  constructor(renderer: Renderer) {
+    this.renderer = renderer;
   }
   getGlobalTransformation(): M44 {
     return this.globalTransformation;
@@ -49,22 +58,95 @@ export default class Webgl2Backend implements Backend {
   getProjectTransformation(): M44 {
     return this.projectTransformation;
   }
-  private compileMinecraftParts(meshGroup: MeshGroup): void {
+  public bindMeshGroup(meshGroup: MeshGroup): void {
+    if (!this.gl || !this.mainProgram) return;
     meshGroup.getChildren().forEach((child) => {
-      if (child instanceof MinecraftPart) {
-        child.compileBuffers(this.gl, this.mainProgram);
+      if (child instanceof MinecraftPart && this.gl && this.mainProgram) {
+        child.compileData();
+        // Create merged buffers
+        const mergedVerticesBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedVerticesBuffer);
+        this.gl.bufferData(
+          this.gl.ARRAY_BUFFER,
+          new Float32Array(child.mergedVertices),
+          this.gl.STATIC_DRAW,
+        );
+
+        const mergedNormalsBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedNormalsBuffer);
+        this.gl.bufferData(
+          this.gl.ARRAY_BUFFER,
+          new Float32Array(child.mergedNormals),
+          this.gl.STATIC_DRAW,
+        );
+
+        const mergedUVsBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedUVsBuffer);
+        this.gl.bufferData(
+          this.gl.ARRAY_BUFFER,
+          new Float32Array(child.mergedUVs),
+          this.gl.STATIC_DRAW,
+        );
+
+        // Create and set up a VAO for this group
+        const vao = this.gl.createVertexArray();
+        this.gl.bindVertexArray(vao);
+
+        // Bind position buffer
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedVerticesBuffer);
+        this.gl.enableVertexAttribArray(
+          this.mainProgram.getLocation("a_position") as number,
+        );
+        this.gl.vertexAttribPointer(
+          this.mainProgram.getLocation("a_position") as number,
+          3,
+          this.gl.FLOAT,
+          false,
+          0,
+          0,
+        );
+
+        // Bind uv buffer
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedUVsBuffer);
+        this.gl.enableVertexAttribArray(
+          this.mainProgram.getLocation("a_texcoord") as number,
+        );
+        this.gl.vertexAttribPointer(
+          this.mainProgram.getLocation("a_texcoord") as number,
+          2,
+          this.gl.FLOAT,
+          false,
+          0,
+          0,
+        );
+
+        // Bind normal buffer
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mergedNormalsBuffer);
+        this.gl.enableVertexAttribArray(
+          this.mainProgram.getLocation("a_normal") as number,
+        );
+        this.gl.vertexAttribPointer(
+          this.mainProgram.getLocation("a_normal") as number,
+          3,
+          this.gl.FLOAT,
+          false,
+          0,
+          0,
+        );
+
+        this.gl.bindVertexArray(null);
+        child.vao = vao;
       } else if (child instanceof MeshGroup) {
-        this.compileMinecraftParts(child);
+        this.bindMeshGroup(child);
       }
     });
   }
   public onStart(meshes: MeshGroup, state: State) {
     this.meshes = meshes;
     this.state = state;
-    this.compileMinecraftParts(meshes);
   }
   private renderMeshGroup(meshGroup: MeshGroup, skin: MinecraftSkin): void {
-    if (!meshGroup.visible) return;
+    if (!meshGroup.visible || !this.gl || !this.mainProgram) return;
     const material = meshGroup.getMaterial();
     if (material instanceof MeshImageMaterial) {
       if (!this.materialTextureCache.has(material.uuid)) {
@@ -117,13 +199,12 @@ export default class Webgl2Backend implements Backend {
 
       if (
         this.state?.getGridVisible() &&
-        this.state.getMode() === "Editing" &&
+        this.renderer instanceof MiSkEditingRenderer &&
         this.shouldRenderGrid(meshGroup, skin)
       ) {
         // Save current depth state
         const currentDepthFunc = this.gl.getParameter(this.gl.DEPTH_FUNC);
         const currentDepthMask = this.gl.getParameter(this.gl.DEPTH_WRITEMASK);
-
 
         this.gl.uniform1f(
           this.mainProgram.getLocation("u_gridLines") as WebGLUniformLocation,
@@ -179,9 +260,15 @@ export default class Webgl2Backend implements Backend {
     return true;
   }
   public onRenderFrame() {
-    if (!this.attachedCanvas || !this.meshes || !this.state) return;
-
-    const canvas = this.attachedCanvas;
+    if (
+      !this.canvas ||
+      !this.meshes ||
+      !this.state ||
+      !this.gl ||
+      !this.mainProgram
+    )
+      return;
+    const canvas = this.canvas;
     resizeCanvasToDisplaySize(canvas);
 
     const skin = this.meshes.getChildren()[0] as MinecraftSkin;
@@ -193,7 +280,7 @@ export default class Webgl2Backend implements Backend {
     )[0] as MeshGroup;
 
     this.gl.depthMask(true);
-    if (this.state.getMode() === "Editing") {
+    if (this.renderer instanceof MiSkEditingRenderer) {
       this.gl.enable(this.gl.CULL_FACE);
     } else {
       this.gl.disable(this.gl.CULL_FACE);
