@@ -225,8 +225,10 @@ const Tutorial: React.FC = () => {
               <Dialog.Title className="text-lg font-bold mb-2">
                 {step.title}
               </Dialog.Title>
-              <Dialog.Description className="text-sm">
-                {step.content}
+              <Dialog.Description asChild>
+                <div className="text-sm">
+                  {step.content}
+                </div>
               </Dialog.Description>
               <div className="flex justify-between gap-2 mt-4">
                 <span>
