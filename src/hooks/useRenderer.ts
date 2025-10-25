@@ -47,11 +47,8 @@ export function useRenderer<T extends MineSkinRenderer>(
   useEffect(() => {
     return () => {
       if (rendererRef.current) {
-        // Save state before unmounting
         rendererRef.current.state.save();
-        // Stop animation loop
         rendererRef.current.stop();
-        // Unmount listeners
         rendererRef.current.unmount();
       }
     };
