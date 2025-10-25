@@ -59,7 +59,6 @@ export function useRenderer<T extends MineSkinRenderer>(
     (canvas: HTMLCanvasElement | null) => {
       if (!rendererRef.current?.backend.canvas && !!canvas) {
         canvasRef.current = canvas;
-        console.log(sharedState)
         const state = sharedState || State.load();
         rendererRef.current = new rendererClass(state);
         rendererRef.current?.backend.setCanvas(canvas);
