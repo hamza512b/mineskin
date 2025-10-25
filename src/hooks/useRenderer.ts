@@ -36,6 +36,7 @@ export async function setup<T extends MineSkinRenderer>(renderer: T) {
 
 export function useRenderer<T extends MineSkinRenderer>(
   rendererClass: new (state: State) => T,
+  sharedState?: State,
 ): [T, (c: HTMLCanvasElement | null) => void] {
   const rendererRef = useRef<T | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -47,19 +48,19 @@ export function useRenderer<T extends MineSkinRenderer>(
   useEffect(() => {
     return () => {
       if (rendererRef.current) {
-        rendererRef.current.state.save();
         rendererRef.current.stop();
         rendererRef.current.unmount();
       }
     };
-  }, []);
+  }, [sharedState]);
 
   return [
     rendererRef.current!,
     (canvas: HTMLCanvasElement | null) => {
       if (!rendererRef.current?.backend.canvas && !!canvas) {
         canvasRef.current = canvas;
-        const state = State.load();
+        console.log(sharedState)
+        const state = sharedState || State.load();
         rendererRef.current = new rendererClass(state);
         rendererRef.current?.backend.setCanvas(canvas);
         setup(rendererRef.current!).then(() => {

@@ -1,3 +1,4 @@
+import { MinecraftSkinMaterial } from "./MeshMaterial";
 import { degToRad } from "./utils";
 
 export const FOG_COLOR_LIGHT = "#FFFFFF";
@@ -6,6 +7,39 @@ export const FOG_COLOR_DARK = "#1A1D23";
 export const FLOOR_COLOR_LIGHT = "#D9E2E9";
 export const FLOOR_COLOR_DARK = "#16181D";
 
+export class Stack<T> {
+  private items: T[] = [];
+  constructor(private onChange: (count: number) => void) {
+    this.notify();
+  }
+  private notify() {
+    this.onChange(this.items.length);
+  }
+  public push(item: T): void {
+    this.items.push(item);
+    this.notify();
+  }
+  public pop(): T | undefined {
+    const item = this.items.pop();
+    this.notify();
+    return item;
+  }
+  public clear(): void {
+    this.items = [];
+    this.notify();
+  }
+  public get count(): number {
+    return this.items.length;
+  }
+  public peek(): T | undefined {
+    return this.items[this.items.length - 1];
+  }
+}
+
+export interface HistorySnapshot {
+  material: MinecraftSkinMaterial;
+  skinIsPocket: boolean;
+}
 export interface StateShape {
   objectTranslationY: number;
   objectTranslationX: number;
@@ -75,6 +109,18 @@ function parseStringState(config: string): StateShape {
 }
 export class State {
   indexDB?: IDBDatabase | null = null;
+
+  public undoStack: Stack<HistorySnapshot>;
+  public redoStack: Stack<HistorySnapshot>;
+
+  constructor() {
+    this.undoStack = new Stack<HistorySnapshot>(() => {
+      this.notify(this, undefined, "redoCount");
+    });
+    this.redoStack = new Stack<HistorySnapshot>(() => {
+      this.notify(this, undefined, "redoCount");
+    });
+  }
 
   async initializeIndexDB() {
     return new Promise<IDBDatabase>((resolve, reject) => {
@@ -199,8 +245,6 @@ export class State {
   private paintColor = "#000000";
   private floorColor = isInitiallyDark ? FLOOR_COLOR_DARK : FLOOR_COLOR_LIGHT;
   private skinIsPocket = false;
-  private undoCount = 0;
-  private redoCount = 0;
   private colorPickerActive = false;
   private paintMode = "pixel";
   private variationIntensity = 0.5;
@@ -291,11 +335,12 @@ export class State {
     return this.ambientLight;
   }
   public getUndoCount() {
-    return this.undoCount;
+    return this.undoStack.count - 1;
   }
   public getRedoCount() {
-    return this.redoCount;
+    return this.redoStack.count;
   }
+
   public getDiffuseLightPositionX() {
     return this.diffuseLightPositionX;
   }
@@ -586,14 +631,6 @@ export class State {
     this.skinIsPocket = skinIsPocket;
     if (notify) this.notify(this, origin, "skinIsPocket");
   }
-  public setUndoCount(count: number, notify: boolean = true, origin?: string) {
-    this.undoCount = count;
-    if (notify) this.notify(this, origin, "undoCount");
-  }
-  public setRedoCount(count: number, notify: boolean = true, origin?: string) {
-    this.redoCount = count;
-    if (notify) this.notify(this, origin, "redoCount");
-  }
 
   public setColorPickerActive(
     active: boolean,
@@ -653,8 +690,8 @@ export class State {
       paintColor: this.paintColor,
       floorColor: this.floorColor,
       skinIsPocket: this.skinIsPocket,
-      redoCount: this.redoCount,
-      undoCount: this.undoCount,
+      redoCount: this.redoStack.count,
+      undoCount: this.undoStack.count,
       baseheadVisible: this.baseheadVisible,
       basebodyVisible: this.basebodyVisible,
       baseleftArmVisible: this.baseleftArmVisible,
@@ -702,8 +739,6 @@ export class State {
     this.paintColor = config.paintColor;
     this.floorColor = config.floorColor;
     this.skinIsPocket = config.skinIsPocket;
-    this.redoCount = config.redoCount;
-    this.undoCount = config.undoCount;
     this.baseheadVisible = config.baseheadVisible;
     this.basebodyVisible = config.basebodyVisible;
     this.baseleftArmVisible = config.baseleftArmVisible;

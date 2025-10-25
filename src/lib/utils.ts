@@ -8,3 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 export function randomInRange(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
+
+
+export const CAN_USE_DOM = typeof window !== "undefined";
