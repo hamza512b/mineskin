@@ -130,7 +130,7 @@ export default function CookiePopup() {
     <AnimatePresence>
       {popupOpen && (
         <motion.div
-          className="z-[2000] fixed bottom-4 left-4"
+          className="z-[2000] fixed bottom-4 left-4 !pointer-events-auto"
           initial="hidden"
           animate="visible"
           exit="exit"
