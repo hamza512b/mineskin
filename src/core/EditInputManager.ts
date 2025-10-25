@@ -163,7 +163,6 @@ export class EditInputManager {
 
   private getPointerPos(e: PointerEvent): { x: number; y: number } {
     if (!this.renderer.backend.canvas) return { x: 0, y: 0 };
-    if (this.renderer.getMode() === "Preview") return { x: 0, y: 0 };
     const rect = this.renderer.backend.canvas.getBoundingClientRect();
     const scaleX = this.renderer.backend.canvas.width / rect.width;
     const scaleY = this.renderer.backend.canvas.height / rect.height;

@@ -31,7 +31,7 @@ function ActionBar({
       value: "Preview",
       icon: (
         <PreviewIcon
-          className="h-4 w-4 text-gray-500 dark:text-gray-400"
+          className="h-4 w-4 text-gray-50 dark:text-gray-400"
           aria-hidden="true"
         />
       ),
@@ -42,7 +42,7 @@ function ActionBar({
 
       icon: (
         <EditorIcon
-          className="h-4 w-4 text-gray-500 dark:text-gray-400"
+          className="h-4 w-4 text-gray-50 dark:text-gray-400"
           aria-hidden="true"
         />
       ),
@@ -74,12 +74,22 @@ function ActionBar({
         }
       >
         <Link href="/preview">
-          <DropdownItem leftIcon={<PreviewIcon className="h-4 w-4" />}>
+          <DropdownItem 
+            leftIcon={<PreviewIcon className="h-4 w-4" />}
+            className={clsx(
+              mode === "Preview" && "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+            )}
+          >
             Preview
           </DropdownItem>
         </Link>
         <Link href="/editor">
-          <DropdownItem leftIcon={<EditorIcon className="h-4 w-4" />}>
+          <DropdownItem 
+            leftIcon={<EditorIcon className="h-4 w-4" />}
+            className={clsx(
+              mode === "Editing" && "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+            )}
+          >
             Editor
           </DropdownItem>
         </Link>

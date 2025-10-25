@@ -212,7 +212,7 @@ export default function CookiePopup() {
                     className="flex justify-end gap-2"
                   >
                     <Button
-                      variant="secondary"
+                      variant="outlined"
                       onClick={toggleDetails}
                       aria-label="Customize cookie preferences"
                     >

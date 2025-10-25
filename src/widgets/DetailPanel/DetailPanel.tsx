@@ -1,5 +1,6 @@
 import IconButton from "@/components/IconButton/IconButton";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
@@ -30,6 +31,9 @@ const DetailPanel: React.FC<DetailPanelProps> = (props) => {
                 transition={{ duration: 0.3 }}
                 className="fixed right-0 top-0 h-full max-w-[300px] w-full  overflow-y-auto"
               >
+                <VisuallyHidden.Root>
+                  <Dialog.Title>Settings</Dialog.Title>
+                </VisuallyHidden.Root>
                 <DetailPanelContent
                   {...props}
                   className="p-0"

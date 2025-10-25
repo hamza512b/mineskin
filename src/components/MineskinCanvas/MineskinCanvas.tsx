@@ -14,12 +14,13 @@ export function MineskinCanvas<T extends MineSkinRenderer>({
   renderer,
   setCanvas,
   children,
+  mode
 }: {
   renderer: T | null;
   setCanvas: (canvas: HTMLCanvasElement | null) => void;
   children?: React.ReactNode;
+  mode: Mode;
 }) {
-  const mode = renderer instanceof MiSkEditingRenderer ? "Editing" : "Preview";
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
   const { values, errors, handleChange, redoCount, undoCount } =
     useRendererState(renderer);

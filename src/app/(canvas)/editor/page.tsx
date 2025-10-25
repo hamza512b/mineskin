@@ -12,7 +12,7 @@ export default function EditorPage() {
   const { hasCompletedTutorial } = useTutorialState();
 
   return (
-    <MineskinCanvas renderer={renderer} setCanvas={setCanvas}>
+    <MineskinCanvas renderer={renderer} setCanvas={setCanvas} mode="Editing">
       {!hasCompletedTutorial && <Tutorial />}
     </MineskinCanvas>
   );
