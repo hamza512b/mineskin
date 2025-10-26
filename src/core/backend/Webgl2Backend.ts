@@ -17,7 +17,7 @@ import {
 import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
 import { MinecraftSkin } from "../MinecraftSkin";
-import { MiSkEditingRenderer } from "../MineSkinRenderer";
+import { MiSkiEditingRenderer } from "../MineSkinRenderer";
 import { Renderer } from "../Renderer";
 import { State } from "../State";
 import { resizeCanvasToDisplaySize } from "../utils";
@@ -199,7 +199,7 @@ export default class Webgl2Backend implements Backend {
 
       if (
         this.state?.getGridVisible() &&
-        this.renderer instanceof MiSkEditingRenderer &&
+        this.renderer instanceof MiSkiEditingRenderer &&
         this.shouldRenderGrid(meshGroup, skin)
       ) {
         // Save current depth state
@@ -280,7 +280,7 @@ export default class Webgl2Backend implements Backend {
     )[0] as MeshGroup;
 
     this.gl.depthMask(true);
-    if (this.renderer instanceof MiSkEditingRenderer) {
+    if (this.renderer instanceof MiSkiEditingRenderer) {
       this.gl.enable(this.gl.CULL_FACE);
     } else {
       this.gl.disable(this.gl.CULL_FACE);

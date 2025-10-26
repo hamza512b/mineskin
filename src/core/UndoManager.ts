@@ -1,4 +1,4 @@
-import { MineSkinRenderer } from "./MineSkinRenderer";
+import { MiSkiRenderer } from "./MineSkinRenderer";
 import { HistorySnapshot as Snapshot } from "./State";
 
 export class UndoRedoManager {
@@ -19,7 +19,7 @@ export class UndoRedoManager {
     }
   };
 
-  constructor(public renderer: MineSkinRenderer) {}
+  constructor(public renderer: MiSkiRenderer) {}
 
   public beginBatch() {
     if (!this.batching) {

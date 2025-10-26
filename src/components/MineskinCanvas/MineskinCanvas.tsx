@@ -1,6 +1,6 @@
 "use client";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
-import { MiSkEditingRenderer, MineSkinRenderer } from "@/core/MineSkinRenderer";
+import { MiSkiEditingRenderer, MiSkiRenderer } from "@/core/MineSkinRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
@@ -10,7 +10,7 @@ import Head from "next/head";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-export function MineskinCanvas<T extends MineSkinRenderer>({
+export function MineskinCanvas<T extends MiSkiRenderer>({
   renderer,
   setCanvas,
   children,
@@ -82,7 +82,7 @@ export function MineskinCanvas<T extends MineSkinRenderer>({
   }, [renderer]);
 
   const getUniqueColors = useCallback((): string[] => {
-    return renderer instanceof MiSkEditingRenderer
+    return renderer instanceof MiSkiEditingRenderer
       ? renderer.getUniqueColors()
       : [];
   }, [renderer]);

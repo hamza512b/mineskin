@@ -1,5 +1,5 @@
 "use client";
-import { MiSkEditingRenderer } from "@/core/MineSkinRenderer";
+import { MiSkiEditingRenderer } from "@/core/MineSkinRenderer";
 import { useRenderer } from "@/hooks/useRenderer";
 import { MineskinCanvas } from "../../../components/MineskinCanvas/MineskinCanvas";
 import { useTutorialState } from "@/hooks/useTutorialState";
@@ -8,7 +8,7 @@ import { useSharedState } from "../layout";
 
 export default function EditorPage() {
   const state = useSharedState();
-  const [renderer, setCanvas] = useRenderer(MiSkEditingRenderer, state);
+  const [renderer, setCanvas] = useRenderer(MiSkiEditingRenderer, state);
   const { hasCompletedTutorial } = useTutorialState();
 
   return (

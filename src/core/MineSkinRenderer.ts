@@ -12,9 +12,10 @@ import { Renderer } from "./Renderer";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
 import { Mesh, MeshGroup } from "./mesh";
+import { AnimationSystem } from "./AnimationSystem";
 import { computeRay, getMeshAtRay } from "./rayTracing";
 
-export class MineSkinRenderer extends Renderer {
+export class MiSkiRenderer extends Renderer {
   public undoRedoManager: UndoRedoManager;
   constructor(state: State) {
     super(state);
@@ -185,7 +186,7 @@ export class MineSkinRenderer extends Renderer {
     this.undoRedoManager.reset();
   }
 
-  private onPocketChange(constants: State, origin: string | undefined): void {
+  protected onPocketChange(constants: State, origin: string | undefined): void {
     if (origin !== "PocketSwitch") return;
 
     const skin = this.getMainSkin();
@@ -270,11 +271,11 @@ export class MineSkinRenderer extends Renderer {
   }
 
   public getMode() {
-    return this instanceof MiSkEditingRenderer ? "Editing" : "Preview";
+    return this instanceof MiSkiEditingRenderer ? "Editing" : "Preview";
   }
 }
 
-export class MiSkEditingRenderer extends MineSkinRenderer {
+export class MiSkiEditingRenderer extends MiSkiRenderer {
   public inputManager: EditInputManager;
   constructor(state: State) {
     super(state);
@@ -464,8 +465,111 @@ export class MiSkEditingRenderer extends MineSkinRenderer {
   }
 }
 
-export class MiSkPreviewRenderer extends MineSkinRenderer {
+export class MiSkPreviewRenderer extends MiSkiRenderer {
+  private animationSystem: AnimationSystem;
+
   constructor(state: State) {
     super(state);
+    this.animationSystem = new AnimationSystem();
+  }
+
+  public override mount() {
+    super.mount();
+    const skin = this.getMainSkin();
+
+    this.animationSystem.setupBodyParts(skin, this.state.getSkinIsPocket());
+
+    // Start with walking animation
+    this.playAnimation("walking");
+  }
+
+  public override unmount() {
+    super.unmount();
+    this.animationSystem.dispose();
+  }
+
+  /**
+   * Play an animation by name
+   * @param animationName Name of the animation to play
+   */
+  public playAnimation(animationName: string): void {
+    this.animationSystem.playAnimation(animationName);
+  }
+
+  /**
+   * Stop the current animation
+   */
+  public stopAnimation(): void {
+    this.animationSystem.stopAnimation();
+  }
+
+  /**
+   * Pause the current animation
+   */
+  public pauseAnimation(): void {
+    this.animationSystem.pauseAnimation();
+  }
+
+  public resumeAnimation(): void {
+    this.animationSystem.resumeAnimation();
+  }
+
+  /**
+   * Set animation speed multiplier
+   * @param speed Speed multiplier (1.0 = normal, 2.0 = double speed, etc.)
+   */
+  public setAnimationSpeed(speed: number): void {
+    this.animationSystem.setAnimationSpeed(speed);
+  }
+
+  /**
+   * Toggle animation playback
+   */
+  public toggleAnimation(): void {
+    if (this.animationSystem.isAnimationPlaying()) {
+      this.animationSystem.pauseAnimation();
+    } else {
+      this.animationSystem.resumeAnimation();
+    }
+  }
+
+  /**
+   * Check if any animation is currently playing
+   */
+  public isAnimationPlaying(): boolean {
+    return this.animationSystem.isAnimationPlaying();
+  }
+
+  /**
+   * Get the currently playing animation name
+   */
+  public getCurrentAnimationName(): string | null {
+    return this.animationSystem.getCurrentAnimationName();
+  }
+
+  /**
+   * Get list of available animations
+   */
+  public getAvailableAnimations(): string[] {
+    return this.animationSystem.getAvailableAnimations();
+  }
+
+  /**
+   * Load animations from a custom URL
+   */
+  public async loadAnimationsFromUrl(url: string): Promise<void> {
+    return this.animationSystem.loadAnimationsFromUrl(url);
+  }
+
+  protected override onPocketChange(
+    constants: State,
+    origin: string | undefined,
+  ): void {
+    super.onPocketChange(constants, origin);
+
+    this.animationSystem.setupBodyParts(
+      this.getMainSkin(),
+      constants.getSkinIsPocket(),
+    );
   }
 }

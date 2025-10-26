@@ -1,11 +1,11 @@
 import { MinecraftSkin } from "@/core/MinecraftSkin";
 import { useEffect, useRef, useState } from "react";
-import { MineSkinRenderer } from "../core/MineSkinRenderer";
+import { MiSkiRenderer, MiSkPreviewRenderer } from "../core/MineSkinRenderer";
 import { State } from "../core/State";
 
 const DEFAULT_SKIN = "/steve.png";
 
-export async function setup<T extends MineSkinRenderer>(renderer: T) {
+export async function setup<T extends MiSkiRenderer>(renderer: T) {
   await renderer.state.initializeIndexDB();
   const old_skin_base64URL = localStorage.getItem("skin_editor");
   const texture = await renderer.state.readSkinImageData("main_skin");
@@ -29,12 +29,21 @@ export async function setup<T extends MineSkinRenderer>(renderer: T) {
     true,
     "classic",
   );
+
+  if (renderer instanceof MiSkPreviewRenderer) {
+    await Promise.all([
+      renderer.loadAnimationsFromUrl("/animations/walking.json"),
+      renderer.loadAnimationsFromUrl("/animations/idle.json"),
+      renderer.loadAnimationsFromUrl("/animations/dance.json"),
+    ]);
+  }
+
   document.body.setAttribute("data-skin-version", skin.material.version);
   renderer.addMesh(skin);
   renderer.backend.bindMeshGroup(skin);
 }
 
-export function useRenderer<T extends MineSkinRenderer>(
+export function useRenderer<T extends MiSkiRenderer>(
   rendererClass: new (state: State) => T,
   sharedState?: State,
 ): [T, (c: HTMLCanvasElement | null) => void] {

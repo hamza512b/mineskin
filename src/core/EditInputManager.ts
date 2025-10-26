@@ -1,4 +1,4 @@
-import { MiSkEditingRenderer } from "./MineSkinRenderer";
+import { MiSkiEditingRenderer } from "./MineSkinRenderer";
 
 export class EditInputManager {
   private isDrawing = false;
@@ -10,7 +10,7 @@ export class EditInputManager {
     if (document.hidden) this.onWindowBlur();
   }
 
-  constructor(public renderer: MiSkEditingRenderer) {}
+  constructor(public renderer: MiSkiEditingRenderer) {}
 
   public mountListeners() {
     this.renderer.backend.canvas?.addEventListener(

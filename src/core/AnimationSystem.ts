@@ -1,0 +1,408 @@
+import { MinecraftPart } from "./mesh";
+import { MinecraftSkin } from "./MinecraftSkin";
+import { lerpVector3, smoothStepLerpVector3 } from "./interpolationUtils";
+
+export interface AnimationKeyframe {
+  time: number;
+  rotation?: [number, number, number];
+  position?: [number, number, number];
+  scale?: [number, number, number];
+}
+
+export interface AnimationPartData {
+  name: string;
+  keyframes: AnimationKeyframe[];
+}
+
+export interface AnimationDefinition {
+  name: string;
+  duration: number;
+  loop: boolean;
+  parts: AnimationPartData[];
+}
+
+export interface PartTransform {
+  rotation: [number, number, number];
+  position: [number, number, number];
+  scale: [number, number, number];
+}
+
+export interface AnimationBodyPart {
+  name: string;
+  base: MinecraftPart | null;
+  overlay: MinecraftPart | null;
+}
+
+export class AnimationSystem {
+  private animations: Map<string, AnimationDefinition> = new Map();
+  private currentAnimation: AnimationDefinition | null = null;
+  private animationTime: number = 0;
+  private animationSpeed: number = 1.0;
+  private isPlaying: boolean = false;
+  private animationId: number | null = null;
+  private bodyParts: AnimationBodyPart[] = [];
+  private originalTransforms: Map<string, PartTransform> = new Map();
+  private onAnimationUpdate?: () => void;
+
+  constructor(onAnimationUpdate?: () => void) {
+    this.onAnimationUpdate = onAnimationUpdate;
+  }
+
+  public loadAnimation(animationData: AnimationDefinition): void {
+    this.animations.set(animationData.name, animationData);
+  }
+
+  public loadAnimations(animationsData: AnimationDefinition[]): void {
+    animationsData.forEach((animation) => this.loadAnimation(animation));
+  }
+
+  public async loadAnimationsFromUrl(url: string): Promise<void> {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        this.loadAnimations(data);
+      } else {
+        this.loadAnimation(data);
+      }
+    } catch (error) {
+      console.error("Failed to load animations from URL:", error);
+      throw error;
+    }
+  }
+
+  public setupBodyParts(skin: MinecraftSkin, isSlim: boolean): void {
+    this.bodyParts = [
+      { name: "head", base: skin.baseHead, overlay: skin.overlayHead },
+      { name: "body", base: skin.baseBody, overlay: skin.overlayBody },
+      {
+        name: "leftArm",
+        base: isSlim ? skin.baseLeftSlimArm : skin.baseLeftArm,
+        overlay: isSlim ? skin.overlayLeftSlimArm : skin.overlayLeftArm,
+      },
+      {
+        name: "rightArm",
+        base: isSlim ? skin.baseRightSlimArm : skin.baseRightArm,
+        overlay: isSlim ? skin.overlayRightSlimArm : skin.overlayRightArm,
+      },
+      { name: "leftLeg", base: skin.baseLeftLeg, overlay: skin.overlayLeftLeg },
+      {
+        name: "rightLeg",
+        base: skin.baseRightLeg,
+        overlay: skin.overlayRightLeg,
+      },
+    ];
+
+    this.storeOriginalTransforms();
+  }
+
+  private storeOriginalTransforms(): void {
+    this.originalTransforms.clear();
+
+    this.bodyParts.forEach((part) => {
+      if (part.base) {
+        this.originalTransforms.set(`base_${part.name}`, {
+          rotation: [...part.base.rotation] as [number, number, number],
+          position: [...(part.base.position || [0, 0, 0])] as [
+            number,
+            number,
+            number,
+          ],
+          scale: [...(part.base.scale || [1, 1, 1])] as [
+            number,
+            number,
+            number,
+          ],
+        });
+      }
+      if (part.overlay) {
+        this.originalTransforms.set(`overlay_${part.name}`, {
+          rotation: [...part.overlay.rotation] as [number, number, number],
+          position: [...(part.overlay.position || [0, 0, 0])] as [
+            number,
+            number,
+            number,
+          ],
+          scale: [...(part.overlay.scale || [1, 1, 1])] as [
+            number,
+            number,
+            number,
+          ],
+        });
+      }
+    });
+  }
+
+  public playAnimation(animationName: string): void {
+    const animation = this.animations.get(animationName);
+    if (!animation) {
+      console.warn(`Animation "${animationName}" not found`);
+      return;
+    }
+
+    this.currentAnimation = animation;
+    this.animationTime = 0;
+    this.isPlaying = true;
+
+    this.startAnimationLoop();
+  }
+
+  public stopAnimation(): void {
+    this.isPlaying = false;
+    this.currentAnimation = null;
+
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+
+    this.resetToOriginalTransforms();
+  }
+
+  public pauseAnimation(): void {
+    this.isPlaying = false;
+
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+  }
+
+  public resumeAnimation(): void {
+    if (this.currentAnimation && !this.isPlaying) {
+      this.isPlaying = true;
+      this.startAnimationLoop();
+    }
+  }
+
+  public setAnimationSpeed(speed: number): void {
+    this.animationSpeed = Math.max(0.1, speed);
+  }
+
+  public isAnimationPlaying(): boolean {
+    return this.isPlaying;
+  }
+
+  public getCurrentAnimationName(): string | null {
+    return this.currentAnimation?.name || null;
+  }
+
+  public getAvailableAnimations(): string[] {
+    return Array.from(this.animations.keys());
+  }
+
+  private startAnimationLoop(): void {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+    }
+
+    const animate = () => {
+      if (!this.isPlaying || !this.currentAnimation) return;
+
+      this.animationTime += 0.016 * this.animationSpeed;
+      if (this.animationTime >= this.currentAnimation.duration) {
+        if (this.currentAnimation.loop) {
+          this.animationTime =
+            this.animationTime % this.currentAnimation.duration;
+        } else {
+          this.stopAnimation();
+          return;
+        }
+      }
+
+      this.updateAnimation();
+      this.onAnimationUpdate?.();
+
+      this.animationId = requestAnimationFrame(animate);
+    };
+
+    this.animationId = requestAnimationFrame(animate);
+  }
+
+  private updateAnimation(): void {
+    if (!this.currentAnimation) return;
+
+    this.currentAnimation.parts.forEach((partData) => {
+      const bodyPart = this.bodyParts.find((bp) => bp.name === partData.name);
+      if (!bodyPart) return;
+
+      const transform = this.calculatePartTransformAtTime(
+        partData,
+        this.animationTime,
+      );
+
+      if (bodyPart.base) {
+        bodyPart.base.rotation = transform.rotation;
+        if (bodyPart.base.position) {
+          bodyPart.base.position = transform.position;
+        }
+        if (bodyPart.base.scale) {
+          bodyPart.base.scale = transform.scale;
+        }
+      }
+
+      if (bodyPart.overlay) {
+        bodyPart.overlay.rotation = transform.rotation;
+        if (bodyPart.overlay.position) {
+          bodyPart.overlay.position = transform.position;
+        }
+        if (bodyPart.overlay.scale) {
+          bodyPart.overlay.scale = transform.scale;
+        }
+      }
+    });
+  }
+
+  private calculatePartTransformAtTime(
+    partData: AnimationPartData,
+    time: number,
+  ): PartTransform {
+    const keyframes = partData.keyframes.sort((a, b) => a.time - b.time);
+
+    const originalBase = this.originalTransforms.get(`base_${partData.name}`);
+    const originalOverlay = this.originalTransforms.get(
+      `overlay_${partData.name}`,
+    );
+    const original = originalBase ||
+      originalOverlay || {
+        rotation: [0, 0, 0] as [number, number, number],
+        position: [0, 0, 0] as [number, number, number],
+        scale: [1, 1, 1] as [number, number, number],
+      };
+
+    if (keyframes.length === 0) {
+      return original;
+    }
+
+    if (time <= keyframes[0].time) {
+      return this.blendWithOriginal(original, keyframes[0]);
+    }
+
+    if (time >= keyframes[keyframes.length - 1].time) {
+      return this.blendWithOriginal(original, keyframes[keyframes.length - 1]);
+    }
+
+    for (let i = 0; i < keyframes.length - 1; i++) {
+      const currentKeyframe = keyframes[i];
+      const nextKeyframe = keyframes[i + 1];
+
+      if (time >= currentKeyframe.time && time <= nextKeyframe.time) {
+        const t =
+          (time - currentKeyframe.time) /
+          (nextKeyframe.time - currentKeyframe.time);
+        return this.interpolateKeyframes(
+          original,
+          currentKeyframe,
+          nextKeyframe,
+          t,
+        );
+      }
+    }
+
+    return original;
+  }
+
+  private blendWithOriginal(
+    original: PartTransform,
+    keyframe: AnimationKeyframe,
+  ): PartTransform {
+    return {
+      rotation: keyframe.rotation
+        ? lerpVector3(original.rotation, keyframe.rotation, 1)
+        : original.rotation,
+      position: keyframe.position
+        ? lerpVector3(original.position, keyframe.position, 1)
+        : original.position,
+      scale: keyframe.scale
+        ? lerpVector3(original.scale, keyframe.scale, 1)
+        : original.scale,
+    };
+  }
+
+  private interpolateKeyframes(
+    original: PartTransform,
+    keyframe1: AnimationKeyframe,
+    keyframe2: AnimationKeyframe,
+    t: number,
+  ): PartTransform {
+    const rotation1 = keyframe1.rotation || original.rotation;
+    const rotation2 = keyframe2.rotation || original.rotation;
+
+    const position1 = keyframe1.position || original.position;
+    const position2 = keyframe2.position || original.position;
+
+    const scale1 = keyframe1.scale || original.scale;
+    const scale2 = keyframe2.scale || original.scale;
+
+    return {
+      rotation: smoothStepLerpVector3(rotation1, rotation2, t),
+      position: smoothStepLerpVector3(position1, position2, t),
+      scale: smoothStepLerpVector3(scale1, scale2, t),
+    };
+  }
+
+  private resetToOriginalTransforms(): void {
+    this.bodyParts.forEach((part) => {
+      if (part.base) {
+        const originalTransform = this.originalTransforms.get(
+          `base_${part.name}`,
+        );
+        if (originalTransform) {
+          part.base.rotation = [...originalTransform.rotation] as [
+            number,
+            number,
+            number,
+          ];
+          if (part.base.position) {
+            part.base.position = [...originalTransform.position] as [
+              number,
+              number,
+              number,
+            ];
+          }
+          if (part.base.scale) {
+            part.base.scale = [...originalTransform.scale] as [
+              number,
+              number,
+              number,
+            ];
+          }
+        }
+      }
+      if (part.overlay) {
+        const originalTransform = this.originalTransforms.get(
+          `overlay_${part.name}`,
+        );
+        if (originalTransform) {
+          part.overlay.rotation = [...originalTransform.rotation] as [
+            number,
+            number,
+            number,
+          ];
+          if (part.overlay.position) {
+            part.overlay.position = [...originalTransform.position] as [
+              number,
+              number,
+              number,
+            ];
+          }
+          if (part.overlay.scale) {
+            part.overlay.scale = [...originalTransform.scale] as [
+              number,
+              number,
+              number,
+            ];
+          }
+        }
+      }
+    });
+  }
+
+  public dispose(): void {
+    this.stopAnimation();
+    this.animations.clear();
+    this.originalTransforms.clear();
+    this.bodyParts = [];
+  }
+}

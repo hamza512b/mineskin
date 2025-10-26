@@ -517,6 +517,9 @@ export class MeshGroup extends Base {
 }
 
 export class MinecraftPart extends MeshGroup {
+  private _jointPosition: V3 = [0, 0, 0];
+  private _partRotation: V3 = [0, 0, 0];
+
   constructor(
     size: V3,
     position: V3,
@@ -524,8 +527,12 @@ export class MinecraftPart extends MeshGroup {
     uvs: V2,
     name: string,
     transformMatrix?: M44,
+    jointPosition?: V3,
   ) {
     super(name);
+    if (jointPosition) {
+      this._jointPosition = [...jointPosition] as V3;
+    }
     const [width, height, depth] = size;
 
     type Face = {
@@ -675,6 +682,89 @@ export class MinecraftPart extends MeshGroup {
     }
   }
 
+  get jointPosition(): V3 {
+    return [...this._jointPosition] as V3;
+  }
+
+  set jointPosition(value: V3) {
+    this._jointPosition = [...value] as V3;
+  }
+
+  override set rotation(value: V3) {
+    this._partRotation = [...value] as V3;
+    this.updateJointBasedTransform();
+  }
+
+  override get rotation(): V3 {
+    return [...this._partRotation] as V3;
+  }
+
+  override set position(value: V3) {
+    super.position = value;
+    this.updateJointBasedTransform();
+  }
+
+  override get position(): V3 {
+    return super.position;
+  }
+
+  override set scale(value: V3) {
+    super.scale = value;
+    this.updateJointBasedTransform();
+  }
+
+  override get scale(): V3 {
+    return super.scale;
+  }
+
+  private updateJointBasedTransform() {
+    // For joint-based rotation, we need to:
+    // 1. Translate to joint position
+    // 2. Apply rotation
+    // 3. Translate back
+    // 4. Apply position and scale
+    
+    const jointTranslate = translateM44(
+      this._jointPosition[0],
+      this._jointPosition[1], 
+      this._jointPosition[2]
+    );
+    
+    const jointTranslateInverse = translateM44(
+      -this._jointPosition[0],
+      -this._jointPosition[1],
+      -this._jointPosition[2]
+    );
+    
+    const rotation = rotateM44(
+      this._partRotation[0],
+      this._partRotation[1], 
+      this._partRotation[2]
+    );
+    
+    const currentPosition = super.position;
+    const currentScale = super.scale;
+    
+    const position = translateM44(
+      currentPosition[0],
+      currentPosition[1],
+      currentPosition[2]
+    );
+    
+    const scale = scaleM44(currentScale[0], currentScale[1], currentScale[2]);
+
+    // Combine: Position * JointTranslate * Rotation * JointTranslateInverse * Scale
+    const newMatrix = multiplyM44(
+      position,
+      jointTranslate,
+      rotation,
+      jointTranslateInverse,
+      scale
+    );
+
+    super.setTransformMatrix(newMatrix);
+  }
+
   /**
    * Recursively applies a transformation matrix directly to all vertices and normals in the mesh hierarchy
    */
@@ -746,6 +836,7 @@ export class MinecraftPart extends MeshGroup {
     parent: MeshGroup | null,
     transformMatrix?: M44,
     metadata?: MeshMetadata,
+    jointPosition?: V3,
   ) {
     const part = new MinecraftPart(
       size,
@@ -754,6 +845,7 @@ export class MinecraftPart extends MeshGroup {
       uvs,
       name,
       transformMatrix,
+      jointPosition,
     );
     part.setParent(parent);
     part.metadata = { ...part.metadata, ...metadata };
