@@ -401,50 +401,61 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
               )}
 
               {mode === "Preview" && onAnimationSelect && (
-                <Dropdown
-                  trigger={
-                    <button
-                      type="button"
-                      aria-label="Animations"
-                      className={`flex items-center justify-center p-1 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-offset-2 dark:focus:ring-offset-blue-600 border-none dark:focus:ring-blue-600 focus:ring-blue-300 focus:ring-offset-blue-300 dark:hover:bg-blue-600 hover:bg-blue-300 ${
-                        currentAnimation !== null
-                          ? "bg-blue-200 dark:bg-blue-700"
-                          : ""
-                      }`}
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Dropdown
+                      trigger={
+                        <Tooltip.Trigger asChild>
+                          <IconButton
+                            active={currentAnimation !== null}
+                            label={"Animations"}
+                          >
+                            <div className="w-6 h-6">
+                              <AnimationIcon className="w-full h-full dark:text-white" />
+                            </div>
+                          </IconButton>
+                        </Tooltip.Trigger>
+                      }
+                      align="start"
+                      side="right"
                     >
-                      <div className="w-6 h-6">
-                        <AnimationIcon className="w-full h-full dark:text-white" />
-                      </div>
-                    </button>
-                  }
-                  align="start"
-                  side="right"
-                >
-                  <DropdownItem
-                    onClick={() => onAnimationSelect(null)}
-                    className={
-                      currentAnimation === null
-                        ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
-                        : ""
-                    }
-                  >
-                    No Animation
-                  </DropdownItem>
-                  {availableAnimations.map((animation) => (
-                    <DropdownItem
-                      key={animation.name}
-                      onClick={() => onAnimationSelect(animation.name)}
-                      className={clsx(
-                        currentAnimation === animation.name
-                          ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
-                          : "",
-                        "capitalize",
-                      )}
-                    >
-                      {animation.label}
-                    </DropdownItem>
-                  ))}
-                </Dropdown>
+                      <DropdownItem
+                        onClick={() => onAnimationSelect(null)}
+                        className={
+                          currentAnimation === null
+                            ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                            : ""
+                        }
+                      >
+                        No Animation
+                      </DropdownItem>
+                      {availableAnimations.map((animation) => (
+                        <DropdownItem
+                          key={animation.name}
+                          onClick={() => onAnimationSelect(animation.name)}
+                          className={clsx(
+                            currentAnimation === animation.name
+                              ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                              : "",
+                            "capitalize",
+                          )}
+                        >
+                          {animation.label}
+                        </DropdownItem>
+                      ))}
+                    </Dropdown>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                        side="right"
+                        sideOffset={5}
+                      >
+                        Animations
+                        <Tooltip.Arrow className="fill-gray-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
               )}
 
               <Tooltip.Provider>

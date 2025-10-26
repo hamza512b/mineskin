@@ -1,7 +1,7 @@
 "use client";
 import { State } from "@/core/State";
 import { CAN_USE_DOM } from "@/lib/utils";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface StateContextType {
   state: State;
@@ -23,6 +23,12 @@ export default function CanvasLayout({
   children: React.ReactNode;
 }) {
   const [state] = useState(() => (!CAN_USE_DOM ? new State() : State.load()));
+
+  useEffect(() => {
+    return () => {
+      state.save(); // Save state on unmount
+    };
+  });
 
   return (
     <StateContext.Provider value={{ state }}>{children}</StateContext.Provider>
