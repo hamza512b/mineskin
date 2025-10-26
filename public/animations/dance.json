@@ -1,5 +1,6 @@
 {
   "name": "dance",
+  "description": "Dance animation",
   "duration": 4.0,
   "loop": true,
   "parts": [

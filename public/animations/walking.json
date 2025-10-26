@@ -1,5 +1,6 @@
 {
   "name": "walking",
+  "description": "Walking animation",
   "duration": 2.0,
   "loop": true,
   "parts": [

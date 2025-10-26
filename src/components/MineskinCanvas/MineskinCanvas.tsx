@@ -1,13 +1,13 @@
 "use client";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
-import { MiSkiEditingRenderer, MiSkiRenderer } from "@/core/MineSkinRenderer";
+import { MiSkiEditingRenderer, MiSkiRenderer, MiSkPreviewRenderer } from "@/core/MineSkinRenderer"
 import { useRendererState } from "@/hooks/useRendererState";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import Head from "next/head";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { toast } from "sonner";
 
 export function MineskinCanvas<T extends MiSkiRenderer>({
@@ -42,6 +42,28 @@ export function MineskinCanvas<T extends MiSkiRenderer>({
   const toggleGrid = useCallback(() => {
     handleChange("gridVisible", !values.gridVisible);
   }, [handleChange, values.gridVisible]);
+
+  // Animation-related state and functions
+  const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
+  
+  const availableAnimations = useMemo(() => {
+    if (renderer instanceof MiSkPreviewRenderer) {
+      return renderer.getAvailableAnimations();
+    }
+    return [];
+  }, [renderer]);
+
+  const handleAnimationSelect = useCallback((animation: string | null) => {
+    if (renderer instanceof MiSkPreviewRenderer) {
+      if (animation === null) {
+        renderer.stopAnimation();
+        setCurrentAnimation(null);
+      } else {
+        renderer.playAnimation(animation);
+        setCurrentAnimation(animation);
+      }
+    }
+  }, [renderer]);
 
   const setSettingsOpen = useCallback(
     (open: boolean) => {
@@ -162,6 +184,9 @@ export function MineskinCanvas<T extends MiSkiRenderer>({
             overlayrightLegVisible={values.overlayrightLegVisible}
             gridVisible={values.gridVisible}
             toggleGrid={toggleGrid}
+            availableAnimations={availableAnimations}
+            currentAnimation={currentAnimation}
+            onAnimationSelect={handleAnimationSelect}
           />
           <ActionBar
             className={"absolute bottom-0 left-0 right-0"}

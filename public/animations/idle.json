@@ -1,5 +1,6 @@
 {
   "name": "idle",
+  "label": "Idle animation",
   "duration": 6.0,
   "loop": true,
   "parts": [

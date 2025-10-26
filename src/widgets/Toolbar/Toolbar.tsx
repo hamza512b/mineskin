@@ -14,9 +14,12 @@ import {
   PenToolIcon,
   VariationIcon,
   GridIcon,
+  AnimationIcon,
 } from "../../components/Icons/Icons";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import { Mode } from "../ActionBar/ActionBar";
+import Dropdown, { DropdownItem } from "../../components/Dropdown";
+import clsx from "clsx";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -56,6 +59,14 @@ interface FloatingToolbarProps {
   overlayrightLegVisible: boolean;
   gridVisible: boolean;
   toggleGrid: () => void;
+
+  // Animation props (only used in Preview mode)
+  availableAnimations?: {
+    name: string;
+    label: string;
+  }[];
+  currentAnimation?: string | null;
+  onAnimationSelect?: (animation: string | null) => void;
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -87,6 +98,9 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   overlayrightLegVisible,
   gridVisible,
   toggleGrid,
+  availableAnimations = [],
+  currentAnimation = null,
+  onAnimationSelect,
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -103,7 +117,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
           <div className="p-2">
             {mode === "Editing" && (
               <>
-                <div className="space-y-2" data-tutorial-id="color-picker-tools">
+                <div
+                  className="space-y-2"
+                  data-tutorial-id="color-picker-tools"
+                >
                   <ColorPicker
                     value={paintColor}
                     onChange={(color) => setValues("paintColor", color)}
@@ -381,6 +398,53 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                     </Tooltip.Portal>
                   </Tooltip.Root>
                 </Tooltip.Provider>
+              )}
+
+              {mode === "Preview" && onAnimationSelect && (
+                <Dropdown
+                  trigger={
+                    <button
+                      type="button"
+                      aria-label="Animations"
+                      className={`flex items-center justify-center p-1 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-offset-2 dark:focus:ring-offset-blue-600 border-none dark:focus:ring-blue-600 focus:ring-blue-300 focus:ring-offset-blue-300 dark:hover:bg-blue-600 hover:bg-blue-300 ${
+                        currentAnimation !== null
+                          ? "bg-blue-200 dark:bg-blue-700"
+                          : ""
+                      }`}
+                    >
+                      <div className="w-6 h-6">
+                        <AnimationIcon className="w-full h-full dark:text-white" />
+                      </div>
+                    </button>
+                  }
+                  align="start"
+                  side="right"
+                >
+                  <DropdownItem
+                    onClick={() => onAnimationSelect(null)}
+                    className={
+                      currentAnimation === null
+                        ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                        : ""
+                    }
+                  >
+                    No Animation
+                  </DropdownItem>
+                  {availableAnimations.map((animation) => (
+                    <DropdownItem
+                      key={animation.name}
+                      onClick={() => onAnimationSelect(animation.name)}
+                      className={clsx(
+                        currentAnimation === animation.name
+                          ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                          : "",
+                        "capitalize",
+                      )}
+                    >
+                      {animation.label}
+                    </DropdownItem>
+                  ))}
+                </Dropdown>
               )}
 
               <Tooltip.Provider>

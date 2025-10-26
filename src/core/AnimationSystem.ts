@@ -16,6 +16,7 @@ export interface AnimationPartData {
 
 export interface AnimationDefinition {
   name: string;
+  label: string;
   duration: number;
   loop: boolean;
   parts: AnimationPartData[];
@@ -188,8 +189,14 @@ export class AnimationSystem {
     return this.currentAnimation?.name || null;
   }
 
-  public getAvailableAnimations(): string[] {
-    return Array.from(this.animations.keys());
+  public getAvailableAnimations(): {
+    name: string;
+    label: string;
+  }[] {
+    return Array.from(this.animations.keys()).map((name) => ({
+      name,
+      label: this.animations.get(name)?.label || name,
+    }));
   }
 
   private startAnimationLoop(): void {

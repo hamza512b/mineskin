@@ -479,8 +479,6 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
 
     this.animationSystem.setupBodyParts(skin, this.state.getSkinIsPocket());
 
-    // Start with walking animation
-    this.playAnimation("walking");
   }
 
   public override unmount() {
@@ -550,7 +548,10 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
   /**
    * Get list of available animations
    */
-  public getAvailableAnimations(): string[] {
+  public getAvailableAnimations(): {
+    name: string;
+    label: string;
+  }[] {
     return this.animationSystem.getAvailableAnimations();
   }
 
