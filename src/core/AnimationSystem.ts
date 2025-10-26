@@ -94,45 +94,6 @@ export class AnimationSystem {
         overlay: skin.overlayRightLeg,
       },
     ];
-
-    this.storeOriginalTransforms();
-  }
-
-  private storeOriginalTransforms(): void {
-    this.originalTransforms.clear();
-
-    this.bodyParts.forEach((part) => {
-      if (part.base) {
-        this.originalTransforms.set(`base_${part.name}`, {
-          rotation: [...part.base.rotation] as [number, number, number],
-          position: [...(part.base.position || [0, 0, 0])] as [
-            number,
-            number,
-            number,
-          ],
-          scale: [...(part.base.scale || [1, 1, 1])] as [
-            number,
-            number,
-            number,
-          ],
-        });
-      }
-      if (part.overlay) {
-        this.originalTransforms.set(`overlay_${part.name}`, {
-          rotation: [...part.overlay.rotation] as [number, number, number],
-          position: [...(part.overlay.position || [0, 0, 0])] as [
-            number,
-            number,
-            number,
-          ],
-          scale: [...(part.overlay.scale || [1, 1, 1])] as [
-            number,
-            number,
-            number,
-          ],
-        });
-      }
-    });
   }
 
   public playAnimation(animationName: string): void {
@@ -352,56 +313,13 @@ export class AnimationSystem {
   private resetToOriginalTransforms(): void {
     this.bodyParts.forEach((part) => {
       if (part.base) {
-        const originalTransform = this.originalTransforms.get(
-          `base_${part.name}`,
-        );
-        if (originalTransform) {
-          part.base.rotation = [...originalTransform.rotation] as [
-            number,
-            number,
-            number,
-          ];
-          if (part.base.position) {
-            part.base.position = [...originalTransform.position] as [
-              number,
-              number,
-              number,
-            ];
-          }
-          if (part.base.scale) {
-            part.base.scale = [...originalTransform.scale] as [
-              number,
-              number,
-              number,
-            ];
-          }
-        }
+        part.base.rotation = [0, 0, 0];
+        part.base.position = [0, 0, 0];
+        part.base.scale = [1, 1, 1];
       }
       if (part.overlay) {
-        const originalTransform = this.originalTransforms.get(
-          `overlay_${part.name}`,
-        );
-        if (originalTransform) {
-          part.overlay.rotation = [...originalTransform.rotation] as [
-            number,
-            number,
-            number,
-          ];
-          if (part.overlay.position) {
-            part.overlay.position = [...originalTransform.position] as [
-              number,
-              number,
-              number,
-            ];
-          }
-          if (part.overlay.scale) {
-            part.overlay.scale = [...originalTransform.scale] as [
-              number,
-              number,
-              number,
-            ];
-          }
-        }
+        part.overlay.rotation = [0, 0, 0];
+        part.overlay.position = [0, 0, 0];
       }
     });
   }

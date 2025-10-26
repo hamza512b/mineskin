@@ -4,10 +4,10 @@
   "type": "module",
   "author": "Hamza512b",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "preview": "next dev --turbopack --port 3001",
+    "preview": "next dev --port 3001",
     "format": "prettier --write .",
     "lint": "eslint ."
   },

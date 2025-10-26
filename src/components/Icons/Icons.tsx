@@ -103,16 +103,19 @@ export const EditorIcon = (props: SVGProps<SVGSVGElement>) => (
 export const AnimationIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
+    fill="none"
     viewBox="0 0 100 100"
     {...props}
   >
-    <path fill="currentColor" d="M47 54.138 56.495 51l11.458 34.667-9.495 3.139z" />
     <path
       fill="currentColor"
-      d="m42.961 51 9.349 3.55-12.96 34.134-9.35-3.55zm-.515-23 4.742 7.868-22.446 13.529L20 41.529zm15.296 0L53 35.868l22.446 13.529 4.743-7.868z"
+      d="m46.764 57.593 10.218-3.377 12.332 37.31-10.218 3.377z"
     />
-    <path fill="currentColor" d="M41 28h18.184v33.402H41zm2-17h14v14H43z" />
+    <path
+      fill="currentColor"
+      d="m42.417 54.215 10.061 3.82L38.53 94.771l-10.061-3.82zm-.554-24.753 5.104 8.468L22.81 52.49l-5.103-8.468zm16.462 0-5.103 8.468 24.156 14.56 5.104-8.468z"
+    />
+    <path fill="currentColor" d="M40 29.903h20v36H40zm-1-25h22v21H39z" />
   </svg>
 );
 

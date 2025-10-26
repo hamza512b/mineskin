@@ -1,20 +1,24 @@
 "use client";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
-import { MiSkiEditingRenderer, MiSkiRenderer, MiSkPreviewRenderer } from "@/core/MineSkinRenderer"
+import {
+  MiSkiEditingRenderer,
+  MiSkiRenderer,
+  MiSkPreviewRenderer,
+} from "@/core/MineSkinRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import Head from "next/head";
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export function MineskinCanvas<T extends MiSkiRenderer>({
   renderer,
   setCanvas,
   children,
-  mode
+  mode,
 }: {
   renderer: T | null;
   setCanvas: (canvas: HTMLCanvasElement | null) => void;
@@ -45,7 +49,7 @@ export function MineskinCanvas<T extends MiSkiRenderer>({
 
   // Animation-related state and functions
   const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
-  
+
   const availableAnimations = useMemo(() => {
     if (renderer instanceof MiSkPreviewRenderer) {
       return renderer.getAvailableAnimations();
@@ -53,17 +57,20 @@ export function MineskinCanvas<T extends MiSkiRenderer>({
     return [];
   }, [renderer]);
 
-  const handleAnimationSelect = useCallback((animation: string | null) => {
-    if (renderer instanceof MiSkPreviewRenderer) {
-      if (animation === null) {
-        renderer.stopAnimation();
-        setCurrentAnimation(null);
-      } else {
-        renderer.playAnimation(animation);
-        setCurrentAnimation(animation);
+  const handleAnimationSelect = useCallback(
+    (animation: string | null) => {
+      if (renderer instanceof MiSkPreviewRenderer) {
+        if (animation === null) {
+          renderer.stopAnimation();
+          setCurrentAnimation(null);
+        } else {
+          renderer.playAnimation(animation);
+          setCurrentAnimation(animation);
+        }
       }
-    }
-  }, [renderer]);
+    },
+    [renderer],
+  );
 
   const setSettingsOpen = useCallback(
     (open: boolean) => {
