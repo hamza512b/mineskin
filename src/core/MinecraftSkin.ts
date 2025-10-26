@@ -119,7 +119,7 @@ export class MinecraftSkin extends MeshGroup {
       opaqueGroup,
       undefined,
       undefined,
-      [-4, 6, 0], // Joint at shoulder
+      [-4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseLeftSlimArm);
 
@@ -132,7 +132,7 @@ export class MinecraftSkin extends MeshGroup {
       opaqueGroup,
       undefined,
       undefined,
-      [4, 6, 0], // Joint at shoulder
+      [4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseRightSlimArm);
     mesh.baseLeftArm = MinecraftPart.create(
@@ -144,7 +144,7 @@ export class MinecraftSkin extends MeshGroup {
       opaqueGroup,
       undefined,
       undefined,
-      [-4, 6, 0], // Joint at shoulder
+      [-4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseLeftArm);
 
@@ -157,7 +157,7 @@ export class MinecraftSkin extends MeshGroup {
       opaqueGroup,
       undefined,
       undefined,
-      [4, 6, 0], // Joint at shoulder
+      [4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseRightArm);
 
@@ -253,7 +253,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
-      [-4, 6, 0], // Joint at shoulder
+      [-4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayLeftSlimArm);
 
@@ -272,7 +272,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
-      [4, 6, 0], // Joint at shoulder
+      [4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayRightSlimArm);
     mesh.overlayLeftArm = MinecraftPart.create(
@@ -290,7 +290,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
-      [-4, 6, 0], // Joint at shoulder
+      [-4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayLeftArm);
 
@@ -309,7 +309,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
-      [4, 6, 0], // Joint at shoulder
+      [4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayRightArm);
 
