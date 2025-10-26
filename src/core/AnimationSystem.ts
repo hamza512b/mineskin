@@ -1,41 +1,14 @@
-import { MinecraftPart } from "./mesh";
-import { MinecraftSkin } from "./MinecraftSkin";
+import animations, {
+  AnimationBodyPart,
+  AnimationDefinition,
+  AnimationKeyframe,
+  AnimationPartData,
+  PartTransform,
+} from "./animations";
 import { lerpVector3, smoothStepLerpVector3 } from "./interpolationUtils";
-
-export interface AnimationKeyframe {
-  time: number;
-  rotation?: [number, number, number];
-  position?: [number, number, number];
-  scale?: [number, number, number];
-}
-
-export interface AnimationPartData {
-  name: string;
-  keyframes: AnimationKeyframe[];
-}
-
-export interface AnimationDefinition {
-  name: string;
-  label: string;
-  duration: number;
-  loop: boolean;
-  parts: AnimationPartData[];
-}
-
-export interface PartTransform {
-  rotation: [number, number, number];
-  position: [number, number, number];
-  scale: [number, number, number];
-}
-
-export interface AnimationBodyPart {
-  name: string;
-  base: MinecraftPart | null;
-  overlay: MinecraftPart | null;
-}
+import { MinecraftSkin } from "./MinecraftSkin";
 
 export class AnimationSystem {
-  private animations: Map<string, AnimationDefinition> = new Map();
   private currentAnimation: AnimationDefinition | null = null;
   private animationTime: number = 0;
   private animationSpeed: number = 1.0;
@@ -47,30 +20,6 @@ export class AnimationSystem {
 
   constructor(onAnimationUpdate?: () => void) {
     this.onAnimationUpdate = onAnimationUpdate;
-  }
-
-  public loadAnimation(animationData: AnimationDefinition): void {
-    this.animations.set(animationData.name, animationData);
-  }
-
-  public loadAnimations(animationsData: AnimationDefinition[]): void {
-    animationsData.forEach((animation) => this.loadAnimation(animation));
-  }
-
-  public async loadAnimationsFromUrl(url: string): Promise<void> {
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        this.loadAnimations(data);
-      } else {
-        this.loadAnimation(data);
-      }
-    } catch (error) {
-      console.error("Failed to load animations from URL:", error);
-      throw error;
-    }
   }
 
   public setupBodyParts(skin: MinecraftSkin, isSlim: boolean): void {
@@ -97,7 +46,7 @@ export class AnimationSystem {
   }
 
   public playAnimation(animationName: string): void {
-    const animation = this.animations.get(animationName);
+    const animation = animations.find((a) => a.name === animationName);
     if (!animation) {
       console.warn(`Animation "${animationName}" not found`);
       return;
@@ -150,16 +99,6 @@ export class AnimationSystem {
     return this.currentAnimation?.name || null;
   }
 
-  public getAvailableAnimations(): {
-    name: string;
-    label: string;
-  }[] {
-    return Array.from(this.animations.keys()).map((name) => ({
-      name,
-      label: this.animations.get(name)?.label || name,
-    }));
-  }
-
   private startAnimationLoop(): void {
     if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId);
@@ -191,6 +130,7 @@ export class AnimationSystem {
   private updateAnimation(): void {
     if (!this.currentAnimation) return;
 
+    // Normal animation update
     this.currentAnimation.parts.forEach((partData) => {
       const bodyPart = this.bodyParts.find((bp) => bp.name === partData.name);
       if (!bodyPart) return;
@@ -326,7 +266,6 @@ export class AnimationSystem {
 
   public dispose(): void {
     this.stopAnimation();
-    this.animations.clear();
     this.originalTransforms.clear();
     this.bodyParts = [];
   }

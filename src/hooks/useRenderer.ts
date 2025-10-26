@@ -1,6 +1,6 @@
 import { MinecraftSkin } from "@/core/MinecraftSkin";
 import { useEffect, useRef, useState } from "react";
-import { MiSkiRenderer, MiSkPreviewRenderer } from "../core/MineSkinRenderer";
+import { MiSkiRenderer } from "../core/MineSkinRenderer";
 import { State } from "../core/State";
 
 const DEFAULT_SKIN = "/steve.png";
@@ -29,14 +29,6 @@ export async function setup<T extends MiSkiRenderer>(renderer: T) {
     true,
     "classic",
   );
-
-  if (renderer instanceof MiSkPreviewRenderer) {
-    await Promise.all([
-      renderer.loadAnimationsFromUrl("/animations/walking.json"),
-      renderer.loadAnimationsFromUrl("/animations/idle.json"),
-      renderer.loadAnimationsFromUrl("/animations/dance.json"),
-    ]);
-  }
 
   document.body.setAttribute("data-skin-version", skin.material.version);
   renderer.addMesh(skin);

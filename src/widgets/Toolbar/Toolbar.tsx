@@ -20,6 +20,7 @@ import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import { Mode } from "../ActionBar/ActionBar";
 import Dropdown, { DropdownItem } from "../../components/Dropdown";
 import clsx from "clsx";
+import animations from "@/core/animations";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -429,7 +430,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       >
                         No Animation
                       </DropdownItem>
-                      {availableAnimations.map((animation) => (
+                      {animations.map((animation) => (
                         <DropdownItem
                           key={animation.name}
                           onClick={() => onAnimationSelect(animation.name)}

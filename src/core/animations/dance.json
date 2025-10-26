@@ -1,6 +1,6 @@
 {
   "name": "dance",
-  "description": "Dance animation",
+  "label": "Dance animation",
   "duration": 4.0,
   "loop": true,
   "parts": [
@@ -170,15 +170,15 @@
         },
         {
           "time": 0.5,
-          "rotation": [0, 0, 0.1]
+          "rotation": [0, 0, 0.05]
         },
         {
           "time": 1.0,
-          "rotation": [0, 0, -0.1]
+          "rotation": [0, 0, -0.05]
         },
         {
           "time": 1.5,
-          "rotation": [0, 0, 0.1]
+          "rotation": [0, 0, 0.05]
         },
         {
           "time": 2.0,
@@ -186,15 +186,15 @@
         },
         {
           "time": 2.5,
-          "rotation": [0, 0, -0.1]
+          "rotation": [0, 0, -0.05]
         },
         {
           "time": 3.0,
-          "rotation": [0, 0, 0.1]
+          "rotation": [0, 0, 0.05]
         },
         {
           "time": 3.5,
-          "rotation": [0, 0, -0.1]
+          "rotation": [0, 0, -0.05]
         },
         {
           "time": 4.0,

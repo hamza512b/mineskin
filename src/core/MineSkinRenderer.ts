@@ -5,6 +5,7 @@ import {
   sortColors,
 } from "@/components/ColorPicker/colorUtils";
 import { randomInRange } from "@/lib/utils";
+import { AnimationSystem } from "./AnimationSystem";
 import { EditInputManager } from "./EditInputManager";
 import { MeshImageMaterial, MinecraftSkinMaterial } from "./MeshMaterial";
 import { MinecraftSkin } from "./MinecraftSkin";
@@ -12,8 +13,8 @@ import { Renderer } from "./Renderer";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
 import { Mesh, MeshGroup } from "./mesh";
-import { AnimationSystem } from "./AnimationSystem";
 import { computeRay, getMeshAtRay } from "./rayTracing";
+import animations from "./animations";
 
 export class MiSkiRenderer extends Renderer {
   public undoRedoManager: UndoRedoManager;
@@ -478,7 +479,6 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     const skin = this.getMainSkin();
 
     this.animationSystem.setupBodyParts(skin, this.state.getSkinIsPocket());
-
   }
 
   public override unmount() {
@@ -486,24 +486,14 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     this.animationSystem.dispose();
   }
 
-  /**
-   * Play an animation by name
-   * @param animationName Name of the animation to play
-   */
   public playAnimation(animationName: string): void {
     this.animationSystem.playAnimation(animationName);
   }
 
-  /**
-   * Stop the current animation
-   */
   public stopAnimation(): void {
     this.animationSystem.stopAnimation();
   }
 
-  /**
-   * Pause the current animation
-   */
   public pauseAnimation(): void {
     this.animationSystem.pauseAnimation();
   }
@@ -511,55 +501,22 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
   public resumeAnimation(): void {
     this.animationSystem.resumeAnimation();
   }
-
-  /**
-   * Set animation speed multiplier
-   * @param speed Speed multiplier (1.0 = normal, 2.0 = double speed, etc.)
-   */
   public setAnimationSpeed(speed: number): void {
     this.animationSystem.setAnimationSpeed(speed);
   }
 
-  /**
-   * Toggle animation playback
-   */
-  public toggleAnimation(): void {
-    if (this.animationSystem.isAnimationPlaying()) {
-      this.animationSystem.pauseAnimation();
-    } else {
-      this.animationSystem.resumeAnimation();
-    }
-  }
-
-  /**
-   * Check if any animation is currently playing
-   */
   public isAnimationPlaying(): boolean {
     return this.animationSystem.isAnimationPlaying();
   }
 
-  /**
-   * Get the currently playing animation name
-   */
-  public getCurrentAnimationName(): string | null {
-    return this.animationSystem.getCurrentAnimationName();
-  }
-
-  /**
-   * Get list of available animations
-   */
   public getAvailableAnimations(): {
     name: string;
     label: string;
   }[] {
-    return this.animationSystem.getAvailableAnimations();
-  }
-
-  /**
-   * Load animations from a custom URL
-   */
-  public async loadAnimationsFromUrl(url: string): Promise<void> {
-    return this.animationSystem.loadAnimationsFromUrl(url);
+    return animations.map((an) => ({
+      name: an.name,
+      label: an.label || an.name,
+    }));
   }
 
   protected override onPocketChange(
