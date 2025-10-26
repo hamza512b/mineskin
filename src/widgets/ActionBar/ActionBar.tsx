@@ -77,7 +77,7 @@ function ActionBar({
           <DropdownItem 
             leftIcon={<PreviewIcon className="h-4 w-4" />}
             className={clsx(
-              mode === "Preview" && "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+              mode === "Preview" && "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
             )}
           >
             Preview
@@ -87,7 +87,7 @@ function ActionBar({
           <DropdownItem 
             leftIcon={<EditorIcon className="h-4 w-4" />}
             className={clsx(
-              mode === "Editing" && "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
+              mode === "Editing" && "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
             )}
           >
             Editor

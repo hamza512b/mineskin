@@ -517,8 +517,6 @@ export class MeshGroup extends Base {
 }
 
 export class MinecraftPart extends MeshGroup {
-  readonly cubeCenter: V3;
-
   constructor(
     size: V3,
     position: V3,
@@ -529,7 +527,6 @@ export class MinecraftPart extends MeshGroup {
   ) {
     super(name);
     const [width, height, depth] = size;
-    this.cubeCenter = position;
 
     type Face = {
       label: string;
@@ -545,7 +542,7 @@ export class MinecraftPart extends MeshGroup {
     const faces: Face[] = [
       {
         label: "Front",
-        faceCenter: addV3(this.cubeCenter, [0, 0, depth / 2]),
+        faceCenter: addV3(position, [0, 0, depth / 2]),
         uAxis: [1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -555,7 +552,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Back",
-        faceCenter: addV3(this.cubeCenter, [0, 0, -depth / 2]),
+        faceCenter: addV3(position, [0, 0, -depth / 2]),
         uAxis: [-1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -565,7 +562,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Right",
-        faceCenter: addV3(this.cubeCenter, [-width / 2, 0, 0]),
+        faceCenter: addV3(position, [-width / 2, 0, 0]),
         uAxis: [0, 0, 1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -575,7 +572,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Left",
-        faceCenter: addV3(this.cubeCenter, [width / 2, 0, 0]),
+        faceCenter: addV3(position, [width / 2, 0, 0]),
         uAxis: [0, 0, -1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -585,7 +582,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Top",
-        faceCenter: addV3(this.cubeCenter, [0, height / 2, 0]),
+        faceCenter: addV3(position, [0, height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -595,7 +592,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Bottom",
-        faceCenter: addV3(this.cubeCenter, [0, -height / 2, 0]),
+        faceCenter: addV3(position, [0, -height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -671,7 +668,73 @@ export class MinecraftPart extends MeshGroup {
       meshes.push(faceGroup);
     });
     meshes.forEach((group) => this.addMesh(group));
-    if (transformMatrix) this.setTransformMatrix(transformMatrix);
+
+    // Bake in the transform matrix to the mesh group
+    if (transformMatrix) {
+      this.applyTransformToVertices(transformMatrix);
+    }
+  }
+
+  /**
+   * Recursively applies a transformation matrix directly to all vertices and normals in the mesh hierarchy
+   */
+  private applyTransformToVertices(matrix: M44) {
+    // Extract the 3x3 rotation/scale part for transforming normals
+    const rotationMatrix: M44 = [
+      matrix[0],
+      matrix[1],
+      matrix[2],
+      0,
+      matrix[4],
+      matrix[5],
+      matrix[6],
+      0,
+      matrix[8],
+      matrix[9],
+      matrix[10],
+      0,
+      0,
+      0,
+      0,
+      1,
+    ];
+
+    const transformMeshGroup = (group: MeshGroup) => {
+      for (const child of group.getChildren()) {
+        if (child instanceof Mesh) {
+          // Transform vertices
+          for (let i = 0; i < child.vertices.length; i += 3) {
+            const vertex: V3 = [
+              child.vertices[i],
+              child.vertices[i + 1],
+              child.vertices[i + 2],
+            ];
+            const transformedVertex = multiplyM4V3(matrix, vertex);
+            child.vertices[i] = transformedVertex[0];
+            child.vertices[i + 1] = transformedVertex[1];
+            child.vertices[i + 2] = transformedVertex[2];
+          }
+
+          // Transform normals (using the rotation part only)
+          for (let i = 0; i < child.normals.length; i += 3) {
+            const normal: V3 = [
+              child.normals[i],
+              child.normals[i + 1],
+              child.normals[i + 2],
+            ];
+            const transformedNormal = multiplyM4V3(rotationMatrix, normal);
+            child.normals[i] = transformedNormal[0];
+            child.normals[i + 1] = transformedNormal[1];
+            child.normals[i + 2] = transformedNormal[2];
+          }
+        } else if (child instanceof MeshGroup) {
+          // Recursively transform child groups
+          transformMeshGroup(child);
+        }
+      }
+    };
+
+    transformMeshGroup(this);
   }
 
   static create(
