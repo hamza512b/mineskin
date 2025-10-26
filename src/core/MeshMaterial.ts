@@ -59,7 +59,7 @@ export class MeshImageMaterial extends MeshMaterial {
     super();
 
     this.image = new ImageData(
-      initialData || new Uint8ClampedArray(width * height * 4).fill(0),
+      initialData as any,
       width,
       height,
     );

@@ -12,93 +12,93 @@ const formSchema = z.object({
   skinIsPocket: z.boolean(),
   objectTranslationX: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectTranslationY: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectTranslationZ: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectRotationX: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   objectRotationY: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   objectRotationZ: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraPhi: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraTheta: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraRadius: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Radius must be positive"),
   diffuseLightPositionX: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionY: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionZ: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   cameraFieldOfView: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "FOV must be positive")
     .max(180, "FOV cannot exceed 180°"),
   cameraSpeed: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Speed must be positive")
     .max(2, "Speed cannot exceed 2"),
   cameraDampingFactor: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Damping must be positive")
     .max(1, "Damping cannot exceed 1"),
   ambientLight: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Ambient light must be positive")
     .max(1, "Ambient light cannot exceed 1"),
   specularStrength: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Specular strength must be positive")
     .max(1, "Specular strength cannot exceed 1"),
   diffuseStrength: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Diffuse strength must be positive")
     .max(1, "Diffuse strength cannot exceed 1"),
@@ -106,7 +106,7 @@ const formSchema = z.object({
   paintMode: z.enum(["pixel", "bulk", "eraser", "variation"]),
   variationIntensity: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Variation intensity must be positive")
     .max(1, "Variation intensity cannot exceed 1"),
@@ -123,7 +123,7 @@ const formSchema = z.object({
   overlayleftLegVisible: z.boolean(),
   overlayrightLegVisible: z.boolean(),
   directionalLightIntensity: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   mode: z.enum(["Preview", "Editing"]),
   gridVisible: z.boolean(),

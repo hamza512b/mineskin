@@ -1,6 +1,5 @@
 import { FormValues } from "@/hooks/useRendererState";
 import * as Dialog from "@radix-ui/react-dialog";
-import React from "react";
 import { PartButton } from "./PartButton";
 
 type PartFilterDialogProps = {

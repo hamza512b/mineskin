@@ -1,5 +1,4 @@
 import * as Switch from "@radix-ui/react-switch";
-import React from "react";
 
 interface ToggleSwitchProps {
   label: string;

@@ -1,7 +1,7 @@
 import IconButton from "@/components/IconButton/IconButton";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";

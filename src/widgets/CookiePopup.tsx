@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import Button from "@/components/Button/index";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { AnimatePresence, motion } from "framer-motion";
