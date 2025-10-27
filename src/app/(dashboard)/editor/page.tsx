@@ -1,20 +1,20 @@
 "use client";
-import { MiSkiEditingRenderer } from "@/core/MineSkinRenderer";
-import { useRenderer } from "@/hooks/useRenderer";
-import { MineskinCanvas } from "../../../components/MineskinCanvas/MineskinCanvas";
-import { useTutorialState } from "@/hooks/useTutorialState";
 import Tutorial from "@/components/Tutorial/Tutorial";
+import { MiSkiEditingRenderer } from "@/core/MineSkinRenderer";
+import { useTutorialState } from "@/hooks/useTutorialState";
+import { useState } from "react";
 import { useSharedState } from "../layout";
+import { Dashboard } from "../MineskinDashboard";
 
 export default function EditorPage() {
   const state = useSharedState();
-  const [renderer, setCanvas] = useRenderer(MiSkiEditingRenderer, state);
+  const [renderer] = useState(() => new MiSkiEditingRenderer(state));
+
   const { hasCompletedTutorial } = useTutorialState();
 
   return (
-    <MineskinCanvas renderer={renderer} setCanvas={setCanvas} mode="Editing">
+    <Dashboard renderer={renderer} mode="Editing">
       {!hasCompletedTutorial && <Tutorial />}
-    </MineskinCanvas>
+    </Dashboard>
   );
 }
-

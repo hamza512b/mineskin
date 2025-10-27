@@ -45,6 +45,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
     "gray-matter": "^4.0.3",
+    "its-fine": "^2.0.0",
     "lodash": "^4.17.21",
     "mdast-util-toc": "^7.1.0",
     "micro": "^10.0.1",

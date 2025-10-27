@@ -1,7 +1,7 @@
 import { MinecraftSkin } from "@/core/MinecraftSkin";
-import { useEffect, useRef, useState } from "react";
-import { MiSkiRenderer } from "../core/MineSkinRenderer";
-import { State } from "../core/State";
+import { useEffect, useState } from "react";
+import { MiSkiRenderer } from "../../core/MineSkinRenderer";
+import { State } from "../../core/State";
 
 const DEFAULT_SKIN = "/steve.png";
 
@@ -34,36 +34,35 @@ export async function setup<T extends MiSkiRenderer>(renderer: T) {
   renderer.backend.bindMeshGroup(skin);
 }
 
-export function useRenderer<T extends MiSkiRenderer>(
-  rendererClass: new (state: State) => T,
-  sharedState?: State,
-): [T, (c: HTMLCanvasElement | null) => void] {
-  const [renderer] = useState(() => {
-    return new rendererClass(sharedState || State.load());
-  });
+import { useNearestChild } from "its-fine";
+export function MiSkiCanvas<T extends MiSkiRenderer>({
+  renderer,
+  className,
+}: {
+  renderer: T;
+  className?: string;
+}) {
+  const canvas: React.MutableRefObject<HTMLCanvasElement | undefined> =
+    useNearestChild<HTMLCanvasElement>("canvas");
 
   // UseEffect is guaranteed to run after the DOM is painted, but after it runs, we need to render.
   const [, setGeneration] = useState(0);
 
   // Cleanup function to save state and unmount renderer when component unmounts
   useEffect(() => {
-    setup(renderer).then(() => {
-      renderer?.mount();
-      renderer?.start("parallaxEffect");
-      setGeneration((generation) => generation + 1);
-    });
-    return () => {
-      if (renderer) {
+    if (canvas.current) {
+      renderer.backend.setCanvas(canvas.current);
+      setup(renderer).then(() => {
+        renderer?.mount();
+        renderer?.start("parallaxEffect");
+        setGeneration((generation) => generation + 1);
+      });
+      return () => {
         renderer.stop();
         renderer.unmount();
-      }
-    };
+      };
+    }
   }, []);
 
-  return [
-    renderer,
-    (canvas: HTMLCanvasElement | null) => {
-      renderer?.backend.setCanvas(canvas);
-    },
-  ];
+  return <canvas className={className} />;
 }

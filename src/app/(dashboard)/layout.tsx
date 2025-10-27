@@ -1,6 +1,7 @@
 "use client";
 import { State } from "@/core/State";
 import { CAN_USE_DOM } from "@/lib/utils";
+import { FiberProvider } from "its-fine";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface StateContextType {
@@ -31,6 +32,10 @@ export default function CanvasLayout({
   });
 
   return (
-    <StateContext.Provider value={{ state }}>{children}</StateContext.Provider>
+    <FiberProvider>
+      <StateContext.Provider value={{ state }}>
+        {children}
+      </StateContext.Provider>
+    </FiberProvider>
   );
 }

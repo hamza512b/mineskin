@@ -13,15 +13,14 @@ import Toolbar from "@/widgets/Toolbar/Toolbar";
 import Head from "next/head";
 import React, { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { MiSkiCanvas } from "./MiSkiCanvas";
 
-export function MineskinCanvas<T extends MiSkiRenderer>({
+export function Dashboard<T extends MiSkiRenderer>({
   renderer,
-  setCanvas,
   children,
   mode,
 }: {
-  renderer: T | null;
-  setCanvas: (canvas: HTMLCanvasElement | null) => void;
+  renderer: T;
   children?: React.ReactNode;
   mode: Mode;
 }) {
@@ -126,8 +125,8 @@ export function MineskinCanvas<T extends MiSkiRenderer>({
       </Head>
       <div className="relative flex justify-between h-dvh w-full overflow-hidden bg-grid">
         <div className="relative flex-1" data-tutorial-id="main">
-          <canvas
-            ref={(node) => setCanvas(node)}
+          <MiSkiCanvas
+            renderer={renderer}
             className="w-full h-full select-none"
           />
 
