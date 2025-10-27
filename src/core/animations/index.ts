@@ -1,5 +1,4 @@
 import { MinecraftPart } from "../mesh";
-import dance from "./dance.json";
 import idle from "./idle.json";
 import walking from "./walking.json";
 
@@ -37,6 +36,4 @@ export interface AnimationBodyPart {
 
 export const walkingAnimation = walking as AnimationDefinition;
 export const idleAnimation = idle as AnimationDefinition;
-export const danceAnimation = dance as AnimationDefinition;
-
-export default [walkingAnimation, idleAnimation, danceAnimation];
+export default [walkingAnimation, idleAnimation];

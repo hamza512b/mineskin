@@ -56,6 +56,8 @@ export class AnimationSystem {
     this.animationTime = 0;
     this.isPlaying = true;
 
+    this.resetToOriginalTransforms();
+
     this.startAnimationLoop();
   }
 

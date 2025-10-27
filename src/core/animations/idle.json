@@ -1,7 +1,7 @@
 {
   "name": "idle",
   "label": "Idle animation",
-  "duration": 6.0,
+  "duration": 4.0,
   "loop": true,
   "parts": [
     {
@@ -12,15 +12,69 @@
           "rotation": [0, 0, 0]
         },
         {
-          "time": 0.6,
-          "rotation": [0, 0.2, 0]
+          "time": 1.0,
+          "rotation": [-0.05, 0.1, 0]
         },
         {
-          "time": 1.8,
-          "rotation": [0, -0.2, 0]
+          "time": 2.0,
+          "rotation": [0.05, -0.1, 0]
         },
         {
-          "time": 6.0,
+          "time": 4.0,
+          "rotation": [0, 0, 0]
+        }
+      ]
+    },
+    {
+      "name": "body",
+      "keyframes": [
+        {
+          "time": 0.0,
+          "rotation": [0, 0, 0],
+          "position": [0, 0, 0]
+        },
+        {
+          "time": 2.0,
+          "rotation": [0.02, 0, 0],
+          "position": [0, -0.2, 0]
+        },
+        {
+          "time": 4.0,
+          "rotation": [0, 0, 0],
+          "position": [0, 0, 0]
+        }
+      ]
+    },
+    {
+      "name": "leftArm",
+      "keyframes": [
+        {
+          "time": 0.0,
+          "rotation": [0, 0, 0]
+        },
+        {
+          "time": 2.0,
+          "rotation": [0.05, 0, 0.02]
+        },
+        {
+          "time": 4.0,
+          "rotation": [0, 0, 0]
+        }
+      ]
+    },
+    {
+      "name": "rightArm",
+      "keyframes": [
+        {
+          "time": 0.0,
+          "rotation": [0, 0, 0]
+        },
+        {
+          "time": 2.0,
+          "rotation": [0.05, 0, -0.02]
+        },
+        {
+          "time": 4.0,
           "rotation": [0, 0, 0]
         }
       ]
