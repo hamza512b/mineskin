@@ -8,6 +8,7 @@ export class Renderer {
   public world: MeshGroup;
   public backend: Backend;
   public orbitControl: OrbitControl;
+  public finished: boolean = false;
 
   private animationFrame: number | null = null;
   public state: State;
@@ -31,6 +32,7 @@ export class Renderer {
 
   public start(): void {
     const loop = () => {
+      if (this.finished) return;
       this.orbitControl.update();
       this.backend.onRenderFrame();
       this.animationFrame = requestAnimationFrame(loop);
@@ -42,6 +44,7 @@ export class Renderer {
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
+      this.finished = true;
     }
   }
 

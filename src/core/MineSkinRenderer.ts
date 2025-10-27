@@ -31,10 +31,10 @@ export class MiSkiRenderer extends Renderer {
   }
 
   public override unmount() {
-    super.unmount();
     this.state.removeListener(this.onVisibilityChange.bind(this));
     this.state.removeListener(this.onPocketChange.bind(this));
     this.undoRedoManager.unmountListeners();
+    super.unmount();
   }
 
   getMainSkin(): MinecraftSkin {
@@ -289,8 +289,8 @@ export class MiSkiEditingRenderer extends MiSkiRenderer {
   }
 
   public override unmount() {
-    super.unmount();
     this.inputManager.unmountListeners();
+    super.unmount();
   }
   public pickColor(x: number, y: number) {
     const hit = this.getMeshHitAt(x, y);
@@ -482,8 +482,8 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
   }
 
   public override unmount() {
-    super.unmount();
     this.animationSystem.dispose();
+    super.unmount();
   }
 
   public playAnimation(animationName: string): void {
