@@ -294,6 +294,10 @@ export class State {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
+  public removeAllListeners() {
+    this.listeners = [];
+  }
+
   // Getters
   public getObjectTranslationX() {
     return this.objectTranslationX;

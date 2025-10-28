@@ -14,12 +14,14 @@ import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
 import { Mesh, MeshGroup } from "./mesh";
 import { computeRay, getMeshAtRay } from "./rayTracing";
+
 import animations from "./animations";
+const DEFAULT_SKIN = "/steve.png";
 
 export class MiSkiRenderer extends Renderer {
   public undoRedoManager: UndoRedoManager;
-  constructor(state: State) {
-    super(state);
+  constructor(canvas: HTMLCanvasElement, state: State) {
+    super(canvas, state);
     this.undoRedoManager = new UndoRedoManager(this);
   }
 
@@ -31,6 +33,12 @@ export class MiSkiRenderer extends Renderer {
   }
 
   public override unmount() {
+    // Create a copy of children array to avoid modifying collection while iterating
+    const meshesToRemove = [...this.world.getChildren()];
+    for (const mesh of meshesToRemove) {
+      this.world.removeMesh(mesh);
+    }
+    this.state.removeAllListeners();
     this.state.removeListener(this.onVisibilityChange.bind(this));
     this.state.removeListener(this.onPocketChange.bind(this));
     this.undoRedoManager.unmountListeners();
@@ -45,55 +53,9 @@ export class MiSkiRenderer extends Renderer {
     return s;
   }
 
-  public start(effect?: "parallaxEffect"): void {
-    if (effect === "parallaxEffect") {
-      this.createParallaxEffect();
-    }
-    super.start();
-  }
-
-  private createParallaxEffect(): void {
-    // Store initial values
-    const initialFOV = this.state.getCameraFieldOfView();
-    const initialRadius = this.state.getCameraRadius();
-
-    // Create a slightly zoomed out effect by decreasing FOV and increasing radius
-    const startFOV = initialFOV * 0.8; // Decrease FOV by 20%
-    const startRadius = initialRadius * 1.2; // Increase radius by 20%
-
-    // Set initial values
-    this.state.setCameraFieldOfView(startFOV, true, "parallaxEffect");
-    this.state.setCameraRadius(startRadius, true, "parallaxEffect");
-
-    // Calculate steps needed for the animation (60 frames per second, animation should be under 1 second)
-    const frameCount = 45;
-    const fovStep = (initialFOV - startFOV) / frameCount;
-    const radiusStep = (initialRadius - startRadius) / frameCount;
-
-    let currentFrame = 0;
-
-    const animate = () => {
-      if (currentFrame >= frameCount || this.orbitControl.isControlling) {
-        // Ensure we end with exact target values
-        this.state.setCameraFieldOfView(initialFOV, false, "parallaxEffect");
-        this.state.setCameraRadius(initialRadius, false, "parallaxEffect");
-        return;
-      }
-
-      // Update values
-      const newFov = this.state.getCameraFieldOfView() + fovStep;
-      const newRadius = this.state.getCameraRadius() + radiusStep;
-
-      this.state.setCameraFieldOfView(newFov, false, "parallaxEffect");
-      this.state.setCameraRadius(newRadius, true, "parallaxEffect");
-
-      currentFrame++;
-
-      requestAnimationFrame(animate);
-    };
-
-    // Start animation on next frame
-    requestAnimationFrame(animate);
+  public start(): number {
+    const deltaTime = super.start();
+    return deltaTime;
   }
 
   public downloadTexture() {
@@ -110,6 +72,12 @@ export class MiSkiRenderer extends Renderer {
     input.type = "file";
     input.accept = "image/png";
     document.body.appendChild(input);
+
+    const cleanup = () => {
+      input.onload = null;
+      input.onerror = null;
+      input.src = "";
+    };
     input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       document.body.removeChild(input);
@@ -127,9 +95,11 @@ export class MiSkiRenderer extends Renderer {
           reader.onload = async () => {
             await this.uploadTextureUrl(reader.result as string, setError);
             res(undefined);
+            cleanup();
           };
           reader.onerror = () => {
             rej(undefined);
+            cleanup();
           };
           reader.readAsDataURL(file);
         });
@@ -142,6 +112,11 @@ export class MiSkiRenderer extends Renderer {
   async uploadTextureUrl(url: string, setError?: (arg0: string) => void) {
     return new Promise((res, rej) => {
       const img = new Image();
+      const cleanup = () => {
+        img.onload = null;
+        img.onerror = null;
+        img.src = "";
+      };
       img.onload = () => {
         if (img.width !== 64 || ![32, 64].includes(img.height)) {
           setError?.("Skin dimensions must be 64x64 or 64x32 pixels.");
@@ -163,10 +138,12 @@ export class MiSkiRenderer extends Renderer {
         );
 
         this.undoRedoManager?.endBatch();
-
+        cleanup();
         res(undefined);
       };
+
       img.onerror = () => {
+        cleanup();
         rej(undefined);
       };
       img.crossOrigin = "";
@@ -274,12 +251,43 @@ export class MiSkiRenderer extends Renderer {
   public getMode() {
     return this instanceof MiSkiEditingRenderer ? "Editing" : "Preview";
   }
+  static async setup(canvas: HTMLCanvasElement, state: State) {
+    const renderer = new this(canvas, state);
+
+    await renderer.state.initializeIndexDB();
+    const old_skin_base64URL = localStorage.getItem("skin_editor");
+    const texture = await renderer.state.readSkinImageData("main_skin");
+
+    let skin: MinecraftSkin;
+    if (old_skin_base64URL && !texture) {
+      skin = await MinecraftSkin.create(
+        "MainSkin",
+        renderer.world,
+        old_skin_base64URL,
+      );
+    } else {
+      skin = await MinecraftSkin.create(
+        "MainSkin",
+        renderer.world,
+        texture || DEFAULT_SKIN,
+      );
+    }
+    renderer.state.setSkinIsPocket(
+      skin.material.version === "slim",
+      true,
+      "classic",
+    );
+
+    renderer.addMesh(skin);
+    renderer.backend.bindMeshGroup(skin);
+    return renderer;
+  }
 }
 
 export class MiSkiEditingRenderer extends MiSkiRenderer {
   public inputManager: EditInputManager;
-  constructor(state: State) {
-    super(state);
+  constructor(canvas: HTMLCanvasElement, state: State) {
+    super(canvas, state);
     this.inputManager = new EditInputManager(this);
   }
 
@@ -469,8 +477,8 @@ export class MiSkiEditingRenderer extends MiSkiRenderer {
 export class MiSkPreviewRenderer extends MiSkiRenderer {
   private animationSystem: AnimationSystem;
 
-  constructor(state: State) {
-    super(state);
+  constructor(canvas: HTMLCanvasElement, state: State) {
+    super(canvas, state);
     this.animationSystem = new AnimationSystem();
   }
 
@@ -486,6 +494,12 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     super.unmount();
   }
 
+  public override start(): number {
+    const deltaTime = super.start();
+    this.animationSystem.update(deltaTime);
+    return deltaTime;
+  }
+
   public playAnimation(animationName: string): void {
     this.animationSystem.playAnimation(animationName);
   }
@@ -494,13 +508,6 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     this.animationSystem.stopAnimation();
   }
 
-  public pauseAnimation(): void {
-    this.animationSystem.pauseAnimation();
-  }
-
-  public resumeAnimation(): void {
-    this.animationSystem.resumeAnimation();
-  }
   public setAnimationSpeed(speed: number): void {
     this.animationSystem.setAnimationSpeed(speed);
   }

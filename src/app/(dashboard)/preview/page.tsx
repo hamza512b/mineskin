@@ -1,12 +1,21 @@
 "use client";
 import { MiSkPreviewRenderer } from "@/core/MineSkinRenderer";
+import { useRef } from "react";
 import { Dashboard } from "../MineskinDashboard";
 import { useSharedState } from "../layout";
-import { useState } from "react";
+import useRenderer from "../useRenderer";
 
 export default function PreviewPage() {
-  const state = useSharedState();
-  const [renderer] = useState(() => new MiSkPreviewRenderer(state));
-
-  return <Dashboard renderer={renderer} mode="Preview" />;
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { state, ...rest } = useSharedState();
+  const renderer = useRenderer(MiSkPreviewRenderer, canvasRef, state);
+  return (
+    <Dashboard
+      renderer={renderer}
+      mode="Preview"
+      canvasRef={canvasRef}
+      state={state}
+      {...rest}
+    />
+  );
 }

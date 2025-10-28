@@ -34,21 +34,16 @@ export default class Webgl2Backend implements Backend {
   private state?: State;
   private meshes?: MeshGroup;
   private materialTextureCache: Map<string, WebGLTexture> = new Map();
-  public renderer: Renderer;
+  canvas: HTMLCanvasElement | null;
 
-  public setCanvas(canvas: HTMLCanvasElement | null) {
-    this._canvasRef.current = canvas;
-    this.gl = canvas?.getContext("webgl2") ?? null;
-    this.mainProgram = this.gl ? new MainProgram(this.gl) : null;
+  constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    const gl = canvas.getContext("webgl2");
+    if (!gl) throw new Error("Could not retrieve WebGL 2 context.");
+    this.gl = gl;
+    this.mainProgram = new MainProgram(this.gl);
   }
 
-  public get canvas() {
-    return this._canvasRef.current;
-  }
-
-  constructor(renderer: Renderer) {
-    this.renderer = renderer;
-  }
   getGlobalTransformation(): M44 {
     return this.globalTransformation;
   }
@@ -60,6 +55,10 @@ export default class Webgl2Backend implements Backend {
   }
   public bindMeshGroup(meshGroup: MeshGroup): void {
     if (!this.gl || !this.mainProgram) return;
+
+    // Clean up any existing WebGL resources for this mesh group first
+    this.cleanupMeshGroup(meshGroup);
+
     meshGroup.getChildren().forEach((child) => {
       if (child instanceof MinecraftPart && this.gl && this.mainProgram) {
         child.compileData();
@@ -87,6 +86,11 @@ export default class Webgl2Backend implements Backend {
           new Float32Array(child.mergedUVs),
           this.gl.STATIC_DRAW,
         );
+
+        // Store buffer references in the mesh group for proper cleanup
+        child.mergedVerticesBuffer = mergedVerticesBuffer;
+        child.mergedNormalsBuffer = mergedNormalsBuffer;
+        child.mergedUVsBuffer = mergedUVsBuffer;
 
         // Create and set up a VAO for this group
         const vao = this.gl.createVertexArray();
@@ -145,7 +149,11 @@ export default class Webgl2Backend implements Backend {
     this.meshes = meshes;
     this.state = state;
   }
-  private renderMeshGroup(meshGroup: MeshGroup, skin: MinecraftSkin): void {
+  private renderMeshGroup(
+    renderer: Renderer,
+    meshGroup: MeshGroup,
+    skin: MinecraftSkin,
+  ): void {
     if (!meshGroup.visible || !this.gl || !this.mainProgram) return;
     const material = meshGroup.getMaterial();
     if (material instanceof MeshImageMaterial) {
@@ -199,7 +207,7 @@ export default class Webgl2Backend implements Backend {
 
       if (
         this.state?.getGridVisible() &&
-        this.renderer instanceof MiSkiEditingRenderer &&
+        renderer instanceof MiSkiEditingRenderer &&
         this.shouldRenderGrid(meshGroup, skin)
       ) {
         // Save current depth state
@@ -235,7 +243,7 @@ export default class Webgl2Backend implements Backend {
     } else {
       meshGroup.getChildren().forEach((child) => {
         if (child instanceof MeshGroup) {
-          this.renderMeshGroup(child, skin);
+          this.renderMeshGroup(renderer, child, skin);
         }
       });
     }
@@ -259,7 +267,7 @@ export default class Webgl2Backend implements Backend {
 
     return true;
   }
-  public onRenderFrame() {
+  public onRenderFrame(renderer: Renderer) {
     if (
       !this.canvas ||
       !this.meshes ||
@@ -268,8 +276,7 @@ export default class Webgl2Backend implements Backend {
       !this.mainProgram
     )
       return;
-    const canvas = this.canvas;
-    resizeCanvasToDisplaySize(canvas);
+    const resized = resizeCanvasToDisplaySize(this.canvas);
 
     const skin = this.meshes.getChildren()[0] as MinecraftSkin;
     const opaqueGroup = this.meshes.findMeshes(
@@ -280,7 +287,7 @@ export default class Webgl2Backend implements Backend {
     )[0] as MeshGroup;
 
     this.gl.depthMask(true);
-    if (this.renderer instanceof MiSkiEditingRenderer) {
+    if (renderer instanceof MiSkiEditingRenderer) {
       this.gl.enable(this.gl.CULL_FACE);
     } else {
       this.gl.disable(this.gl.CULL_FACE);
@@ -295,8 +302,11 @@ export default class Webgl2Backend implements Backend {
     this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
 
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-    this.gl.viewport(0, 0, canvas.width, canvas.height);
-    const aspect = canvas.clientWidth / canvas.clientHeight;
+    if (resized) {
+      this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
     this.projectTransformation = project(
       aspect,
       this.state.getCameraFieldOfView(),
@@ -358,7 +368,7 @@ export default class Webgl2Backend implements Backend {
       cameraPosition,
     );
 
-    this.renderMeshGroup(opaqueGroup, skin);
+    this.renderMeshGroup(renderer, opaqueGroup, skin);
 
     this.gl.uniform1f(
       this.mainProgram.getLocation(
@@ -367,7 +377,7 @@ export default class Webgl2Backend implements Backend {
       this.state.getDirectionalLightIntensity(),
     );
 
-    this.renderMeshGroup(transparentGroup, skin);
+    this.renderMeshGroup(renderer, transparentGroup, skin);
   }
   public onEnd() {
     if (this.mainProgram) {
@@ -377,8 +387,38 @@ export default class Webgl2Backend implements Backend {
       for (const texture of this.materialTextureCache.values()) {
         this.gl.deleteTexture(texture);
       }
+      // Clear the texture cache
+      this.materialTextureCache.clear();
     }
 
     if (this.meshes) this.meshes.cleanup(this.gl);
+
+    this.mainProgram = null;
+    this.gl = null;
+    this._canvasRef.current = null;
+  }
+
+  public cleanupMeshGroup(meshGroup: MeshGroup): void {
+    if (!this.gl) return;
+
+    // Clean up material textures for this mesh group
+    const material = meshGroup.getMaterial();
+    if (
+      material instanceof MeshImageMaterial &&
+      this.materialTextureCache.has(material.uuid)
+    ) {
+      const texture = this.materialTextureCache.get(material.uuid);
+      if (texture) {
+        this.gl.deleteTexture(texture);
+        this.materialTextureCache.delete(material.uuid);
+      }
+    }
+
+    // Recursively clean up child mesh groups
+    meshGroup.getChildren().forEach((child) => {
+      if (child instanceof MeshGroup) {
+        this.cleanupMeshGroup(child);
+      }
+    });
   }
 }

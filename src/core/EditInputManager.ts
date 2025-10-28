@@ -200,6 +200,8 @@ export class EditInputManager {
       "visibilitychange",
       this.boundOnVisibilityChange,
     );
+    // Remove keydown listener to prevent memory leak
+    document.removeEventListener("keydown", this.onKeyDown);
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -233,7 +235,4 @@ export class EditInputManager {
     }
   };
 
-  public destroyListeners() {
-    document.removeEventListener("keydown", this.onKeyDown);
-  }
 }

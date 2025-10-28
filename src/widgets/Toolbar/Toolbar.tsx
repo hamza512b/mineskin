@@ -1,26 +1,26 @@
+import animations from "@/core/animations";
 import { FormValues } from "@/hooks/useRendererState";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import ColorPicker from "../../components/ColorPicker/ColorPicker";
+import Dropdown, { DropdownItem } from "../../components/Dropdown";
 import IconButton from "../../components/IconButton/IconButton";
 import {
+  AnimationIcon,
   ColorPickerIcon,
   EraserIcon,
   GearIcon,
+  GridIcon,
   PaintCanIcon,
   PartsFilterIcon,
   PenToolIcon,
   VariationIcon,
-  GridIcon,
-  AnimationIcon,
 } from "../../components/Icons/Icons";
-import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import { Mode } from "../ActionBar/ActionBar";
-import Dropdown, { DropdownItem } from "../../components/Dropdown";
-import clsx from "clsx";
-import animations from "@/core/animations";
+import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -99,7 +99,6 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   overlayrightLegVisible,
   gridVisible,
   toggleGrid,
-  availableAnimations = [],
   currentAnimation = null,
   onAnimationSelect,
 }) => {

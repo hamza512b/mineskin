@@ -9,33 +9,46 @@ export class Renderer {
   public backend: Backend;
   public orbitControl: OrbitControl;
 
+  protected isMounted: boolean = false;
+
   private animationFrame: number | null = null;
   public state: State;
 
-  constructor(state: State) {
-    this.backend = new Webgl2Backend(this);
+  /** last frame time for animation
+   */
+  private lastFrameTime: number = 0;
+
+  constructor(canvas: HTMLCanvasElement, state: State) {
+    this.backend = new Webgl2Backend(canvas);
     this.state = state;
     this.world = new MeshGroup("World");
     this.orbitControl = new OrbitControl(this);
   }
 
   public mount() {
+    if (this.isMounted) return;
+    this.isMounted = true;
     this.backend.onStart(this.world, this.state);
     this.orbitControl.mountListeners();
   }
 
   public unmount() {
+    this.isMounted = false;
+    // Ensure animation is stopped before cleanup to prevent race conditions
+    this.stop();
     this.orbitControl.unmountListeners();
     this.backend.onEnd();
   }
 
-  public start(): void {
-    const loop = () => {
-      this.orbitControl.update();
-      this.backend.onRenderFrame();
-      this.animationFrame = requestAnimationFrame(loop);
-    };
-    this.animationFrame = requestAnimationFrame(loop);
+  public start(): number {
+    if (!this.isMounted) return 0;
+    const currentTime = performance.now();
+    const deltaTime = (currentTime - this.lastFrameTime) / 1000;
+    this.lastFrameTime = currentTime;
+    this.orbitControl.update();
+    this.backend.onRenderFrame(this);
+    this.animationFrame = requestAnimationFrame(this.start.bind(this));
+    return deltaTime;
   }
 
   public stop(): void {

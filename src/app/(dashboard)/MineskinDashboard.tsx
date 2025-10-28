@@ -1,4 +1,5 @@
 "use client";
+import ClientOnly from "@/components/ClientOnly/ClientOnly";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
 import {
   MiSkiEditingRenderer,
@@ -11,22 +12,26 @@ import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import Head from "next/head";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { RefObject, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { MiSkiCanvas } from "./MiSkiCanvas";
 
 export function Dashboard<T extends MiSkiRenderer>({
   renderer,
   children,
   mode,
+  canvasRef,
+  values,
+  errors,
+  handleChange,
+  redoCount,
+  undoCount,
 }: {
-  renderer: T;
   children?: React.ReactNode;
+  renderer: T | null;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
   mode: Mode;
-}) {
+} & ReturnType<typeof useRendererState>) {
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
-  const { values, errors, handleChange, redoCount, undoCount } =
-    useRendererState(renderer);
 
   const setColorPickerActive = useCallback(
     (active: boolean) => {
@@ -125,10 +130,7 @@ export function Dashboard<T extends MiSkiRenderer>({
       </Head>
       <div className="relative flex justify-between h-dvh w-full overflow-hidden bg-grid">
         <div className="relative flex-1" data-tutorial-id="main">
-          <MiSkiCanvas
-            renderer={renderer}
-            className="w-full h-full select-none"
-          />
+          <canvas ref={canvasRef} className="w-full h-full select-none" />
 
           {children}
 
@@ -161,39 +163,41 @@ export function Dashboard<T extends MiSkiRenderer>({
             </div>
           </div>
 
-          <Toolbar
-            setValues={handleChange}
-            redo={redo}
-            undo={undo}
-            redoCount={redoCount}
-            undoCount={undoCount}
-            setColorPickerActive={setColorPickerActive}
-            colorPickerActive={values.colorPickerActive}
-            setPaintMode={setPaintMode}
-            paintMode={values.paintMode}
-            settingsOpen={controlPanelOpen}
-            setSettingsOpen={setSettingsOpen}
-            getUniqueColors={getUniqueColors}
-            mode={mode}
-            paintColor={values.paintColor}
-            baseheadVisible={values.baseheadVisible}
-            basebodyVisible={values.basebodyVisible}
-            baseleftArmVisible={values.baseleftArmVisible}
-            baserightArmVisible={values.baserightArmVisible}
-            baseleftLegVisible={values.baseleftLegVisible}
-            baserightLegVisible={values.baserightLegVisible}
-            overlayheadVisible={values.overlayheadVisible}
-            overlaybodyVisible={values.overlaybodyVisible}
-            overlayleftArmVisible={values.overlayleftArmVisible}
-            overlayrightArmVisible={values.overlayrightArmVisible}
-            overlayleftLegVisible={values.overlayleftLegVisible}
-            overlayrightLegVisible={values.overlayrightLegVisible}
-            gridVisible={values.gridVisible}
-            toggleGrid={toggleGrid}
-            availableAnimations={availableAnimations}
-            currentAnimation={currentAnimation}
-            onAnimationSelect={handleAnimationSelect}
-          />
+          <ClientOnly>
+            <Toolbar
+              setValues={handleChange}
+              redo={redo}
+              undo={undo}
+              redoCount={redoCount}
+              undoCount={undoCount}
+              setColorPickerActive={setColorPickerActive}
+              colorPickerActive={values.colorPickerActive}
+              setPaintMode={setPaintMode}
+              paintMode={values.paintMode}
+              settingsOpen={controlPanelOpen}
+              setSettingsOpen={setSettingsOpen}
+              getUniqueColors={getUniqueColors}
+              mode={mode}
+              paintColor={values.paintColor}
+              baseheadVisible={values.baseheadVisible}
+              basebodyVisible={values.basebodyVisible}
+              baseleftArmVisible={values.baseleftArmVisible}
+              baserightArmVisible={values.baserightArmVisible}
+              baseleftLegVisible={values.baseleftLegVisible}
+              baserightLegVisible={values.baserightLegVisible}
+              overlayheadVisible={values.overlayheadVisible}
+              overlaybodyVisible={values.overlaybodyVisible}
+              overlayleftArmVisible={values.overlayleftArmVisible}
+              overlayrightArmVisible={values.overlayrightArmVisible}
+              overlayleftLegVisible={values.overlayleftLegVisible}
+              overlayrightLegVisible={values.overlayrightLegVisible}
+              gridVisible={values.gridVisible}
+              toggleGrid={toggleGrid}
+              availableAnimations={availableAnimations}
+              currentAnimation={currentAnimation}
+              onAnimationSelect={handleAnimationSelect}
+            />
+          </ClientOnly>
           <ActionBar
             className={"absolute bottom-0 left-0 right-0"}
             downlodTexture={downloadTexture}

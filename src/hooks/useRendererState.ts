@@ -1,7 +1,6 @@
 import { omit } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { z, ZodError } from "zod";
-import { MiSkiRenderer } from "../core/MineSkinRenderer";
 import { State, StateShape } from "../core/State";
 
 /**
@@ -135,10 +134,10 @@ export type FieldErrors = {
   [K in keyof FormValues]?: string;
 };
 
-export function useRendererState(renderer: MiSkiRenderer | null) {
+export function useRendererState(state: State) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [values, setValues] = useState<FormValues>(
-    (renderer?.state.toObject() || {}) as FormValues,
+    (state.toObject() || {}) as FormValues,
   );
   const [undoCount, setUndoCount] = useState(0);
   const [redoCount, setRedoCount] = useState(0);
@@ -149,23 +148,23 @@ export function useRendererState(renderer: MiSkiRenderer | null) {
       setRedoCount(args.getRedoCount());
     }
 
-    renderer?.state.addListener(changeListener);
+    state.addListener(changeListener);
     return () => {
-      renderer?.state.removeListener(changeListener);
+      state.removeListener(changeListener);
     };
-  }, [renderer]);
+  }, [state]);
 
   useEffect(() => {
     function changeListener(args: State) {
       setValues(args.toObject());
     }
 
-    renderer?.state.addListener(changeListener);
+    state.addListener(changeListener);
 
     return () => {
-      renderer?.state.removeListener(changeListener);
+      state.removeListener(changeListener);
     };
-  }, [renderer]);
+  }, [state]);
 
   const handleChange = useCallback(
     (
@@ -180,14 +179,14 @@ export function useRendererState(renderer: MiSkiRenderer | null) {
       const result = fieldSchema.safeParse({ [name]: argsValeue });
       setValues((prev) => ({ ...prev, [name]: value }));
       if (result.success) {
-        if (!renderer?.state) return;
-        const currentArgs = renderer.state.toObject();
+        if (!state) return;
+        const currentArgs = state.toObject();
         const newArgs = {
           ...omit(currentArgs, [...Object.keys(errors), name]),
           [name]: argsValeue,
         };
-        renderer?.state.setAll(newArgs as StateShape, true, origin);
-        renderer.state.save();
+        state.setAll(newArgs as StateShape, true, origin);
+        state.save();
         setErrors((prev) => omit(prev, [name]));
       } else {
         let error: string | undefined;
@@ -201,11 +200,11 @@ export function useRendererState(renderer: MiSkiRenderer | null) {
         }));
       }
     },
-    [renderer?.state],
+    [state],
   );
 
   return {
-    setErrors,
+    state,
     values,
     errors,
     handleChange,

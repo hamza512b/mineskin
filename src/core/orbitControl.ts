@@ -39,44 +39,44 @@ export class OrbitControl {
     this.renderer.backend.canvas?.addEventListener(
       "touchstart",
       this.boundOnTouchStart,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "touchmove",
       this.boundOnTouchMove,
-      false,
+      { passive: false },
     );
     this.renderer.backend.canvas?.addEventListener(
       "touchend",
       this.boundOnTouchEnd,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "mousedown",
       this.boundOnMouseDown,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "mousemove",
       this.boundOnMouseMove,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "mouseup",
       this.boundOnMouseUp,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "mouseout",
       this.boundOnMouseOut,
-      false,
+      { passive: true },
     );
     this.renderer.backend.canvas?.addEventListener(
       "wheel",
       this.boundOnMouseWheel,
-      false,
+      { passive: true },
     );
-    window.addEventListener("blur", this.boundOnWindowBlur, false);
+    window.addEventListener("blur", this.boundOnWindowBlur, { passive: true });
     this.renderer.state.addListener(this.constantsListener);
   }
 
@@ -115,6 +115,8 @@ export class OrbitControl {
         this.boundOnMouseWheel,
       );
       window.removeEventListener("blur", this.boundOnWindowBlur);
+
+      this.renderer.state.removeListener(this.constantsListener);
 
       // Cancel any pending debounced save operations
       this.debouncedSave?.cancel();

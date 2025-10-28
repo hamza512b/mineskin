@@ -13,7 +13,6 @@ export class AnimationSystem {
   private animationTime: number = 0;
   private animationSpeed: number = 1.0;
   private isPlaying: boolean = false;
-  private animationId: number | null = null;
   private bodyParts: AnimationBodyPart[] = [];
   private originalTransforms: Map<string, PartTransform> = new Map();
   private onAnimationUpdate?: () => void;
@@ -57,36 +56,29 @@ export class AnimationSystem {
     this.isPlaying = true;
 
     this.resetToOriginalTransforms();
-
-    this.startAnimationLoop();
   }
 
   public stopAnimation(): void {
-    this.isPlaying = false;
     this.currentAnimation = null;
-
-    if (this.animationId !== null) {
-      cancelAnimationFrame(this.animationId);
-      this.animationId = null;
-    }
-
     this.resetToOriginalTransforms();
   }
 
-  public pauseAnimation(): void {
-    this.isPlaying = false;
+  public update(deltaTime: number = 0.016): void {
+    if (!this.currentAnimation) return;
 
-    if (this.animationId !== null) {
-      cancelAnimationFrame(this.animationId);
-      this.animationId = null;
+    this.animationTime += deltaTime * this.animationSpeed;
+    if (this.animationTime >= this.currentAnimation.duration) {
+      if (this.currentAnimation.loop) {
+        this.animationTime =
+          this.animationTime % this.currentAnimation.duration;
+      } else {
+        this.stopAnimation();
+        return;
+      }
     }
-  }
 
-  public resumeAnimation(): void {
-    if (this.currentAnimation && !this.isPlaying) {
-      this.isPlaying = true;
-      this.startAnimationLoop();
-    }
+    this.updateAnimation();
+    this.onAnimationUpdate?.();
   }
 
   public setAnimationSpeed(speed: number): void {
@@ -99,34 +91,6 @@ export class AnimationSystem {
 
   public getCurrentAnimationName(): string | null {
     return this.currentAnimation?.name || null;
-  }
-
-  private startAnimationLoop(): void {
-    if (this.animationId !== null) {
-      cancelAnimationFrame(this.animationId);
-    }
-
-    const animate = () => {
-      if (!this.isPlaying || !this.currentAnimation) return;
-
-      this.animationTime += 0.016 * this.animationSpeed;
-      if (this.animationTime >= this.currentAnimation.duration) {
-        if (this.currentAnimation.loop) {
-          this.animationTime =
-            this.animationTime % this.currentAnimation.duration;
-        } else {
-          this.stopAnimation();
-          return;
-        }
-      }
-
-      this.updateAnimation();
-      this.onAnimationUpdate?.();
-
-      this.animationId = requestAnimationFrame(animate);
-    };
-
-    this.animationId = requestAnimationFrame(animate);
   }
 
   private updateAnimation(): void {

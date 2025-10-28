@@ -1,13 +1,9 @@
 "use client";
 import { State } from "@/core/State";
+import { useRendererState } from "@/hooks/useRendererState";
 import { CAN_USE_DOM } from "@/lib/utils";
-import { FiberProvider } from "its-fine";
 import React, { createContext, useContext, useEffect, useState } from "react";
-
-interface StateContextType {
-  state: State;
-}
-
+export type StateContextType = ReturnType<typeof useRendererState>;
 const StateContext = createContext<StateContextType | null>(null);
 
 export function useSharedState() {
@@ -15,7 +11,7 @@ export function useSharedState() {
   if (!context) {
     throw new Error("useSharedState must be used within CanvasLayout");
   }
-  return context.state;
+  return context;
 }
 
 export default function CanvasLayout({
@@ -24,7 +20,8 @@ export default function CanvasLayout({
   children: React.ReactNode;
 }) {
   const [state] = useState(() => (!CAN_USE_DOM ? new State() : State.load()));
-
+  const { values, errors, handleChange, redoCount, undoCount } =
+    useRendererState(state);
   useEffect(() => {
     return () => {
       state.save(); // Save state on unmount
@@ -32,10 +29,17 @@ export default function CanvasLayout({
   });
 
   return (
-    <FiberProvider>
-      <StateContext.Provider value={{ state }}>
-        {children}
-      </StateContext.Provider>
-    </FiberProvider>
+    <StateContext.Provider
+      value={{
+        state,
+        values,
+        errors,
+        handleChange,
+        redoCount,
+        undoCount,
+      }}
+    >
+      {children}
+    </StateContext.Provider>
   );
 }
