@@ -66,7 +66,7 @@ function ActionBar({
     >
       <Dropdown
         trigger={
-          <Button variant={"secondary"}>
+          <Button variant={"secondary"} size={"sm"}>
             {modeOptions.find((option) => option.value === mode)?.icon ||
               modeOptions[0].icon}
             <span className="ml-2">{mode || "Preview"}</span>
@@ -74,20 +74,22 @@ function ActionBar({
         }
       >
         <Link href="/preview">
-          <DropdownItem 
+          <DropdownItem
             leftIcon={<PreviewIcon className="h-4 w-4" />}
             className={clsx(
-              mode === "Preview" && "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+              mode === "Preview" &&
+                "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
             )}
           >
             Preview
           </DropdownItem>
         </Link>
         <Link href="/editor">
-          <DropdownItem 
+          <DropdownItem
             leftIcon={<EditorIcon className="h-4 w-4" />}
             className={clsx(
-              mode === "Editing" && "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+              mode === "Editing" &&
+                "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
             )}
           >
             Editor
@@ -98,6 +100,7 @@ function ActionBar({
         <div className="hidden md:flex gap-2 ">
           {/* Desktop buttons */}
           <Button
+            size={"sm"}
             variant="secondary"
             onClick={handleUploadTexture}
             leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
@@ -106,6 +109,7 @@ function ActionBar({
           </Button>
           {mode === "Editing" && (
             <Button
+              size={"sm"}
               variant="primary"
               onClick={handleDownloadTexture}
               leftIcon={<DownloadIcon className="h-4 w-4" aria-hidden="true" />}

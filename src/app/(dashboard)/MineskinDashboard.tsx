@@ -5,7 +5,7 @@ import {
   MiSkiEditingRenderer,
   MiSkiRenderer,
   MiSkPreviewRenderer,
-} from "@/core/MineSkinRenderer";
+} from "@/core/MiSkiRenderer";
 import { useRendererState } from "@/hooks/useRendererState";
 import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";

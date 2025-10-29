@@ -1,6 +1,6 @@
 "use client";
 import Tutorial from "@/components/Tutorial/Tutorial";
-import { MiSkiEditingRenderer } from "@/core/MineSkinRenderer";
+import { MiSkiEditingRenderer } from "@/core/MiSkiRenderer";
 import { useTutorialState } from "@/hooks/useTutorialState";
 import { useSharedState } from "../layout";
 import { Dashboard } from "../MineskinDashboard";

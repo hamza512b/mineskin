@@ -1,5 +1,5 @@
 "use client";
-import { MiSkPreviewRenderer } from "@/core/MineSkinRenderer";
+import { MiSkPreviewRenderer } from "@/core/MiSkiRenderer";
 import { useRef } from "react";
 import { Dashboard } from "../MineskinDashboard";
 import { useSharedState } from "../layout";

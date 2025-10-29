@@ -1,4 +1,4 @@
-import { MiSkiRenderer } from "./MineSkinRenderer";
+import { MiSkiRenderer } from "./MiSkiRenderer";
 import { HistorySnapshot as Snapshot } from "./State";
 
 export class UndoRedoManager {

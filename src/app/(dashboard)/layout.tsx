@@ -1,9 +1,24 @@
 "use client";
 import { State } from "@/core/State";
-import { useRendererState } from "@/hooks/useRendererState";
-import { CAN_USE_DOM } from "@/lib/utils";
-import React, { createContext, useContext, useEffect, useState } from "react";
-export type StateContextType = ReturnType<typeof useRendererState>;
+import {
+  FieldErrors,
+  FormValues,
+  useRendererState,
+} from "@/hooks/useRendererState";
+import React, { createContext, useContext } from "react";
+
+export type StateContextType = {
+  state: State;
+  errors: FieldErrors;
+  values: FormValues;
+  undoCount: number;
+  redoCount: number;
+  handleChange: (
+    name: keyof FormValues,
+    value: string | number | boolean,
+    origin?: string,
+  ) => void;
+};
 const StateContext = createContext<StateContextType | null>(null);
 
 export function useSharedState() {
@@ -14,31 +29,19 @@ export function useSharedState() {
   return context;
 }
 
-export default function CanvasLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [state] = useState(() => (!CAN_USE_DOM ? new State() : State.load()));
-  const { values, errors, handleChange, redoCount, undoCount } =
-    useRendererState(state);
-  useEffect(() => {
-    return () => {
-      state.save(); // Save state on unmount
-    };
-  });
+  const sharedState = useRendererState();
+
+  if (!sharedState || !sharedState.state) {
+    return null;
+  }
 
   return (
-    <StateContext.Provider
-      value={{
-        state,
-        values,
-        errors,
-        handleChange,
-        redoCount,
-        undoCount,
-      }}
-    >
+    <StateContext.Provider value={sharedState as StateContextType}>
       {children}
     </StateContext.Provider>
   );

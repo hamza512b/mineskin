@@ -346,60 +346,6 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
               </>
             )}
             <div className="space-y-2">
-              <Tooltip.Provider>
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <div data-tutorial-id="mobile-part-filter">
-                      <IconButton
-                        label="Parts Filter"
-                        onClick={() => setDialogOpen(true)}
-                        active={dialogOpen}
-                      >
-                        <PartsFilterIcon className="w-full h-full dark:text-white" />
-                      </IconButton>
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side="right"
-                      sideOffset={5}
-                    >
-                      Parts Filter
-                      <Tooltip.Arrow className="fill-gray-800" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </Tooltip.Provider>
-
-              {mode === "Editing" && (
-                <Tooltip.Provider>
-                  <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                      <div>
-                        <IconButton
-                          label="Grid"
-                          onClick={() => toggleGrid()}
-                          active={gridVisible}
-                        >
-                          <GridIcon className="w-full h-full dark:text-white" />
-                        </IconButton>
-                      </div>
-                    </Tooltip.Trigger>
-                    <Tooltip.Portal>
-                      <Tooltip.Content
-                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                        side="right"
-                        sideOffset={5}
-                      >
-                        Grid
-                        <Tooltip.Arrow className="fill-gray-800" />
-                      </Tooltip.Content>
-                    </Tooltip.Portal>
-                  </Tooltip.Root>
-                </Tooltip.Provider>
-              )}
-
               {mode === "Preview" && onAnimationSelect && (
                 <Tooltip.Provider>
                   <Tooltip.Root>
@@ -451,6 +397,59 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         sideOffset={5}
                       >
                         Animations
+                        <Tooltip.Arrow className="fill-gray-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              )}
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <div data-tutorial-id="mobile-part-filter">
+                      <IconButton
+                        label="Parts Filter"
+                        onClick={() => setDialogOpen(true)}
+                        active={dialogOpen}
+                      >
+                        <PartsFilterIcon className="w-full h-full dark:text-white" />
+                      </IconButton>
+                    </div>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                      side="right"
+                      sideOffset={5}
+                    >
+                      Parts Filter
+                      <Tooltip.Arrow className="fill-gray-800" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+
+              {mode === "Editing" && (
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div>
+                        <IconButton
+                          label="Grid"
+                          onClick={() => toggleGrid()}
+                          active={gridVisible}
+                        >
+                          <GridIcon className="w-full h-full dark:text-white" />
+                        </IconButton>
+                      </div>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                        side="right"
+                        sideOffset={5}
+                      >
+                        Grid
                         <Tooltip.Arrow className="fill-gray-800" />
                       </Tooltip.Content>
                     </Tooltip.Portal>

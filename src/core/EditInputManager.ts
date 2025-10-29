@@ -1,4 +1,4 @@
-import { MiSkiEditingRenderer } from "./MineSkinRenderer";
+import { MiSkiEditingRenderer } from "./MiSkiRenderer";
 
 export class EditInputManager {
   private isDrawing = false;
@@ -177,7 +177,6 @@ export class EditInputManager {
     this.renderer.backend.canvas.removeEventListener(
       "pointerdown",
       this.onPointerDown,
-      true,
     );
     this.renderer.backend.canvas.removeEventListener(
       "pointermove",
@@ -234,5 +233,4 @@ export class EditInputManager {
       this.renderer.state.setPaintMode("variation");
     }
   };
-
 }

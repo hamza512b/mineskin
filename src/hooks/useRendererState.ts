@@ -1,7 +1,7 @@
 import { omit } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z, ZodError } from "zod";
-import { State, StateShape } from "../core/State";
+import { initialState, State, StateShape } from "../core/State";
 
 /**
  * Schema should be on nested level because this how validation is done
@@ -134,37 +134,34 @@ export type FieldErrors = {
   [K in keyof FormValues]?: string;
 };
 
-export function useRendererState(state: State) {
+export function useRendererState() {
+  const currentState = useRef<State | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [values, setValues] = useState<FormValues>(
-    (state.toObject() || {}) as FormValues,
-  );
+  const [values, setValues] = useState<FormValues>(initialState);
   const [undoCount, setUndoCount] = useState(0);
   const [redoCount, setRedoCount] = useState(0);
 
   useEffect(() => {
-    function changeListener(args: State) {
-      setUndoCount(args.getUndoCount());
-      setRedoCount(args.getRedoCount());
-    }
-
-    state.addListener(changeListener);
-    return () => {
-      state.removeListener(changeListener);
-    };
-  }, [state]);
-
-  useEffect(() => {
+    const state = State.load();
+    currentState.current = state;
+    setValues(state?.toObject() || initialState);
     function changeListener(args: State) {
       setValues(args.toObject());
     }
 
     state.addListener(changeListener);
 
+    function changeUndoRedoListener(args: State) {
+      setUndoCount(args.getUndoCount());
+      setRedoCount(args.getRedoCount());
+    }
+
+    state.addListener(changeUndoRedoListener);
     return () => {
-      state.removeListener(changeListener);
+      state?.removeListener(changeListener);
+      state?.removeListener(changeUndoRedoListener);
     };
-  }, [state]);
+  }, []);
 
   const handleChange = useCallback(
     (
@@ -179,14 +176,14 @@ export function useRendererState(state: State) {
       const result = fieldSchema.safeParse({ [name]: argsValeue });
       setValues((prev) => ({ ...prev, [name]: value }));
       if (result.success) {
-        if (!state) return;
-        const currentArgs = state.toObject();
+        if (!currentState.current) return;
+        const currentArgs = currentState.current?.toObject();
         const newArgs = {
           ...omit(currentArgs, [...Object.keys(errors), name]),
           [name]: argsValeue,
         };
-        state.setAll(newArgs as StateShape, true, origin);
-        state.save();
+        currentState.current?.setAll(newArgs as StateShape, true, origin);
+        currentState.current?.save();
         setErrors((prev) => omit(prev, [name]));
       } else {
         let error: string | undefined;
@@ -200,11 +197,11 @@ export function useRendererState(state: State) {
         }));
       }
     },
-    [state],
+    [errors],
   );
 
   return {
-    state,
+    state: currentState.current,
     values,
     errors,
     handleChange,

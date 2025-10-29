@@ -17,7 +17,7 @@ import {
 import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
 import { MinecraftSkin } from "../MinecraftSkin";
-import { MiSkiEditingRenderer } from "../MineSkinRenderer";
+import { MiSkiEditingRenderer } from "../MiSkiRenderer";
 import { Renderer } from "../Renderer";
 import { State } from "../State";
 import { resizeCanvasToDisplaySize } from "../utils";
@@ -281,10 +281,10 @@ export default class Webgl2Backend implements Backend {
     const skin = this.meshes.getChildren()[0] as MinecraftSkin;
     const opaqueGroup = this.meshes.findMeshes(
       (g) => g.name === "opaque",
-    )[0] as MeshGroup;
+    )[0] as MinecraftPart;
     const transparentGroup = this.meshes.findMeshes(
       (g) => g.name === "transparent",
-    )[0] as MeshGroup;
+    )[0] as MinecraftPart;
 
     this.gl.depthMask(true);
     if (renderer instanceof MiSkiEditingRenderer) {

@@ -13,13 +13,17 @@ import { Renderer } from "./Renderer";
 import { Layers, Parts, State } from "./State";
 import { UndoRedoManager } from "./UndoManager";
 import { Mesh, MeshGroup } from "./mesh";
-import { computeRay, getMeshAtRay } from "./rayTracing";
+import { computeRay, getMeshAtRay, getMeshsAtRay } from "./rayTracing";
 
 import animations from "./animations";
+import { sortBy } from "lodash";
 const DEFAULT_SKIN = "/steve.png";
 
 export class MiSkiRenderer extends Renderer {
   public undoRedoManager: UndoRedoManager;
+  private boundOnVisibilityChange = this.onVisibilityChange.bind(this);
+  private boundOnPocketChange = this.onPocketChange.bind(this);
+
   constructor(canvas: HTMLCanvasElement, state: State) {
     super(canvas, state);
     this.undoRedoManager = new UndoRedoManager(this);
@@ -27,8 +31,8 @@ export class MiSkiRenderer extends Renderer {
 
   public override mount() {
     super.mount();
-    this.state.addListener(this.onVisibilityChange.bind(this));
-    this.state.addListener(this.onPocketChange.bind(this));
+    this.state.addListener(this.boundOnVisibilityChange);
+    this.state.addListener(this.boundOnPocketChange);
     this.undoRedoManager.mountListeners();
   }
 
@@ -38,9 +42,8 @@ export class MiSkiRenderer extends Renderer {
     for (const mesh of meshesToRemove) {
       this.world.removeMesh(mesh);
     }
-    this.state.removeAllListeners();
-    this.state.removeListener(this.onVisibilityChange.bind(this));
-    this.state.removeListener(this.onPocketChange.bind(this));
+    this.state.removeListener(this.boundOnVisibilityChange);
+    this.state.removeListener(this.boundOnPocketChange);
     this.undoRedoManager.unmountListeners();
     super.unmount();
   }
@@ -185,9 +188,10 @@ export class MiSkiRenderer extends Renderer {
     constants: State,
     origin: string | undefined,
   ): void {
-    if (origin !== "App") return;
-
     const mainSkinInstance = this.getMainSkin();
+
+    if (!mainSkinInstance) return;
+
     // Reset all arms
     if (mainSkinInstance.baseLeftArm)
       mainSkinInstance.baseLeftArm.visible = false;
@@ -247,6 +251,24 @@ export class MiSkiRenderer extends Renderer {
     }
     return null;
   }
+  public getMeshsHitAt(x: number, y: number) {
+    if (!this.backend.canvas) return [];
+    const skinObject = this.getMainSkin();
+
+    const ray = computeRay(
+      x,
+      y,
+      this.backend.canvas.width,
+      this.backend.canvas.height,
+      this.backend.getProjectTransformation(),
+      this.backend.getViewTransformation(),
+      this.backend.getGlobalTransformation(),
+    );
+    const hits = getMeshsAtRay(skinObject, ray);
+    return sortBy(hits, (hit) => hit.t).filter(
+      (h) => h.mesh.metadata.type === "skinPixel",
+    );
+  }
 
   public getMode() {
     return this instanceof MiSkiEditingRenderer ? "Editing" : "Preview";
@@ -301,27 +323,22 @@ export class MiSkiEditingRenderer extends MiSkiRenderer {
     super.unmount();
   }
   public pickColor(x: number, y: number) {
-    const hit = this.getMeshHitAt(x, y);
-    if (!hit) return false;
-    const { u, v } = hit.mesh.metadata;
-    let pixel = this.getMainSkin().material.getPixel(u as number, v as number);
-    if (!pixel) return;
-    const alpha = pixel[3];
-    if (alpha === 0) {
-      const opaqueHit = this.getMeshHitAt(x, y);
-      if (opaqueHit) {
-        pixel = this.getMainSkin().material.getPixel(
-          opaqueHit.mesh.metadata.u as number,
-          opaqueHit.mesh.metadata.v as number,
-        );
-        if (!pixel) return;
-      }
-    }
-    const toHex = (n: number) => ("0" + n.toString(16)).slice(-2);
-    const color = `#${toHex(pixel[0])}${toHex(pixel[1])}${toHex(pixel[2])}`;
-    this.state.setPaintColor(color, true, "App");
+    const hits = this.getMeshsHitAt(x, y);
+    const material = this.getMainSkin().material;
+    if (!material) return;
+    const color = hits
+      .map((hit) =>
+        material.getPixel(
+          hit.mesh.metadata.u as number,
+          hit.mesh.metadata.v as number,
+        ),
+      )
+      .filter((color) => color && color[3] > 0)[0];
+    if (!color) return;
+    const hex = rgbToHex(color[0], color[1], color[2]);
+    this.state.setPaintColor(hex, true, "App");
     this.state.save();
-    return;
+    return hex;
   }
 
   public fillFace(x: number, y: number): void {
@@ -530,6 +547,8 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     constants: State,
     origin: string | undefined,
   ): void {
+    if (origin !== "PocketSwitch") return;
+    
     super.onPocketChange(constants, origin);
 
     this.animationSystem.setupBodyParts(

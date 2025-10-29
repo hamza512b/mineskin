@@ -1,4 +1,4 @@
-import { MiSkiRenderer } from "@/core/MineSkinRenderer";
+import { MiSkiRenderer } from "@/core/MiSkiRenderer";
 import { State } from "@/core/State";
 import { RefObject, useEffect, useRef, useState } from "react";
 

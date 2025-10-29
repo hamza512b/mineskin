@@ -294,10 +294,6 @@ export class State {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  public removeAllListeners() {
-    this.listeners = [];
-  }
-
   // Getters
   public getObjectTranslationX() {
     return this.objectTranslationX;
@@ -620,7 +616,7 @@ export class State {
     if (notify) this.notify(this, origin, "diffuseStrength");
   }
   public setPaintColor(color: string, notify: boolean = true, origin?: string) {
-    this.paintColor = color;
+    this.paintColor = color.toUpperCase();
     if (notify) this.notify(this, origin, "paintColor");
   }
   public setFloorColor(color: string, notify: boolean = true, origin?: string) {
@@ -740,7 +736,7 @@ export class State {
     this.diffuseLightPositionZ = config.diffuseLightPositionZ;
     this.specularStrength = config.specularStrength;
     this.diffuseStrength = config.diffuseStrength;
-    this.paintColor = config.paintColor;
+    this.paintColor = config.paintColor.toUpperCase();
     this.floorColor = config.floorColor;
     this.skinIsPocket = config.skinIsPocket;
     this.baseheadVisible = config.baseheadVisible;

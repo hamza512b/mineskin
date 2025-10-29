@@ -108,14 +108,19 @@ export const AnimationIcon = (props: SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path
-      fill="currentColor"
-      d="m46.764 57.593 10.218-3.377 12.332 37.31-10.218 3.377z"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={6}
+      paintOrder="stroke"
+      fill="none"
+      d="m84.157 44.463-5.104 8.468L60 41.446v21.898l9.314 28.181-10.218 3.378-9.585-29h-.02l-10.962 28.87-10.06-3.82L40 60.58V41.446L20.947 52.931l-5.104-8.468L40 29.903h20l24.157 14.56ZM61 25.903H39v-21h22v21Z"
     />
     <path
       fill="currentColor"
-      d="m42.417 54.215 10.061 3.82L38.53 94.771l-10.061-3.82zm-.554-24.753 5.104 8.468L22.81 52.49l-5.103-8.468zm16.462 0-5.103 8.468 24.156 14.56 5.104-8.468z"
+      opacity={0.3}
+      d="m84.157 44.463-5.104 8.468L60 41.446v21.898l9.314 28.181-10.218 3.378-9.585-29h-.02l-10.962 28.87-10.06-3.82L40 60.58V41.446L20.947 52.931l-5.104-8.468L40 29.903h20l24.157 14.56ZM61 25.903H39v-21h22v21Z"
     />
-    <path fill="currentColor" d="M40 29.903h20v36H40zm-1-25h22v21H39z" />
   </svg>
 );
 
