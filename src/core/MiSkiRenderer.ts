@@ -186,7 +186,7 @@ export class MiSkiRenderer extends Renderer {
 
   private onVisibilityChange(
     constants: State,
-    origin: string | undefined,
+    _origin: string | undefined,
   ): void {
     const mainSkinInstance = this.getMainSkin();
 
