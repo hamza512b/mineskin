@@ -3,53 +3,36 @@ import ClientOnly from "@/components/ClientOnly/ClientOnly";
 import GlobalRotationGizmo from "@/components/RotationGizmo/RotationGizmo";
 import {
   MiSkiEditingRenderer,
-  MiSkiRenderer,
   MiSkPreviewRenderer,
 } from "@/core/MiSkiRenderer";
-import { useRendererState } from "@/hooks/useRendererState";
-import ActionBar, { Mode } from "@/widgets/ActionBar/ActionBar";
+import { State } from "@/core/State";
+import { useRendererStore } from "@/hooks/useRendererState";
+import ActionBar from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import Head from "next/head";
 import React, { RefObject, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+import useRenderer from "./useRenderer";
 
-export function Dashboard<T extends MiSkiRenderer>({
-  renderer,
+export function Dashboard({
+  rendererClass,
   children,
-  mode,
   canvasRef,
-  values,
-  errors,
-  handleChange,
-  redoCount,
-  undoCount,
+  state,
+  mode,
 }: {
   children?: React.ReactNode;
-  renderer: T | null;
+  rendererClass: any;
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  mode: Mode;
-} & ReturnType<typeof useRendererState>) {
+  state: State;
+  mode: "Editing" | "Preview";
+}) {
+  const renderer = useRenderer(rendererClass, canvasRef, state);
+  const undoCount = useRendererStore((state) => state.undoCount);
+  const redoCount = useRendererStore((state) => state.redoCount);
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
-
-  const setColorPickerActive = useCallback(
-    (active: boolean) => {
-      handleChange("colorPickerActive", active);
-    },
-    [handleChange],
-  );
-
-  const setPaintMode = useCallback(
-    (mode: "pixel" | "bulk" | "eraser" | "variation") => {
-      handleChange("paintMode", mode);
-    },
-    [handleChange],
-  );
-
-  const toggleGrid = useCallback(() => {
-    handleChange("gridVisible", !values.gridVisible);
-  }, [handleChange, values.gridVisible]);
 
   // Animation-related state and functions
   const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
@@ -81,13 +64,6 @@ export function Dashboard<T extends MiSkiRenderer>({
       setControlPanelOpen(open);
     },
     [setControlPanelOpen],
-  );
-
-  const setMode = useCallback(
-    (mode: Mode) => {
-      handleChange("mode", mode);
-    },
-    [handleChange],
   );
 
   const undo = useCallback(() => {
@@ -136,66 +112,24 @@ export function Dashboard<T extends MiSkiRenderer>({
 
           <div className="absolute top-0 right-0 p-2 pointer-events-none z-0 flex gap-2">
             <div className="flex flex-col gap-6 p-2">
-              <GlobalRotationGizmo
-                rotation={[values.cameraPhi, values.cameraTheta, 0]}
-                onRotationChange={(rotation) => {
-                  handleChange("cameraPhi", rotation[0]);
-                  handleChange("cameraTheta", rotation[1]);
-                }}
-              />
-              <DesktopPartFilter
-                values={values}
-                baseheadVisible={values.baseheadVisible}
-                basebodyVisible={values.basebodyVisible}
-                baseleftArmVisible={values.baseleftArmVisible}
-                baserightArmVisible={values.baserightArmVisible}
-                baseleftLegVisible={values.baseleftLegVisible}
-                baserightLegVisible={values.baserightLegVisible}
-                overlayheadVisible={values.overlayheadVisible}
-                overlaybodyVisible={values.overlaybodyVisible}
-                overlayleftArmVisible={values.overlayleftArmVisible}
-                overlayrightArmVisible={values.overlayrightArmVisible}
-                overlayleftLegVisible={values.overlayleftLegVisible}
-                overlayrightLegVisible={values.overlayrightLegVisible}
-                setValues={handleChange}
-                className="hidden md:flex"
-              />
+              <GlobalRotationGizmo />
+              <DesktopPartFilter className="hidden md:flex" />
             </div>
           </div>
 
           <ClientOnly>
             <Toolbar
-              setValues={handleChange}
               redo={redo}
               undo={undo}
               redoCount={redoCount}
               undoCount={undoCount}
-              setColorPickerActive={setColorPickerActive}
-              colorPickerActive={values.colorPickerActive}
-              setPaintMode={setPaintMode}
-              paintMode={values.paintMode}
               settingsOpen={controlPanelOpen}
               setSettingsOpen={setSettingsOpen}
               getUniqueColors={getUniqueColors}
-              mode={mode}
-              paintColor={values.paintColor}
-              baseheadVisible={values.baseheadVisible}
-              basebodyVisible={values.basebodyVisible}
-              baseleftArmVisible={values.baseleftArmVisible}
-              baserightArmVisible={values.baserightArmVisible}
-              baseleftLegVisible={values.baseleftLegVisible}
-              baserightLegVisible={values.baserightLegVisible}
-              overlayheadVisible={values.overlayheadVisible}
-              overlaybodyVisible={values.overlaybodyVisible}
-              overlayleftArmVisible={values.overlayleftArmVisible}
-              overlayrightArmVisible={values.overlayrightArmVisible}
-              overlayleftLegVisible={values.overlayleftLegVisible}
-              overlayrightLegVisible={values.overlayrightLegVisible}
-              gridVisible={values.gridVisible}
-              toggleGrid={toggleGrid}
               availableAnimations={availableAnimations}
               currentAnimation={currentAnimation}
               onAnimationSelect={handleAnimationSelect}
+              mode={mode}
             />
           </ClientOnly>
           <ActionBar
@@ -203,36 +137,15 @@ export function Dashboard<T extends MiSkiRenderer>({
             downlodTexture={downloadTexture}
             uploadTexture={uploadTexture}
             mode={mode}
-            setMode={setMode}
           />
         </div>
 
         {/* Collapsable */}
         <DetailPanel
-          handleChange={handleChange}
-          errors={errors}
           open={controlPanelOpen}
           setOpen={setControlPanelOpen}
-          mode={mode}
           reset={reset}
-          skinIsPocket={values.skinIsPocket}
-          diffuseStrength={values.diffuseStrength}
-          specularStrength={values.specularStrength}
-          objectTranslationX={values.objectTranslationX}
-          objectTranslationZ={values.objectTranslationZ}
-          objectTranslationY={values.objectTranslationY}
-          objectRotationX={values.objectRotationX}
-          objectRotationY={values.objectRotationY}
-          objectRotationZ={values.objectRotationZ}
-          cameraFieldOfView={values.cameraFieldOfView}
-          cameraSpeed={values.cameraSpeed}
-          cameraDampingFactor={values.cameraDampingFactor}
-          directionalLightIntensity={values.directionalLightIntensity}
-          ambientLight={values.ambientLight}
-          diffuseLightPositionX={values.diffuseLightPositionX}
-          diffuseLightPositionZ={values.diffuseLightPositionZ}
-          diffuseLightPositionY={values.diffuseLightPositionY}
-          variationIntensity={values.variationIntensity}
+          mode={mode}
         />
       </div>
     </>

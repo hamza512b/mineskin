@@ -1,10 +1,10 @@
 import animations from "@/core/animations";
-import { FormValues } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/hooks/useRendererState";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ColorPicker from "../../components/ColorPicker/ColorPicker";
 import Dropdown, { DropdownItem } from "../../components/Dropdown";
 import IconButton from "../../components/IconButton/IconButton";
@@ -19,7 +19,6 @@ import {
   PenToolIcon,
   VariationIcon,
 } from "../../components/Icons/Icons";
-import { Mode } from "../ActionBar/ActionBar";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 
 const isMac =
@@ -32,34 +31,9 @@ interface FloatingToolbarProps {
   undo: (() => void) | undefined;
   redoCount: number;
   undoCount: number;
-
-  setColorPickerActive: (active: boolean) => void;
-  colorPickerActive: boolean;
-  setPaintMode: (mode: "pixel" | "bulk" | "eraser" | "variation") => void;
-  paintMode: "pixel" | "bulk" | "eraser" | "variation";
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
   getUniqueColors: () => string[];
-  mode: Mode;
-  paintColor: string;
-  setValues: (
-    key: keyof FormValues,
-    value: FormValues[keyof FormValues],
-  ) => void;
-  baseheadVisible: boolean;
-  basebodyVisible: boolean;
-  baseleftArmVisible: boolean;
-  baserightArmVisible: boolean;
-  baseleftLegVisible: boolean;
-  baserightLegVisible: boolean;
-  overlayheadVisible: boolean;
-  overlaybodyVisible: boolean;
-  overlayleftArmVisible: boolean;
-  overlayrightArmVisible: boolean;
-  overlayleftLegVisible: boolean;
-  overlayrightLegVisible: boolean;
-  gridVisible: boolean;
-  toggleGrid: () => void;
 
   // Animation props (only used in Preview mode)
   availableAnimations?: {
@@ -68,6 +42,7 @@ interface FloatingToolbarProps {
   }[];
   currentAnimation?: string | null;
   onAnimationSelect?: (animation: string | null) => void;
+  mode: "Editing" | "Preview";
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -75,33 +50,37 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   undo,
   redoCount,
   undoCount,
-  setColorPickerActive,
-  colorPickerActive,
-  setPaintMode,
-  paintMode,
   settingsOpen,
   setSettingsOpen,
   getUniqueColors,
-  mode,
-  paintColor,
-  setValues,
-  baseheadVisible,
-  basebodyVisible,
-  baseleftArmVisible,
-  baserightArmVisible,
-  baseleftLegVisible,
-  baserightLegVisible,
-  overlayheadVisible,
-  overlaybodyVisible,
-  overlayleftArmVisible,
-  overlayrightArmVisible,
-  overlayleftLegVisible,
-  overlayrightLegVisible,
-  gridVisible,
-  toggleGrid,
   currentAnimation = null,
   onAnimationSelect,
+  mode,
 }) => {
+  const colorPickerActive = useRendererStore(
+    (state) => state.values.colorPickerActive,
+  );
+  const paintMode = useRendererStore((state) => state.values.paintMode);
+  const gridVisible = useRendererStore((state) => state.values.gridVisible);
+  const handleChange = useRendererStore((state) => state.handleChange);
+
+  const setColorPickerActive = useCallback(
+    (active: boolean) => {
+      handleChange("colorPickerActive", active);
+    },
+    [handleChange],
+  );
+
+  const setPaintMode = useCallback(
+    (mode: "pixel" | "bulk" | "eraser" | "variation") => {
+      handleChange("paintMode", mode);
+    },
+    [handleChange],
+  );
+
+  const toggleGrid = useCallback(() => {
+    handleChange("gridVisible", !gridVisible);
+  }, [handleChange, gridVisible]);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -122,8 +101,6 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   data-tutorial-id="color-picker-tools"
                 >
                   <ColorPicker
-                    value={paintColor}
-                    onChange={(color) => setValues("paintColor", color)}
                     label="Color picker"
                     id="color-picker"
                     getUniqueColors={getUniqueColors}
@@ -493,23 +470,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
 
-      <PartFilterDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        baseheadVisible={baseheadVisible}
-        basebodyVisible={basebodyVisible}
-        baseleftArmVisible={baseleftArmVisible}
-        baserightArmVisible={baserightArmVisible}
-        baseleftLegVisible={baseleftLegVisible}
-        baserightLegVisible={baserightLegVisible}
-        overlayheadVisible={overlayheadVisible}
-        overlaybodyVisible={overlaybodyVisible}
-        overlayleftArmVisible={overlayleftArmVisible}
-        overlayrightArmVisible={overlayrightArmVisible}
-        overlayleftLegVisible={overlayleftLegVisible}
-        overlayrightLegVisible={overlayrightLegVisible}
-        setValues={setValues}
-      />
+      <PartFilterDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 };

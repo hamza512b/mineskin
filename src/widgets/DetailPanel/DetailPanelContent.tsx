@@ -2,77 +2,81 @@ import Accordion from "@/components/Accordion/Accordion";
 import Button from "@/components/Button";
 import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
-import { FieldErrors, FormValues } from "@/hooks/useRendererState";
-import { useTutorialState } from "@/hooks/useTutorialState";
+import { useRendererStore } from "@/hooks/useRendererState";
 import clsx from "clsx";
 import { useConfirmation } from "../Confirmation/Confirmation";
 
 export interface DetailPanelProps {
-  handleChange: (
-    name: keyof FormValues,
-    value: FormValues[keyof FormValues],
-    origin?: string,
-  ) => void;
-  errors: FieldErrors;
   className?: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  mode: "Preview" | "Editing";
   exitButton?: React.ReactNode;
   reset: (() => void) | undefined;
-  skinIsPocket: boolean;
-  diffuseStrength: number;
-  specularStrength: number;
-  objectTranslationX: number;
-  objectTranslationZ: number;
-  objectTranslationY: number;
-  objectRotationX: number;
-  objectRotationY: number;
-  objectRotationZ: number;
-  cameraFieldOfView: number;
-  cameraSpeed: number;
-  cameraDampingFactor: number;
-  // cameraRadius: number;
-  // cameraTheta: number;
-  // cameraPhi: number;
-  directionalLightIntensity: number;
-  ambientLight: number;
-  diffuseLightPositionX: number;
-  diffuseLightPositionZ: number;
-  diffuseLightPositionY: number;
-  variationIntensity: number;
+  mode: "Editing" | "Preview";
 }
+
 export const DetailPanelContent: React.FC<DetailPanelProps> = ({
-  errors,
-  handleChange,
   className,
   exitButton,
-  mode,
-  skinIsPocket,
-  diffuseStrength,
-  specularStrength,
-  objectTranslationX,
-  objectTranslationZ,
-  objectTranslationY,
-  objectRotationX,
-  objectRotationY,
-  objectRotationZ,
-  cameraFieldOfView,
-  cameraSpeed,
-  cameraDampingFactor,
-  // cameraRadius,
-  // cameraTheta,
-  // cameraPhi,
-  directionalLightIntensity,
-  ambientLight,
-  diffuseLightPositionX,
-  diffuseLightPositionZ,
-  diffuseLightPositionY,
-  variationIntensity,
   setOpen,
+  mode,
 }) => {
+  // Use Zustand store with selective subscriptions
+  const errors = useRendererStore((state) => state.errors);
+  const handleChange = useRendererStore((state) => state.handleChange);
+  const skinIsPocket = useRendererStore((state) => state.values.skinIsPocket);
+  const diffuseStrength = useRendererStore(
+    (state) => state.values.diffuseStrength,
+  );
+  const specularStrength = useRendererStore(
+    (state) => state.values.specularStrength,
+  );
+  const objectTranslationX = useRendererStore(
+    (state) => state.values.objectTranslationX,
+  );
+  const objectTranslationZ = useRendererStore(
+    (state) => state.values.objectTranslationZ,
+  );
+  const objectTranslationY = useRendererStore(
+    (state) => state.values.objectTranslationY,
+  );
+  const objectRotationX = useRendererStore(
+    (state) => state.values.objectRotationX,
+  );
+  const objectRotationY = useRendererStore(
+    (state) => state.values.objectRotationY,
+  );
+  const objectRotationZ = useRendererStore(
+    (state) => state.values.objectRotationZ,
+  );
+  const cameraFieldOfView = useRendererStore(
+    (state) => state.values.cameraFieldOfView,
+  );
+  const cameraSpeed = useRendererStore((state) => state.values.cameraSpeed);
+  const cameraDampingFactor = useRendererStore(
+    (state) => state.values.cameraDampingFactor,
+  );
+  const directionalLightIntensity = useRendererStore(
+    (state) => state.values.directionalLightIntensity,
+  );
+  const ambientLight = useRendererStore((state) => state.values.ambientLight);
+  const diffuseLightPositionX = useRendererStore(
+    (state) => state.values.diffuseLightPositionX,
+  );
+  const diffuseLightPositionZ = useRendererStore(
+    (state) => state.values.diffuseLightPositionZ,
+  );
+  const diffuseLightPositionY = useRendererStore(
+    (state) => state.values.diffuseLightPositionY,
+  );
+  const variationIntensity = useRendererStore(
+    (state) => state.values.variationIntensity,
+  );
+
   const { getConfirmation } = useConfirmation();
-  const { setHasCompletedTutorial } = useTutorialState();
+  const setHasCompletedTutorial = useRendererStore(
+    (state) => state.setHasCompletedTutorial,
+  );
 
   return (
     <div

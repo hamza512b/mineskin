@@ -2,10 +2,9 @@ import clsx from "clsx";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { multiplyM3V3, rotateM33 } from "../../core/maths";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { useRendererStore } from "../../hooks/useRendererState";
 
 interface GlobalRotationGizmoProps {
-  rotation: [number, number, number];
-  onRotationChange: (rotation: [number, number, number]) => void;
   className?: string;
 }
 
@@ -111,10 +110,21 @@ const GIZMO_DPR =
 type Element = LineElement | CircleElement;
 
 const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
-  rotation,
-  onRotationChange,
   className,
 }) => {
+  // Use Zustand store with selective subscriptions for optimal performance
+  const cameraPhi = useRendererStore((state) => state.values.cameraPhi);
+  const cameraTheta = useRendererStore((state) => state.values.cameraTheta);
+  const handleChange = useRendererStore((state) => state.handleChange);
+  
+  const rotation: [number, number, number] = [cameraPhi, cameraTheta, 0];
+  const onRotationChange = useCallback(
+    (rotation: [number, number, number]) => {
+      handleChange("cameraPhi", rotation[0]);
+      handleChange("cameraTheta", rotation[1]);
+    },
+    [handleChange],
+  );
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });

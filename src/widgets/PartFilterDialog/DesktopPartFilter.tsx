@@ -1,47 +1,30 @@
-import { FormValues } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/hooks/useRendererState";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 import React from "react";
 import { PartButton } from "./PartButton";
 
 type PartsComponentProps = {
-  values: FormValues;
   className?: string;
-  baseheadVisible: boolean;
-  basebodyVisible: boolean;
-  baseleftArmVisible: boolean;
-  baserightArmVisible: boolean;
-  baseleftLegVisible: boolean;
-  baserightLegVisible: boolean;
-  overlayheadVisible: boolean;
-  overlaybodyVisible: boolean;
-  overlayleftArmVisible: boolean;
-  overlayrightArmVisible: boolean;
-  overlayleftLegVisible: boolean;
-  overlayrightLegVisible: boolean;
-  setValues: (
-    key: keyof FormValues,
-    value: FormValues[keyof FormValues],
-  ) => void;
 };
 
 const DesktopPartFilter: React.FC<PartsComponentProps> = ({
-  values,
   className,
-  baseheadVisible,
-  basebodyVisible,
-  baseleftArmVisible,
-  baserightArmVisible,
-  baseleftLegVisible,
-  baserightLegVisible,
-  overlayheadVisible,
-  overlaybodyVisible,
-  overlayleftArmVisible,
-  overlayrightArmVisible,
-  overlayleftLegVisible,
-  overlayrightLegVisible,
-  setValues,
 }) => {
+  // Use Zustand store with selective subscriptions
+  const baseheadVisible = useRendererStore((state) => state.values.baseheadVisible);
+  const basebodyVisible = useRendererStore((state) => state.values.basebodyVisible);
+  const baseleftArmVisible = useRendererStore((state) => state.values.baseleftArmVisible);
+  const baserightArmVisible = useRendererStore((state) => state.values.baserightArmVisible);
+  const baseleftLegVisible = useRendererStore((state) => state.values.baseleftLegVisible);
+  const baserightLegVisible = useRendererStore((state) => state.values.baserightLegVisible);
+  const overlayheadVisible = useRendererStore((state) => state.values.overlayheadVisible);
+  const overlaybodyVisible = useRendererStore((state) => state.values.overlaybodyVisible);
+  const overlayleftArmVisible = useRendererStore((state) => state.values.overlayleftArmVisible);
+  const overlayrightArmVisible = useRendererStore((state) => state.values.overlayrightArmVisible);
+  const overlayleftLegVisible = useRendererStore((state) => state.values.overlayleftLegVisible);
+  const overlayrightLegVisible = useRendererStore((state) => state.values.overlayrightLegVisible);
+  const handleChange = useRendererStore((state) => state.handleChange);
   const containerStyle = {} as React.CSSProperties;
 
   const partBgStyle = {
@@ -60,42 +43,42 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   ) => {
     if (layer === "base") {
       if (part === "head") {
-        setValues(`baseheadVisible`, !baseheadVisible);
+        handleChange(`baseheadVisible`, !baseheadVisible);
       }
       if (part === "body") {
-        setValues(`basebodyVisible`, !basebodyVisible);
+        handleChange(`basebodyVisible`, !basebodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`baseleftArmVisible`, !baseleftArmVisible);
+        handleChange(`baseleftArmVisible`, !baseleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`baserightArmVisible`, !baserightArmVisible);
+        handleChange(`baserightArmVisible`, !baserightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`baseleftLegVisible`, !baseleftLegVisible);
+        handleChange(`baseleftLegVisible`, !baseleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`baserightLegVisible`, !baserightLegVisible);
+        handleChange(`baserightLegVisible`, !baserightLegVisible);
       }
     }
     if (layer === "overlay") {
       if (part === "head") {
-        setValues(`overlayheadVisible`, !overlayheadVisible);
+        handleChange(`overlayheadVisible`, !overlayheadVisible);
       }
       if (part === "body") {
-        setValues(`overlaybodyVisible`, !overlaybodyVisible);
+        handleChange(`overlaybodyVisible`, !overlaybodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`overlayleftArmVisible`, !overlayleftArmVisible);
+        handleChange(`overlayleftArmVisible`, !overlayleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`overlayrightArmVisible`, !overlayrightArmVisible);
+        handleChange(`overlayrightArmVisible`, !overlayrightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`overlayleftLegVisible`, !overlayleftLegVisible);
+        handleChange(`overlayleftLegVisible`, !overlayleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`overlayrightLegVisible`, !overlayrightLegVisible);
+        handleChange(`overlayrightLegVisible`, !overlayrightLegVisible);
       }
     }
   };
@@ -125,7 +108,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-0 w-[16px] h-[16px] opacity-100",
-                !values.baseheadVisible && "opacity-40",
+                !baseheadVisible && "opacity-40",
               )}
               onClick={() => toggleVisibility("base", "head")}
               style={{ ...partBgStyle }}
@@ -137,7 +120,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-[16px] w-[16px] h-[24px] [background-position:-16px_0] opacity-100",
-                !values.basebodyVisible && "opacity-40",
+                !basebodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle body"
@@ -149,7 +132,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[24px] top-[16px] w-[8px] h-[24px] [background-position:-32px_0] opacity-100",
-                !values.baserightArmVisible && "opacity-40",
+                !baserightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right arm"
@@ -161,7 +144,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[16px] top-[40px] w-[8px] h-[24px] [background-position:-40px_0] opacity-100",
-                !values.baserightLegVisible && "opacity-40",
+                !baserightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right leg"
@@ -173,7 +156,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-0 top-[16px] w-[8px] h-[24px] [background-position:-48px_0] opacity-100",
-                !values.baseleftArmVisible && "opacity-40",
+                !baseleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left arm"
@@ -185,7 +168,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute left-[8px] top-[40px] w-[8px] h-[24px] [background-position:-56px_0] opacity-100",
-                !values.baseleftLegVisible && "opacity-40",
+                !baseleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left leg"
@@ -214,7 +197,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:0_-16px] w-[16px] h-[16px] left-[8px] top-0 opacity-100",
-                !values.overlayheadVisible && "opacity-40",
+                !overlayheadVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle helmet"
@@ -226,7 +209,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-16px_-24px] w-[16px] h-[24px] left-[8px] top-[16px] opacity-100",
-                !values.overlaybodyVisible && "opacity-40",
+                !overlaybodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle jacket"
@@ -238,7 +221,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-32px_-24px] w-[8px] h-[24px] left-[24px] top-[16px] opacity-100",
-                !values.overlayrightArmVisible && "opacity-40",
+                !overlayrightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right sleeve"
@@ -250,7 +233,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-40px_-24px] w-[8px] h-[24px] left-[16px] top-[40px] opacity-100",
-                !values.overlayrightLegVisible && "opacity-40",
+                !overlayrightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle right pants"
@@ -262,7 +245,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-48px_-24px] w-[8px] h-[24px] left-0 top-[16px] opacity-100",
-                !values.overlayleftArmVisible && "opacity-40",
+                !overlayleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left sleeve"
@@ -274,7 +257,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
             <PartButton
               className={cn(
                 "absolute [background-position:-56px_-24px] w-[8px] h-[24px] left-[8px] top-[40px] opacity-100",
-                !values.overlayleftLegVisible && "opacity-40",
+                !overlayleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
               tooltip="Toggle left pants"

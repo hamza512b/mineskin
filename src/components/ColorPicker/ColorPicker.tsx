@@ -3,24 +3,27 @@ import * as Popover from "@radix-ui/react-popover";
 import { motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { useRendererStore } from "../../hooks/useRendererState";
 import ColorPickerContent from "./ColorPickerContent";
 import { hexToHsv, hsvToHex } from "./colorUtils";
 
 interface ColorPickerProps {
-  value: string;
-  onChange: (color: string) => void;
   label: string;
   id: string;
   getUniqueColors: (() => string[]) | undefined;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
-  value,
-  onChange,
   label,
   id,
   getUniqueColors,
 }) => {
+  const value = useRendererStore((state) => state.values.paintColor);
+  const handleChange = useRendererStore((state) => state.handleChange);
+  
+  const onChange = (color: string) => {
+    handleChange("paintColor", color);
+  };
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState(() => hexToHsv(value));
   const [visualPosition, setVisualPosition] = useState(() => ({

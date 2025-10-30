@@ -1,6 +1,8 @@
 import { omit } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { z, ZodError } from "zod";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { initialState, State, StateShape } from "../core/State";
 
 /**
@@ -134,18 +136,118 @@ export type FieldErrors = {
   [K in keyof FormValues]?: string;
 };
 
-export function useRendererState() {
-  const currentState = useRef<State | null>(null);
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [values, setValues] = useState<FormValues>(initialState);
-  const [undoCount, setUndoCount] = useState(0);
-  const [redoCount, setRedoCount] = useState(0);
+// Zustand store
+interface RendererState {
+  state: State | null;
+  values: FormValues;
+  errors: FieldErrors;
+  undoCount: number;
+  redoCount: number;
+  hasCompletedTutorial: boolean;
+
+  // Actions
+  setState: (state: State) => void;
+  setValues: (values: FormValues) => void;
+  setErrors: (errors: FieldErrors) => void;
+  setUndoCount: (count: number) => void;
+  setRedoCount: (count: number) => void;
+  setHasCompletedTutorial: (hasCompleted: boolean) => void;
+  handleChange: (
+    name: keyof FormValues,
+    value: string | number | boolean,
+    origin?: string,
+  ) => void;
+}
+
+export const useRendererStore = create<RendererState>()(
+  persist(
+    (set, get) => ({
+      state: null,
+      values: initialState,
+      errors: {},
+      undoCount: 0,
+      redoCount: 0,
+      hasCompletedTutorial: false,
+
+      setState: (state: State) => set({ state }),
+      setValues: (values: FormValues) => set({ values }),
+      setErrors: (errors: FieldErrors) => set({ errors }),
+      setUndoCount: (undoCount: number) => set({ undoCount }),
+      setRedoCount: (redoCount: number) => set({ redoCount }),
+      setHasCompletedTutorial: (hasCompleted: boolean) =>
+        set({ hasCompletedTutorial: hasCompleted }),
+
+      handleChange: (
+        name: keyof FormValues,
+        value: string | number | boolean,
+        origin = "App",
+      ) => {
+        const { state, errors } = get();
+        const valueSchema = formSchema.shape[name];
+        const fieldSchema = z.object({ [name]: valueSchema });
+        const argsValeue =
+          valueSchema instanceof z.ZodNumber ? Number(value) : value;
+        const result = fieldSchema.safeParse({ [name]: argsValeue });
+
+        set((state) => ({
+          values: { ...state.values, [name]: value },
+        }));
+
+        if (result.success) {
+          if (!state) return;
+          const currentArgs = state.toObject();
+          const newArgs = {
+            ...omit(currentArgs, [...Object.keys(errors), name]),
+            [name]: argsValeue,
+          };
+          state.setAll(newArgs as StateShape, true, origin);
+          state.save();
+          set((state) => ({
+            errors: omit(state.errors, [name]),
+          }));
+        } else {
+          let error: string | undefined;
+
+          if (result.error instanceof ZodError) {
+            error = result.error.issues[0].message;
+          }
+          set((state) => ({
+            errors: { ...state.errors, [name]: error || undefined },
+          }));
+        }
+      },
+    }),
+    {
+      name: "tutorial-state",
+      storage: createJSONStorage(() => localStorage),
+      // Only persist the tutorial state, not the entire store
+      partialize: (state) => ({
+        hasCompletedTutorial: state.hasCompletedTutorial,
+      }),
+    },
+  ),
+);
+
+export function useInitRendererState() {
+  const initRef = useRef(false);
+  const setState = useRendererStore((state) => state.setState);
+  const setValues = useRendererStore((state) => state.setValues);
+  const setUndoCount = useRendererStore((state) => state.setUndoCount);
+  const setRedoCount = useRendererStore((state) => state.setRedoCount);
 
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+
     const state = State.load();
-    currentState.current = state;
+    setState(state);
     setValues(state?.toObject() || initialState);
-    function changeListener(args: State) {
+
+    function changeListener(
+      args: State,
+      _origin: string | undefined,
+      _value: string,
+    ) {
       setValues(args.toObject());
     }
 
@@ -157,55 +259,10 @@ export function useRendererState() {
     }
 
     state.addListener(changeUndoRedoListener);
+
     return () => {
       state?.removeListener(changeListener);
       state?.removeListener(changeUndoRedoListener);
     };
-  }, []);
-
-  const handleChange = useCallback(
-    (
-      name: keyof FormValues,
-      value: string | number | boolean,
-      origin = "App",
-    ) => {
-      const valueSchema = formSchema.shape[name];
-      const fieldSchema = z.object({ [name]: valueSchema });
-      const argsValeue =
-        valueSchema instanceof z.ZodNumber ? Number(value) : value;
-      const result = fieldSchema.safeParse({ [name]: argsValeue });
-      setValues((prev) => ({ ...prev, [name]: value }));
-      if (result.success) {
-        if (!currentState.current) return;
-        const currentArgs = currentState.current?.toObject();
-        const newArgs = {
-          ...omit(currentArgs, [...Object.keys(errors), name]),
-          [name]: argsValeue,
-        };
-        currentState.current?.setAll(newArgs as StateShape, true, origin);
-        currentState.current?.save();
-        setErrors((prev) => omit(prev, [name]));
-      } else {
-        let error: string | undefined;
-
-        if (result.error instanceof ZodError) {
-          error = result.error.issues[0].message;
-        }
-        setErrors((prev) => ({
-          ...prev,
-          [name]: error || undefined,
-        }));
-      }
-    },
-    [errors],
-  );
-
-  return {
-    state: currentState.current,
-    values,
-    errors,
-    handleChange,
-    undoCount,
-    redoCount,
-  };
+  }, [setState, setValues, setUndoCount, setRedoCount]);
 }

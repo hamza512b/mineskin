@@ -9,14 +9,15 @@ import {
   UploadIcon,
 } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import { useRendererStore } from "@/hooks/useRendererState";
+
 export type Mode = "Preview" | "Editing";
 
 interface TopBarProps {
   className?: string;
   downlodTexture: (() => void) | undefined;
   uploadTexture: ((setError?: (msg: string) => void) => void) | undefined;
-  mode: Mode;
-  setMode: (mode: Mode) => void;
+  mode: "Editing" | "Preview";
 }
 
 function ActionBar({

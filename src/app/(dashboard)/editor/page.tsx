@@ -1,26 +1,27 @@
 "use client";
 import Tutorial from "@/components/Tutorial/Tutorial";
 import { MiSkiEditingRenderer } from "@/core/MiSkiRenderer";
-import { useTutorialState } from "@/hooks/useTutorialState";
-import { useSharedState } from "../layout";
-import { Dashboard } from "../MineskinDashboard";
-import useRenderer from "../useRenderer";
+import { useRendererStore } from "@/hooks/useRendererState";
 import { useRef } from "react";
+import { Dashboard } from "../MineskinDashboard";
 
 export default function EditorPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { state, ...rest } = useSharedState();
-  const renderer = useRenderer(MiSkiEditingRenderer, canvasRef, state);
+  const state = useRendererStore((state) => state.state);
 
-  const { hasCompletedTutorial } = useTutorialState();
+  const hasCompletedTutorial = useRendererStore(
+    (state) => state.hasCompletedTutorial,
+  );
 
+  if (!state) {
+    return null;
+  }
   return (
     <Dashboard
-      renderer={renderer}
-      mode="Editing"
-      canvasRef={canvasRef}
+      rendererClass={MiSkiEditingRenderer}
       state={state}
-      {...rest}
+      canvasRef={canvasRef}
+      mode="Editing"
     >
       {!hasCompletedTutorial && <Tutorial />}
     </Dashboard>
