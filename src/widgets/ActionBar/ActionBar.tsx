@@ -1,15 +1,14 @@
-import React, { useCallback } from "react";
 import Button from "@/components/Button";
 import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import { EditorIcon, PreviewIcon } from "@/components/Icons/Icons";
-import Link from "next/link";
 import {
   DotsVerticalIcon,
   DownloadIcon,
   UploadIcon,
 } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import { useRendererStore } from "@/hooks/useRendererState";
+import Link from "next/link";
+import React, { useCallback } from "react";
 
 export type Mode = "Preview" | "Editing";
 
@@ -20,12 +19,7 @@ interface TopBarProps {
   mode: "Editing" | "Preview";
 }
 
-function ActionBar({
-  className,
-  downlodTexture,
-  uploadTexture,
-  mode,
-}: TopBarProps) {
+function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarProps) {
   const modeOptions = [
     {
       label: "Preview",
@@ -124,7 +118,7 @@ function ActionBar({
           {mode === "Editing" ? (
             <Dropdown
               trigger={
-                <Button variant={"ghost"}>
+                <Button variant={"ghost"} size={"sm"}>
                   <DotsVerticalIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
                   <span className="sr-only">Actions menu</span>
                 </Button>
