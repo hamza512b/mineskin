@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 import "../styles/global.css";
 import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
 import { Toaster } from "../components/ui/toaster";
@@ -102,6 +104,8 @@ export default function RootLayout({
           <Toaster />
         </TooltipProvider>
         <CookiePopup />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
