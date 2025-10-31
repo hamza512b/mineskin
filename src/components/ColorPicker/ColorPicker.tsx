@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Popover from "@radix-ui/react-popover";
 import { motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";
 import { useRendererStore } from "../../hooks/useRendererState";
 import ColorPickerContent from "./ColorPickerContent";
@@ -21,9 +21,9 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   const value = useRendererStore((state) => state.values.paintColor);
   const handleChange = useRendererStore((state) => state.handleChange);
   
-  const onChange = (color: string) => {
+  const onChange = useCallback((color: string) => {
     handleChange("paintColor", color);
-  };
+  }, [handleChange]);
   const [open, setOpen] = useState(false);
   const [hsv, setHsv] = useState(() => hexToHsv(value));
   const [visualPosition, setVisualPosition] = useState(() => ({

@@ -7,6 +7,15 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
   hsv, setHsv, visualPosition, setVisualPosition, lastValidHue, setLastValidHue, hexInput, setHexInput, inputError, setInputError, isMobile, onChange, setDragging, setRecentlyDragged,
 }) => {
   const svCanvasRef = useRef<HTMLCanvasElement>(null);
+  const isInternalUpdateRef = useRef(false);
+
+  // Call onChange when HSV changes internally (not from external prop sync)
+  useEffect(() => {
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      onChange(hsvToHex(hsv));
+    }
+  }, [hsv, onChange]);
 
   useEffect(() => {
     const c = svCanvasRef.current;
@@ -59,7 +68,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
       const newHSV = { ...prev, s, v };
       const newHex = hsvToHex(newHSV);
       setHexInput(newHex);
-      onChange(newHex);
+      isInternalUpdateRef.current = true;
       return newHSV;
     });
   };
@@ -81,7 +90,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
         };
         const newHex = hsvToHex(newHSV);
         setHexInput(newHex);
-        onChange(newHex);
+        isInternalUpdateRef.current = true;
         return newHSV;
       });
     },
@@ -107,8 +116,10 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
         const newHSV = hexToHsv(newHex);
         if (newHSV.s === 0 || newHSV.v === 0) newHSV.h = lastValidHue;
         else setLastValidHue(newHSV.h);
+        setHexInput(newHex.toUpperCase());
+        isInternalUpdateRef.current = true;
         setHsv(newHSV);
-        onChange(newHex.toUpperCase());
+        // onChange will be called by useEffect when hsv changes
       }
     }
   };
