@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import Button from "@/components/Button/index";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { AnimatePresence, motion } from "framer-motion";
@@ -129,7 +129,7 @@ export default function CookiePopup() {
     <AnimatePresence>
       {popupOpen && (
         <motion.div
-          className="z-[2000] fixed bottom-4 left-4"
+          className="z-[2000] fixed bottom-2 left-2 right-2 md:left-2 md:bottom-2  !pointer-events-auto"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -211,7 +211,7 @@ export default function CookiePopup() {
                     className="flex justify-end gap-2"
                   >
                     <Button
-                      variant="secondary"
+                      variant="outlined"
                       onClick={toggleDetails}
                       aria-label="Customize cookie preferences"
                     >

@@ -1,3 +1,11 @@
+## 2025-10-25
+
+- Add animation system.
+
+## 2025-10-25
+
+- Separate the preview and editor to different pages.
+
 ## 2025-10-24
 
 - Always show the exit button on settings panel/dialog

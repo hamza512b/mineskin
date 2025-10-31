@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import React from "react";
 
 type ClientOnlyProps = { children: React.ReactNode };
 const ClientOnly = (props: ClientOnlyProps) => {

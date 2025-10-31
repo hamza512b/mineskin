@@ -1,6 +1,6 @@
+import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import clsx from "clsx";
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { hexToHsv } from "./colorUtils";
 import { ColorChooser } from "./ColorChooser";

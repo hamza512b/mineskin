@@ -1,4 +1,3 @@
-import React from "react";
 import { SVGProps } from "react";
 
 export const ColorPickerIcon = (props: SVGProps<SVGSVGElement>) => (
@@ -102,25 +101,25 @@ export const EditorIcon = (props: SVGProps<SVGSVGElement>) => (
 );
 
 export const AnimationIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 100 100"
+    {...props}
+  >
     <path
-      fill="currentColor"
-      d="M5 12a5 5 0 0 0 7 7c-4 0-7-3-7-7m10-8-3 1c4 0 7 3 7 7a5 5 0 0 0-4-8"
-      opacity={0.3}
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={6}
+      paintOrder="stroke"
+      fill="none"
+      d="m84.157 44.463-5.104 8.468L60 41.446v21.898l9.314 28.181-10.218 3.378-9.585-29h-.02l-10.962 28.87-10.06-3.82L40 60.58V41.446L20.947 52.931l-5.104-8.468L40 29.903h20l24.157 14.56ZM61 25.903H39v-21h22v21Z"
     />
     <path
       fill="currentColor"
-      d="M12 7h-2v2a5 5 0 0 0 7 5v-2c0-3-2-5-5-5"
       opacity={0.3}
-    />
-    <path
-      fill="currentColor"
-      d="M8 9a5 5 0 0 0 7 7c-4 0-7-3-7-7"
-      opacity={0.3}
-    />
-    <path
-      fill="currentColor"
-      d="M15 2c-3 0-5 2-6 4a7 7 0 0 0-3 3 7 7 0 0 0-4 6 7 7 0 0 0 13 3 7 7 0 0 0 3-3 7 7 0 0 0 4-6c0-4-3-7-7-7M9 20a5 5 0 0 1-4-8c0 4 3 7 7 7l-3 1m3-3a5 5 0 0 1-4-8c0 4 3 7 7 7l-3 1m5-3h-2a5 5 0 0 1-5-7h2a5 5 0 0 1 5 7m2-2c0-4-3-7-7-7a5 5 0 0 1 7 7"
+      d="m84.157 44.463-5.104 8.468L60 41.446v21.898l9.314 28.181-10.218 3.378-9.585-29h-.02l-10.962 28.87-10.06-3.82L40 60.58V41.446L20.947 52.931l-5.104-8.468L40 29.903h20l24.157 14.56ZM61 25.903H39v-21h22v21Z"
     />
   </svg>
 );

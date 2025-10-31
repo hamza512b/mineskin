@@ -1,226 +1,46 @@
 import range from "lodash/range";
 import { v4 as uuidv4 } from "uuid";
 import { MeshMaterial } from "./MeshMaterial";
-import { MainProgram } from "./backend/Webgl2Program";
 import {
   M44,
   V2,
   V3,
   addV3,
-  cross,
   identityM44,
   multiplyM3V3,
   multiplyM44,
   multiplyM4V3,
-  normalize,
   rotateM33,
+  rotateM44,
   scaleM44,
   scaleVector,
-  subtractV3,
   translateM44,
 } from "./maths";
+import { createTriangleLine } from "./meshUtils";
 
 type MeshMetadata = {
   [key: string]: string | number | boolean | Record<string, string | number>;
 };
 
-interface BaseMesh {
+class Base {
   readonly uuid: string;
-  calculateCentroid(): V3;
-  visible: boolean;
-}
+  protected parent: MeshGroup | null;
 
-// Helper function to create triangle-based line rendering visible from all angles
-function createTriangleLine(
-  v1: V3,
-  v2: V3,
-  lineWidth: number = 0.01,
-): { vertices: number[]; normals: number[]; uvs: number[] } {
-  const direction: V3 = [v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]];
-  const length = Math.sqrt(
-    direction[0] * direction[0] +
-      direction[1] * direction[1] +
-      direction[2] * direction[2],
-  );
-
-  if (length === 0) {
-    return { vertices: [], normals: [], uvs: [] };
+  constructor() {
+    this.uuid = uuidv4();
+    this.parent = null;
   }
 
-  // Normalize direction
-  const normalizedDir: V3 = normalize(direction);
-
-  // Create two perpendicular vectors to make the line visible from all angles
-  let perp: V3;
-
-  // Choose initial perpendicular vector
-  if (Math.abs(normalizedDir[0]) < 0.9) {
-    perp = [1, 0, 0];
-  } else {
-    perp = [0, 1, 0];
+  public getParent(): MeshGroup | null {
+    return this.parent;
   }
 
-  const cross1: V3 = cross(normalizedDir, perp);
-
-  const normalizedCross1: V3 = normalize(cross1);
-
-  // Second perpendicular (cross of direction and first perpendicular)
-  const cross2: V3 = cross(normalizedDir, normalizedCross1);
-
-  const normalizedCross2: V3 = normalize(cross2);
-
-  const halfWidth = lineWidth * 0.5;
-
-  // Create 4 vertices around the line using both perpendicular vectors
-  const offset1: V3 = scaleVector(normalizedCross1, halfWidth);
-  const offset2: V3 = scaleVector(normalizedCross2, halfWidth);
-
-  // Create vertices for both ends of the line
-  const v1_p1: V3 = addV3(v1, offset1);
-  const v1_n1: V3 = subtractV3(v1, offset1);
-  const v1_p2: V3 = addV3(v1, offset2);
-  const v1_n2: V3 = subtractV3(v1, offset2);
-
-  const v2_p1: V3 = addV3(v2, offset1);
-  const v2_n1: V3 = subtractV3(v2, offset1);
-  const v2_p2: V3 = addV3(v2, offset2);
-  const v2_n2: V3 = subtractV3(v2, offset2);
-
-  // Create 4 triangular faces to form a rectangular tube
-  const vertices = [
-    // Face 1: +perp1 side
-    ...v1_p1,
-    ...v2_p1,
-    ...v1_p2,
-    ...v2_p1,
-    ...v2_p2,
-    ...v1_p2,
-
-    // Face 2: -perp1 side
-    ...v1_n1,
-    ...v1_n2,
-    ...v2_n1,
-    ...v2_n1,
-    ...v1_n2,
-    ...v2_n2,
-
-    // Face 3: +perp2 side
-    ...v1_p2,
-    ...v2_p2,
-    ...v1_n1,
-    ...v2_p2,
-    ...v2_n1,
-    ...v1_n1,
-
-    // Face 4: -perp2 side
-    ...v1_p1,
-    ...v1_n2,
-    ...v2_p1,
-    ...v2_p1,
-    ...v1_n2,
-    ...v2_n2,
-  ];
-
-  // Create normals for each face
-  const normals = [
-    // Face 1 normals
-    ...normalizedCross1,
-    ...normalizedCross1,
-    ...normalizedCross1,
-    ...normalizedCross1,
-    ...normalizedCross1,
-    ...normalizedCross1,
-
-    // Face 2 normals
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-    ...([
-      -normalizedCross1[0],
-      -normalizedCross1[1],
-      -normalizedCross1[2],
-    ] as V3),
-
-    // Face 3 normals
-    ...normalizedCross2,
-    ...normalizedCross2,
-    ...normalizedCross2,
-    ...normalizedCross2,
-    ...normalizedCross2,
-    ...normalizedCross2,
-
-    // Face 4 normals
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-    ...([
-      -normalizedCross2[0],
-      -normalizedCross2[1],
-      -normalizedCross2[2],
-    ] as V3),
-  ];
-
-  // Simple UV coordinates for all faces
-  const uvs = [
-    // Face 1 UVs
-    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
-    // Face 2 UVs
-    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
-    // Face 3 UVs
-    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
-    // Face 4 UVs
-    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
-  ];
-
-  return { vertices, normals, uvs };
+  public setParent(parent: MeshGroup | null) {
+    this.parent = parent;
+  }
 }
 
-export class Mesh implements BaseMesh {
-  readonly uuid: string;
+export class Mesh extends Base {
   readonly name: string;
   public vertices: number[];
   public normals: number[];
@@ -230,12 +50,10 @@ export class Mesh implements BaseMesh {
   public vertexOffset: number = 0;
   readonly metadata: MeshMetadata;
   private transformMatrix = identityM44();
-  private parent: MeshGroup;
-  // public visible = false;
   public query: WebGLQuery | null = null;
   private _visible = true;
   get visible() {
-    return this.parent.visible && this._visible;
+    return !!this.parent?.visible && this._visible;
   }
 
   set visible(arg: boolean) {
@@ -250,7 +68,7 @@ export class Mesh implements BaseMesh {
     name: string,
     metadata?: MeshMetadata,
   ) {
-    this.uuid = uuidv4();
+    super();
     this.vertices = vertices;
     this.normals = normals;
     this.uvs = uvs;
@@ -263,11 +81,15 @@ export class Mesh implements BaseMesh {
     this.visible = arg;
   }
 
+  public getNumVertices(): number {
+    return this.vertices.length / 3;
+  }
+
   public calculateCentroid(): V3 {
     let x = 0,
       y = 0,
       z = 0;
-    const n = this.vertices.length / 3;
+    const n = this.getNumVertices(); // Reuse!
     for (let i = 0; i < this.vertices.length; i += 3) {
       x += this.vertices[i];
       y += this.vertices[i + 1];
@@ -275,7 +97,6 @@ export class Mesh implements BaseMesh {
     }
     return [x / n, y / n, z / n];
   }
-
   static createPlane(
     position: V3,
     size: V2,
@@ -315,14 +136,18 @@ export class Mesh implements BaseMesh {
     return (
       this.cachedTransformMatrix ||
       (this.cachedTransformMatrix = multiplyM44(
-        this.parent.getTransformMatrix() || identityM44(),
+        this.parent?.getTransformMatrix() || identityM44(),
         this.transformMatrix,
       ))
     );
   }
 
-  public getParent(): MeshGroup {
+  public getParent(): MeshGroup | null {
     return this.parent;
+  }
+
+  public setParent(parent: MeshGroup | null) {
+    this.parent = parent;
   }
 
   /**
@@ -335,14 +160,17 @@ export class Mesh implements BaseMesh {
   }
 }
 
-export class MeshGroup implements BaseMesh {
+export class MeshGroup extends Base {
   material?: MeshMaterial;
-  readonly uuid: string;
   readonly name: string;
-  private parent: Mesh | MeshGroup | null;
   private transformMatrix: M44 = identityM44();
   private meshes: (Mesh | MeshGroup)[] = [];
   public metadata?: MeshMetadata;
+
+  // Transform components
+  private _position: V3 = [0, 0, 0];
+  private _rotation: V3 = [0, 0, 0]; // Euler angles in radians (x, y, z)
+  private _scale: V3 = [1, 1, 1];
 
   // New properties for batching
   public mergedVertices: number[] = [];
@@ -357,12 +185,12 @@ export class MeshGroup implements BaseMesh {
   // Cached bounding box
   private cachedBoundingBox: { min: V3; max: V3 } | null = null;
 
-  constructor(name: string, parent: MeshGroup | null, transformMatrix?: M44) {
-    this.uuid = uuidv4();
-    this.parent = parent || null;
+  constructor(name: string, transformMatrix?: M44) {
+    super();
     this.setTransformMatrix(transformMatrix);
     this.name = name;
   }
+
   private _visible = true;
   get visible() {
     return !!(this.parent?.visible ?? true) && this._visible;
@@ -372,6 +200,60 @@ export class MeshGroup implements BaseMesh {
     this._visible = arg;
   }
 
+  // Position getters and setters
+  get position(): V3 {
+    return [...this._position] as V3;
+  }
+
+  set position(value: V3) {
+    this._position = [...value] as V3;
+    this.updateTransformMatrix();
+  }
+
+  // Rotation getters and setters (Euler angles in radians)
+  get rotation(): V3 {
+    return [...this._rotation] as V3;
+  }
+
+  set rotation(value: V3) {
+    this._rotation = [...value] as V3;
+    this.updateTransformMatrix();
+  }
+
+  // Scale getters and setters
+  get scale(): V3 {
+    return [...this._scale] as V3;
+  }
+
+  set scale(value: V3) {
+    this._scale = [...value] as V3;
+    this.updateTransformMatrix();
+  }
+
+  /**
+   * Updates the transformation matrix from position, rotation, and scale components
+   * Order: Translation * Rotation * Scale
+   */
+  private updateTransformMatrix() {
+    const T = translateM44(
+      this._position[0],
+      this._position[1],
+      this._position[2],
+    );
+    const R = rotateM44(
+      this._rotation[0],
+      this._rotation[1],
+      this._rotation[2],
+    );
+    const S = scaleM44(this._scale[0], this._scale[1], this._scale[2]);
+
+    this.transformMatrix = multiplyM44(T, R, S);
+
+    // Invalidate cached values when transform changes
+    this.cachedTransformMatrix = null;
+    this.cachedBoundingBox = null;
+  }
+
   public addMesh(mesh: Mesh | MeshGroup) {
     if (this.meshes.some((m) => m.uuid === mesh.uuid)) {
       throw new Error("Mesh already exists in the group");
@@ -379,7 +261,7 @@ export class MeshGroup implements BaseMesh {
     this.meshes.push(mesh);
   }
 
-  public removeMesh(mesh: Mesh) {
+  public removeMesh(mesh: Mesh | MeshGroup) {
     this.meshes = this.meshes.filter((m) => m.uuid !== mesh.uuid);
   }
 
@@ -387,14 +269,27 @@ export class MeshGroup implements BaseMesh {
     return this.meshes;
   }
 
+  public getNumVertices(): number {
+    return this.meshes.reduce((acc, mesh) => acc + mesh.getNumVertices(), 0);
+  }
+
   public calculateCentroid(): V3 {
-    return this.meshes.reduce(
-      (acc, mesh) => {
-        const c = mesh.calculateCentroid();
-        return acc.map((v, i) => v + c[i]);
-      },
-      [0, 0, 0],
-    ) as unknown as V3;
+    let sumX = 0,
+      sumY = 0,
+      sumZ = 0;
+    let totalVerts = 0;
+
+    for (const mesh of this.meshes) {
+      const c = mesh.calculateCentroid(); // Recursive!
+      const verts = mesh.getNumVertices();
+      sumX += c[0] * verts;
+      sumY += c[1] * verts;
+      sumZ += c[2] * verts;
+      totalVerts += verts;
+    }
+
+    if (totalVerts === 0) return [0, 0, 0]; // Edge case
+    return [sumX / totalVerts, sumY / totalVerts, sumZ / totalVerts];
   }
 
   public calculateBoundingBox(): { min: V3; max: V3 } {
@@ -440,6 +335,11 @@ export class MeshGroup implements BaseMesh {
     return this.cachedBoundingBox;
   }
 
+  /**
+   * Directly sets the transformation matrix, bypassing position/rotation/scale properties.
+   * Note: This does not update the position, rotation, and scale properties.
+   * Use the position, rotation, scale setters for component-based transforms.
+   */
   public setTransformMatrix(matrix: M44 | undefined) {
     this.transformMatrix = matrix || identityM44();
     // Invalidate cached values when transform changes
@@ -504,8 +404,9 @@ export class MeshGroup implements BaseMesh {
     return results;
   }
 
-  cleanup(gl: WebGL2RenderingContext) {
+  cleanup(gl: WebGL2RenderingContext | null) {
     if (
+      !gl ||
       !this.mergedNormals.length ||
       !this.mergedUVs.length ||
       !this.mergedVertices.length
@@ -529,11 +430,8 @@ export class MeshGroup implements BaseMesh {
     this.mergedUVsBuffer = null;
     this.vao = null;
   }
-}
 
-export class MinecraftPart extends MeshGroup {
-  readonly cubeCenter: V3;
-  public compileBuffers(gl: WebGL2RenderingContext, mainProgram: MainProgram) {
+  public compileData() {
     // Reset merged arrays
     this.mergedVertices = [];
     this.mergedNormals = [];
@@ -561,7 +459,7 @@ export class MinecraftPart extends MeshGroup {
     }
 
     this.linesOffset = this.mergedVertices.length / 3;
-    const cubeCenter = this.cubeCenter;
+    const cubeCenter = this.calculateCentroid();
 
     // Render lines outside of the cube
     const moveMatrix = multiplyM44(
@@ -588,9 +486,9 @@ export class MinecraftPart extends MeshGroup {
         uniqueVertices.push(...multiplyM4V3(moveMatrix, v));
       }
 
+      // TODO this part should overloaded and moved to minecraft part
       // Create edges between vertices that share coordinates
       // This creates both horizontal and vertical lines for the grid
-
       for (let i = 0; i < uniqueVertices.length; i += 3) {
         for (let j = i + 3; j < uniqueVertices.length; j += 3) {
           const v1 = uniqueVertices.slice(i, i + 3) as V3;
@@ -615,86 +513,27 @@ export class MinecraftPart extends MeshGroup {
         }
       }
     }
-
-    // Create merged buffers
-    this.mergedVerticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedVerticesBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedVertices),
-      gl.STATIC_DRAW,
-    );
-
-    this.mergedNormalsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedNormalsBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedNormals),
-      gl.STATIC_DRAW,
-    );
-
-    this.mergedUVsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedUVsBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.mergedUVs),
-      gl.STATIC_DRAW,
-    );
-
-    // Create and set up a VAO for this group
-    this.vao = gl.createVertexArray();
-    gl.bindVertexArray(this.vao);
-
-    // Bind position buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedVerticesBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_position") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_position") as number,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    // Bind uv buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedUVsBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_texcoord") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_texcoord") as number,
-      2,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    // Bind normal buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mergedNormalsBuffer);
-    gl.enableVertexAttribArray(mainProgram.getLocation("a_normal") as number);
-    gl.vertexAttribPointer(
-      mainProgram.getLocation("a_normal") as number,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0,
-    );
-
-    gl.bindVertexArray(null);
   }
+}
+
+export class MinecraftPart extends MeshGroup {
+  private _jointPosition: V3 = [0, 0, 0];
+  private _partRotation: V3 = [0, 0, 0];
+
   constructor(
     size: V3,
     position: V3,
     textureSize: V2,
     uvs: V2,
     name: string,
-    parent: MeshGroup | null,
     transformMatrix?: M44,
+    jointPosition?: V3,
   ) {
-    super(name, parent);
+    super(name);
+    if (jointPosition) {
+      this._jointPosition = [...jointPosition] as V3;
+    }
     const [width, height, depth] = size;
-    this.cubeCenter = position;
 
     type Face = {
       label: string;
@@ -710,7 +549,7 @@ export class MinecraftPart extends MeshGroup {
     const faces: Face[] = [
       {
         label: "Front",
-        faceCenter: addV3(this.cubeCenter, [0, 0, depth / 2]),
+        faceCenter: addV3(position, [0, 0, depth / 2]),
         uAxis: [1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -720,7 +559,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Back",
-        faceCenter: addV3(this.cubeCenter, [0, 0, -depth / 2]),
+        faceCenter: addV3(position, [0, 0, -depth / 2]),
         uAxis: [-1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -730,7 +569,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Right",
-        faceCenter: addV3(this.cubeCenter, [-width / 2, 0, 0]),
+        faceCenter: addV3(position, [-width / 2, 0, 0]),
         uAxis: [0, 0, 1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -740,7 +579,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Left",
-        faceCenter: addV3(this.cubeCenter, [width / 2, 0, 0]),
+        faceCenter: addV3(position, [width / 2, 0, 0]),
         uAxis: [0, 0, -1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -750,7 +589,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Top",
-        faceCenter: addV3(this.cubeCenter, [0, height / 2, 0]),
+        faceCenter: addV3(position, [0, height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -760,7 +599,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Bottom",
-        faceCenter: addV3(this.cubeCenter, [0, -height / 2, 0]),
+        faceCenter: addV3(position, [0, -height / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -776,7 +615,8 @@ export class MinecraftPart extends MeshGroup {
     const textureHeight = textureSize[1];
 
     faces.forEach((face) => {
-      const faceGroup = new MeshGroup(face.label, this);
+      const faceGroup = new MeshGroup(face.label);
+      faceGroup.setParent(this);
 
       // Store metadata including UV bounds
       faceGroup.metadata = {
@@ -835,7 +675,156 @@ export class MinecraftPart extends MeshGroup {
       meshes.push(faceGroup);
     });
     meshes.forEach((group) => this.addMesh(group));
-    if (transformMatrix) this.setTransformMatrix(transformMatrix);
+
+    // Bake in the transform matrix to the mesh group
+    if (transformMatrix) {
+      this.applyTransformToVertices(transformMatrix);
+    }
+  }
+
+  get jointPosition(): V3 {
+    return [...this._jointPosition] as V3;
+  }
+
+  set jointPosition(value: V3) {
+    this._jointPosition = [...value] as V3;
+  }
+
+  override set rotation(value: V3) {
+    this._partRotation = [...value] as V3;
+    this.updateJointBasedTransform();
+  }
+
+  override get rotation(): V3 {
+    return [...this._partRotation] as V3;
+  }
+
+  override set position(value: V3) {
+    super.position = value;
+    this.updateJointBasedTransform();
+  }
+
+  override get position(): V3 {
+    return super.position;
+  }
+
+  override set scale(value: V3) {
+    super.scale = value;
+    this.updateJointBasedTransform();
+  }
+
+  override get scale(): V3 {
+    return super.scale;
+  }
+
+  private updateJointBasedTransform() {
+    // For joint-based rotation, we need to:
+    // 1. Translate to joint position
+    // 2. Apply rotation
+    // 3. Translate back
+    // 4. Apply position and scale
+    
+    const jointTranslate = translateM44(
+      this._jointPosition[0],
+      this._jointPosition[1], 
+      this._jointPosition[2]
+    );
+    
+    const jointTranslateInverse = translateM44(
+      -this._jointPosition[0],
+      -this._jointPosition[1],
+      -this._jointPosition[2]
+    );
+    
+    const rotation = rotateM44(
+      this._partRotation[0],
+      this._partRotation[1], 
+      this._partRotation[2]
+    );
+    
+    const currentPosition = super.position;
+    const currentScale = super.scale;
+    
+    const position = translateM44(
+      currentPosition[0],
+      currentPosition[1],
+      currentPosition[2]
+    );
+    
+    const scale = scaleM44(currentScale[0], currentScale[1], currentScale[2]);
+
+    // Combine: Position * JointTranslate * Rotation * JointTranslateInverse * Scale
+    const newMatrix = multiplyM44(
+      position,
+      jointTranslate,
+      rotation,
+      jointTranslateInverse,
+      scale
+    );
+
+    super.setTransformMatrix(newMatrix);
+  }
+
+  /**
+   * Recursively applies a transformation matrix directly to all vertices and normals in the mesh hierarchy
+   */
+  private applyTransformToVertices(matrix: M44) {
+    // Extract the 3x3 rotation/scale part for transforming normals
+    const rotationMatrix: M44 = [
+      matrix[0],
+      matrix[1],
+      matrix[2],
+      0,
+      matrix[4],
+      matrix[5],
+      matrix[6],
+      0,
+      matrix[8],
+      matrix[9],
+      matrix[10],
+      0,
+      0,
+      0,
+      0,
+      1,
+    ];
+
+    const transformMeshGroup = (group: MeshGroup) => {
+      for (const child of group.getChildren()) {
+        if (child instanceof Mesh) {
+          // Transform vertices
+          for (let i = 0; i < child.vertices.length; i += 3) {
+            const vertex: V3 = [
+              child.vertices[i],
+              child.vertices[i + 1],
+              child.vertices[i + 2],
+            ];
+            const transformedVertex = multiplyM4V3(matrix, vertex);
+            child.vertices[i] = transformedVertex[0];
+            child.vertices[i + 1] = transformedVertex[1];
+            child.vertices[i + 2] = transformedVertex[2];
+          }
+
+          // Transform normals (using the rotation part only)
+          for (let i = 0; i < child.normals.length; i += 3) {
+            const normal: V3 = [
+              child.normals[i],
+              child.normals[i + 1],
+              child.normals[i + 2],
+            ];
+            const transformedNormal = multiplyM4V3(rotationMatrix, normal);
+            child.normals[i] = transformedNormal[0];
+            child.normals[i + 1] = transformedNormal[1];
+            child.normals[i + 2] = transformedNormal[2];
+          }
+        } else if (child instanceof MeshGroup) {
+          // Recursively transform child groups
+          transformMeshGroup(child);
+        }
+      }
+    };
+
+    transformMeshGroup(this);
   }
 
   static create(
@@ -847,6 +836,7 @@ export class MinecraftPart extends MeshGroup {
     parent: MeshGroup | null,
     transformMatrix?: M44,
     metadata?: MeshMetadata,
+    jointPosition?: V3,
   ) {
     const part = new MinecraftPart(
       size,
@@ -854,9 +844,10 @@ export class MinecraftPart extends MeshGroup {
       textureSize,
       uvs,
       name,
-      parent,
       transformMatrix,
+      jointPosition,
     );
+    part.setParent(parent);
     part.metadata = { ...part.metadata, ...metadata };
     return part;
   }

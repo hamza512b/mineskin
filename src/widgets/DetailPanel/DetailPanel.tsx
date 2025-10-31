@@ -1,16 +1,22 @@
 import IconButton from "@/components/IconButton/IconButton";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";
 import { DetailPanelContent, DetailPanelProps } from "./DetailPanelContent";
 
-const DetailPanel: React.FC<DetailPanelProps> = (props) => {
+const DetailPanel: React.FC<DetailPanelProps> = ({
+  open,
+  setOpen,
+  reset,
+  mode,
+}) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   if (isMobile) {
     return (
-      <Dialog.Root open={props.open} onOpenChange={props.setOpen}>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
         <AnimatePresence>
           <Dialog.Portal>
             <Dialog.Overlay asChild>
@@ -30,8 +36,14 @@ const DetailPanel: React.FC<DetailPanelProps> = (props) => {
                 transition={{ duration: 0.3 }}
                 className="fixed right-0 top-0 h-full max-w-[300px] w-full  overflow-y-auto"
               >
+                <VisuallyHidden.Root>
+                  <Dialog.Title>Settings</Dialog.Title>
+                </VisuallyHidden.Root>
                 <DetailPanelContent
-                  {...props}
+                  open={open}
+                  setOpen={setOpen}
+                  reset={reset}
+                  mode={mode}
                   className="p-0"
                   exitButton={
                     <Dialog.Close asChild>
@@ -50,7 +62,7 @@ const DetailPanel: React.FC<DetailPanelProps> = (props) => {
   }
   return (
     <AnimatePresence>
-      {props.open && (
+      {open && (
         <motion.div
           key="controlPanel"
           initial={{ width: 0 }}
@@ -70,16 +82,19 @@ const DetailPanel: React.FC<DetailPanelProps> = (props) => {
             transition={{ duration: 0.3 }}
           >
             <DetailPanelContent
-              {...props}
+              open={open}
+              setOpen={setOpen}
+              reset={reset}
               exitButton={
                 <IconButton
                   label="Close setting"
-                  onClick={() => props.setOpen(false)}
+                  onClick={() => setOpen(false)}
                   className="absolute top-4 right-4"
                 >
                   <Cross1Icon className="w-4 h-4 m-1" />
                 </IconButton>
               }
+              mode={mode}
             />
           </motion.div>
         </motion.div>

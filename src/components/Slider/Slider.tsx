@@ -1,4 +1,3 @@
-import React from "react";
 import * as RadixSlider from "@radix-ui/react-slider";
 import { initialState } from "@/core/State";
 

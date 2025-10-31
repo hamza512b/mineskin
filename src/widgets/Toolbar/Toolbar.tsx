@@ -1,22 +1,25 @@
-import { FormValues } from "@/hooks/useRendererState";
+import animations from "@/core/animations";
+import { useRendererStore } from "@/hooks/useRendererState";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import React, { useEffect, useState } from "react";
+import clsx from "clsx";
+import React, { useCallback, useEffect, useState } from "react";
 import ColorPicker from "../../components/ColorPicker/ColorPicker";
+import Dropdown, { DropdownItem } from "../../components/Dropdown";
 import IconButton from "../../components/IconButton/IconButton";
 import {
+  AnimationIcon,
   ColorPickerIcon,
   EraserIcon,
   GearIcon,
+  GridIcon,
   PaintCanIcon,
   PartsFilterIcon,
   PenToolIcon,
   VariationIcon,
-  GridIcon,
 } from "../../components/Icons/Icons";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
-import { Mode } from "../ActionBar/ActionBar";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -28,34 +31,18 @@ interface FloatingToolbarProps {
   undo: (() => void) | undefined;
   redoCount: number;
   undoCount: number;
-
-  setColorPickerActive: (active: boolean) => void;
-  colorPickerActive: boolean;
-  setPaintMode: (mode: "pixel" | "bulk" | "eraser" | "variation") => void;
-  paintMode: "pixel" | "bulk" | "eraser" | "variation";
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
   getUniqueColors: () => string[];
-  mode: Mode;
-  paintColor: string;
-  setValues: (
-    key: keyof FormValues,
-    value: FormValues[keyof FormValues],
-  ) => void;
-  baseheadVisible: boolean;
-  basebodyVisible: boolean;
-  baseleftArmVisible: boolean;
-  baserightArmVisible: boolean;
-  baseleftLegVisible: boolean;
-  baserightLegVisible: boolean;
-  overlayheadVisible: boolean;
-  overlaybodyVisible: boolean;
-  overlayleftArmVisible: boolean;
-  overlayrightArmVisible: boolean;
-  overlayleftLegVisible: boolean;
-  overlayrightLegVisible: boolean;
-  gridVisible: boolean;
-  toggleGrid: () => void;
+
+  // Animation props (only used in Preview mode)
+  availableAnimations?: {
+    name: string;
+    label: string;
+  }[];
+  currentAnimation?: string | null;
+  onAnimationSelect?: (animation: string | null) => void;
+  mode: "Editing" | "Preview";
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -63,31 +50,37 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   undo,
   redoCount,
   undoCount,
-  setColorPickerActive,
-  colorPickerActive,
-  setPaintMode,
-  paintMode,
   settingsOpen,
   setSettingsOpen,
   getUniqueColors,
+  currentAnimation = null,
+  onAnimationSelect,
   mode,
-  paintColor,
-  setValues,
-  baseheadVisible,
-  basebodyVisible,
-  baseleftArmVisible,
-  baserightArmVisible,
-  baseleftLegVisible,
-  baserightLegVisible,
-  overlayheadVisible,
-  overlaybodyVisible,
-  overlayleftArmVisible,
-  overlayrightArmVisible,
-  overlayleftLegVisible,
-  overlayrightLegVisible,
-  gridVisible,
-  toggleGrid,
 }) => {
+  const colorPickerActive = useRendererStore(
+    (state) => state.values.colorPickerActive,
+  );
+  const paintMode = useRendererStore((state) => state.values.paintMode);
+  const gridVisible = useRendererStore((state) => state.values.gridVisible);
+  const handleChange = useRendererStore((state) => state.handleChange);
+
+  const setColorPickerActive = useCallback(
+    (active: boolean) => {
+      handleChange("colorPickerActive", active);
+    },
+    [handleChange],
+  );
+
+  const setPaintMode = useCallback(
+    (mode: "pixel" | "bulk" | "eraser" | "variation") => {
+      handleChange("paintMode", mode);
+    },
+    [handleChange],
+  );
+
+  const toggleGrid = useCallback(() => {
+    handleChange("gridVisible", !gridVisible);
+  }, [handleChange, gridVisible]);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -103,10 +96,11 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
           <div className="p-2">
             {mode === "Editing" && (
               <>
-                <div className="space-y-2" data-tutorial-id="color-picker-tools">
+                <div
+                  className="space-y-2"
+                  data-tutorial-id="color-picker-tools"
+                >
                   <ColorPicker
-                    value={paintColor}
-                    onChange={(color) => setValues("paintColor", color)}
                     label="Color picker"
                     id="color-picker"
                     getUniqueColors={getUniqueColors}
@@ -329,6 +323,63 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
               </>
             )}
             <div className="space-y-2">
+              {mode === "Preview" && onAnimationSelect && (
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Dropdown
+                      trigger={
+                        <Tooltip.Trigger asChild>
+                          <IconButton
+                            active={currentAnimation !== null}
+                            label={"Animations"}
+                          >
+                            <div className="w-6 h-6">
+                              <AnimationIcon className="w-full h-full dark:text-white" />
+                            </div>
+                          </IconButton>
+                        </Tooltip.Trigger>
+                      }
+                      align="start"
+                      side="right"
+                    >
+                      <DropdownItem
+                        onClick={() => onAnimationSelect(null)}
+                        className={
+                          currentAnimation === null
+                            ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                            : ""
+                        }
+                      >
+                        No Animation
+                      </DropdownItem>
+                      {animations.map((animation) => (
+                        <DropdownItem
+                          key={animation.name}
+                          onClick={() => onAnimationSelect(animation.name)}
+                          className={clsx(
+                            currentAnimation === animation.name
+                              ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                              : "",
+                            "capitalize",
+                          )}
+                        >
+                          {animation.label}
+                        </DropdownItem>
+                      ))}
+                    </Dropdown>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                        side="right"
+                        sideOffset={5}
+                      >
+                        Animations
+                        <Tooltip.Arrow className="fill-gray-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              )}
               <Tooltip.Provider>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
@@ -419,23 +470,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
 
-      <PartFilterDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        baseheadVisible={baseheadVisible}
-        basebodyVisible={basebodyVisible}
-        baseleftArmVisible={baseleftArmVisible}
-        baserightArmVisible={baserightArmVisible}
-        baseleftLegVisible={baseleftLegVisible}
-        baserightLegVisible={baserightLegVisible}
-        overlayheadVisible={overlayheadVisible}
-        overlaybodyVisible={overlaybodyVisible}
-        overlayleftArmVisible={overlayleftArmVisible}
-        overlayrightArmVisible={overlayrightArmVisible}
-        overlayleftLegVisible={overlayleftLegVisible}
-        overlayrightLegVisible={overlayrightLegVisible}
-        setValues={setValues}
-      />
+      <PartFilterDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 };

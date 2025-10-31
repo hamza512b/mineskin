@@ -1,8 +1,9 @@
 import { omit } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { z, ZodError } from "zod";
-import { Renderer } from "../core/Renderer";
-import { State, StateShape } from "../core/State";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { initialState, State, StateShape } from "../core/State";
 
 /**
  * Schema should be on nested level because this how validation is done
@@ -12,93 +13,93 @@ const formSchema = z.object({
   skinIsPocket: z.boolean(),
   objectTranslationX: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectTranslationY: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectTranslationZ: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-100, "The value cannot be less than -100")
     .max(100, "The value cannot be greater than 100"),
   objectRotationX: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   objectRotationY: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   objectRotationZ: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraPhi: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraTheta: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   cameraRadius: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Radius must be positive"),
   diffuseLightPositionX: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionY: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   diffuseLightPositionZ: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(-10, "The value cannot be less than -10")
     .max(10, "The value cannot be greater than 10"),
   cameraFieldOfView: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "FOV must be positive")
     .max(180, "FOV cannot exceed 180°"),
   cameraSpeed: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Speed must be positive")
     .max(2, "Speed cannot exceed 2"),
   cameraDampingFactor: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Damping must be positive")
     .max(1, "Damping cannot exceed 1"),
   ambientLight: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Ambient light must be positive")
     .max(1, "Ambient light cannot exceed 1"),
   specularStrength: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Specular strength must be positive")
     .max(1, "Specular strength cannot exceed 1"),
   diffuseStrength: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Diffuse strength must be positive")
     .max(1, "Diffuse strength cannot exceed 1"),
@@ -106,7 +107,7 @@ const formSchema = z.object({
   paintMode: z.enum(["pixel", "bulk", "eraser", "variation"]),
   variationIntensity: z
     .number({
-      invalid_type_error: "Please enter a valid number",
+      error: "Please enter a valid number",
     })
     .min(0, "Variation intensity must be positive")
     .max(1, "Variation intensity cannot exceed 1"),
@@ -123,7 +124,7 @@ const formSchema = z.object({
   overlayleftLegVisible: z.boolean(),
   overlayrightLegVisible: z.boolean(),
   directionalLightIntensity: z.number({
-    invalid_type_error: "Please enter a valid number",
+    error: "Please enter a valid number",
   }),
   mode: z.enum(["Preview", "Editing"]),
   gridVisible: z.boolean(),
@@ -135,81 +136,133 @@ export type FieldErrors = {
   [K in keyof FormValues]?: string;
 };
 
-export function useRendererState(renderer: Renderer | null) {
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [values, setValues] = useState<FormValues>(
-    (renderer?.state.toObject() || {}) as FormValues,
-  );
-  const [undoCount, setUndoCount] = useState(0);
-  const [redoCount, setRedoCount] = useState(0);
+// Zustand store
+interface RendererState {
+  state: State | null;
+  values: FormValues;
+  errors: FieldErrors;
+  undoCount: number;
+  redoCount: number;
+  hasCompletedTutorial: boolean;
+
+  // Actions
+  setState: (state: State) => void;
+  setValues: (values: FormValues) => void;
+  setErrors: (errors: FieldErrors) => void;
+  setUndoCount: (count: number) => void;
+  setRedoCount: (count: number) => void;
+  setHasCompletedTutorial: (hasCompleted: boolean) => void;
+  handleChange: (
+    name: keyof FormValues,
+    value: string | number | boolean,
+    origin?: string,
+  ) => void;
+}
+
+export const useRendererStore = create<RendererState>()(
+  persist(
+    (set, get) => ({
+      state: null,
+      values: initialState,
+      errors: {},
+      undoCount: 0,
+      redoCount: 0,
+      hasCompletedTutorial: false,
+
+      setState: (state: State) => set({ state }),
+      setValues: (values: FormValues) => set({ values }),
+      setErrors: (errors: FieldErrors) => set({ errors }),
+      setUndoCount: (undoCount: number) => set({ undoCount }),
+      setRedoCount: (redoCount: number) => set({ redoCount }),
+      setHasCompletedTutorial: (hasCompleted: boolean) =>
+        set({ hasCompletedTutorial: hasCompleted }),
+
+      handleChange: (
+        name: keyof FormValues,
+        value: string | number | boolean,
+        origin = "App",
+      ) => {
+        const { state, errors } = get();
+        const valueSchema = formSchema.shape[name];
+        const fieldSchema = z.object({ [name]: valueSchema });
+        const argsValeue =
+          valueSchema instanceof z.ZodNumber ? Number(value) : value;
+        const result = fieldSchema.safeParse({ [name]: argsValeue });
+
+        set((state) => ({
+          values: { ...state.values, [name]: value },
+        }));
+
+        if (result.success) {
+          if (!state) return;
+          const currentArgs = state.toObject();
+          const newArgs = {
+            ...omit(currentArgs, [...Object.keys(errors), name]),
+            [name]: argsValeue,
+          };
+          state.setAll(newArgs as StateShape, true, origin);
+          state.save();
+          set((state) => ({
+            errors: omit(state.errors, [name]),
+          }));
+        } else {
+          let error: string | undefined;
+
+          if (result.error instanceof ZodError) {
+            error = result.error.issues[0].message;
+          }
+          set((state) => ({
+            errors: { ...state.errors, [name]: error || undefined },
+          }));
+        }
+      },
+    }),
+    {
+      name: "tutorial-state",
+      storage: createJSONStorage(() => localStorage),
+      // Only persist the tutorial state, not the entire store
+      partialize: (state) => ({
+        hasCompletedTutorial: state.hasCompletedTutorial,
+      }),
+    },
+  ),
+);
+
+export function useInitRendererState() {
+  const initRef = useRef(false);
+  const setState = useRendererStore((state) => state.setState);
+  const setValues = useRendererStore((state) => state.setValues);
+  const setUndoCount = useRendererStore((state) => state.setUndoCount);
+  const setRedoCount = useRendererStore((state) => state.setRedoCount);
 
   useEffect(() => {
-    function changeListener(args: State) {
+    if (initRef.current) return;
+    initRef.current = true;
+
+    const state = State.load();
+    setState(state);
+    setValues(state?.toObject() || initialState);
+
+    function changeListener(
+      args: State,
+      _origin: string | undefined,
+      _value: string,
+    ) {
+      setValues(args.toObject());
+    }
+
+    state.addListener(changeListener);
+
+    function changeUndoRedoListener(args: State) {
       setUndoCount(args.getUndoCount());
       setRedoCount(args.getRedoCount());
     }
 
-    renderer?.state.addListener(changeListener);
-    return () => {
-      renderer?.state.removeListener(changeListener);
-    };
-  }, [renderer]);
-
-  useEffect(() => {
-    function changeListener(args: State) {
-      setValues(args.toObject());
-    }
-
-    renderer?.state.addListener(changeListener);
+    state.addListener(changeUndoRedoListener);
 
     return () => {
-      renderer?.state.removeListener(changeListener);
+      state?.removeListener(changeListener);
+      state?.removeListener(changeUndoRedoListener);
     };
-  }, [renderer]);
-
-  const handleChange = useCallback(
-    (
-      name: keyof FormValues,
-      value: string | number | boolean,
-      origin = "App",
-    ) => {
-      const valueSchema = formSchema.shape[name];
-      const fieldSchema = z.object({ [name]: valueSchema });
-      const argsValeue =
-        valueSchema instanceof z.ZodNumber ? Number(value) : value;
-      const result = fieldSchema.safeParse({ [name]: argsValeue });
-      setValues((prev) => ({ ...prev, [name]: value }));
-      if (result.success) {
-        if (!renderer?.state) return;
-        const currentArgs = renderer.state.toObject();
-        const newArgs = {
-          ...omit(currentArgs, [...Object.keys(errors), name]),
-          [name]: argsValeue,
-        };
-        renderer?.state.setAll(newArgs as StateShape, true, origin);
-        renderer.state.save();
-        setErrors((prev) => omit(prev, [name]));
-      } else {
-        let error: string | undefined;
-
-        if (result.error instanceof ZodError) {
-          error = result.error.issues[0].message;
-        }
-        setErrors((prev) => ({
-          ...prev,
-          [name]: error || undefined,
-        }));
-      }
-    },
-    [renderer?.state],
-  );
-
-  return {
-    setErrors,
-    values,
-    errors,
-    handleChange,
-    undoCount,
-    redoCount,
-  };
+  }, [setState, setValues, setUndoCount, setRedoCount]);
 }

@@ -35,7 +35,7 @@ export function hsvToRgb(h: number, s: number, v: number) {
 }
 
 // Convert RGB to Hex string
-export function rgbToHex(r: number, g: number, b: number) {
+export function rgbToHex(r: number, g: number, b: number): string {
   const toHex = (x: number) => x.toString(16).padStart(2, "0");
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
 }

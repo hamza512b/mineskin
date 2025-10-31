@@ -2,7 +2,7 @@
 title: "Privacy Policy"
 ---
 
-_Last updated: October 18, 2025_
+_Last updated: October 30, 2025_
 
 This Privacy Policy outlines the policies and procedures regarding the collection, use, and disclosure of your personal information when you use our services. In this policy, \"We,\" \"Us,\" \"Our\" refers to mineskin.pro.
 
@@ -43,6 +43,16 @@ We use cookies to enhance your experience. Refer to our [Cookie Policy](/policie
 
 We use Buy Me A Coffee to process donations. Buy Me A Coffee handles your payment details, and we do not directly store your sensitive financial information.
 
+#### Analytics and Performance Monitoring
+
+We use the following third-party services to collect and analyze usage data:
+
+- **Google Analytics:** Collects information about how you use our Service to help us understand user behavior and improve functionality.
+- **Vercel Analytics:** Collects anonymous page view data and basic visitor metrics to understand traffic patterns.
+- **Vercel Speed Insights:** Monitors website performance metrics such as page load times and Core Web Vitals to ensure optimal user experience.
+
+These services may use cookies and similar tracking technologies. You can manage your cookie preferences through our cookie consent banner or your browser settings.
+
 ## How We Use Your Information
 
 Your Information is used to:
@@ -57,7 +67,7 @@ Your Information is used to:
 We may share your Information with:
 
 - **Cloud Service Providers:** e.g., Vercel, PlanetScale, AWS, Google Cloud Platform, for hosting and data storage.
-- **Analytics Providers:** e.g., Google Analytics, for improving and understanding Service usage.
+- **Analytics Providers:** e.g., Google Analytics, Vercel Analytics, and Vercel Speed Insights, for improving and understanding Service usage and performance monitoring.
 - **Communications Providers:** e.g., SendGrid, MailChimp, for sending communications and newsletters.
 - **Legal Requirements:** when legally compelled by authorities, law enforcement, or court orders.
 - **With Your Consent:** for other purposes explicitly approved by you.

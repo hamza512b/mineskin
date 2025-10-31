@@ -1,4 +1,3 @@
-import React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 
@@ -27,7 +26,7 @@ export default function Accordion({
           <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between text-lg p-4  dark:text-slate-300 font-semibold cursor-pointer">
             {label}
             <ChevronDownIcon
-              className="ease-[cubic-bezier(0.87,_0,_0.13,_1)] transition-transform duration-300 group-data-[state=open]:rotate-180"
+              className="ease-[cubic-bezier(0.87,0,0.13,1)] transition-transform duration-300 group-data-[state=open]:rotate-180"
               aria-hidden
             />
           </AccordionPrimitive.Trigger>

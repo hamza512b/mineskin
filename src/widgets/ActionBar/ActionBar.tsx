@@ -1,38 +1,32 @@
-import React, { useCallback } from "react";
 import Button from "@/components/Button";
 import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import { EditorIcon, PreviewIcon } from "@/components/Icons/Icons";
-import { SelectBox } from "@/components/Select";
 import {
   DotsVerticalIcon,
   DownloadIcon,
   UploadIcon,
 } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import Link from "next/link";
+import React, { useCallback } from "react";
+
 export type Mode = "Preview" | "Editing";
 
 interface TopBarProps {
   className?: string;
   downlodTexture: (() => void) | undefined;
   uploadTexture: ((setError?: (msg: string) => void) => void) | undefined;
-  mode: Mode;
-  setMode: (mode: Mode) => void;
+  mode: "Editing" | "Preview";
 }
 
-function ActionBar({
-  className,
-  downlodTexture,
-  uploadTexture,
-  mode,
-  setMode,
-}: TopBarProps) {
+function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarProps) {
   const modeOptions = [
     {
       label: "Preview",
       value: "Preview",
       icon: (
         <PreviewIcon
-          className="h-4 w-4 text-gray-500 dark:text-gray-400"
+          className="h-4 w-4 text-gray-50 dark:text-gray-400"
           aria-hidden="true"
         />
       ),
@@ -43,19 +37,16 @@ function ActionBar({
 
       icon: (
         <EditorIcon
-          className="h-4 w-4 text-gray-500 dark:text-gray-400"
+          className="h-4 w-4 text-gray-50 dark:text-gray-400"
           aria-hidden="true"
         />
       ),
     },
   ];
 
-  const handleUploadTexture = useCallback(
-    () => {
-      uploadTexture?.();
-    },
-    [uploadTexture],
-  );
+  const handleUploadTexture = useCallback(() => {
+    uploadTexture?.();
+  }, [uploadTexture]);
 
   const handleDownloadTexture = useCallback(() => {
     downlodTexture?.();
@@ -68,19 +59,43 @@ function ActionBar({
         className,
       )}
     >
-      <SelectBox
-        leftIcon={
-          modeOptions.find((option) => option.value === mode)?.icon ||
-          modeOptions[0].icon
+      <Dropdown
+        trigger={
+          <Button variant={"secondary"} size={"sm"}>
+            {modeOptions.find((option) => option.value === mode)?.icon ||
+              modeOptions[0].icon}
+            <span className="ml-2">{mode || "Preview"}</span>
+          </Button>
         }
-        options={modeOptions}
-        value={mode || "Preview"}
-        onValueChange={(mode: Mode) => setMode(mode)}
-      />
+      >
+        <Link href="/preview">
+          <DropdownItem
+            leftIcon={<PreviewIcon className="h-4 w-4" />}
+            className={clsx(
+              mode === "Preview" &&
+                "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
+            )}
+          >
+            Preview
+          </DropdownItem>
+        </Link>
+        <Link href="/editor">
+          <DropdownItem
+            leftIcon={<EditorIcon className="h-4 w-4" />}
+            className={clsx(
+              mode === "Editing" &&
+                "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
+            )}
+          >
+            Editor
+          </DropdownItem>
+        </Link>
+      </Dropdown>
       <div className="flex gap-2">
         <div className="hidden md:flex gap-2 ">
           {/* Desktop buttons */}
           <Button
+            size={"sm"}
             variant="secondary"
             onClick={handleUploadTexture}
             leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
@@ -89,6 +104,7 @@ function ActionBar({
           </Button>
           {mode === "Editing" && (
             <Button
+              size={"sm"}
               variant="primary"
               onClick={handleDownloadTexture}
               leftIcon={<DownloadIcon className="h-4 w-4" aria-hidden="true" />}
@@ -102,7 +118,7 @@ function ActionBar({
           {mode === "Editing" ? (
             <Dropdown
               trigger={
-                <Button variant={"ghost"}>
+                <Button variant={"ghost"} size={"sm"}>
                   <DotsVerticalIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
                   <span className="sr-only">Actions menu</span>
                 </Button>

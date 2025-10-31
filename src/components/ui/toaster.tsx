@@ -1,4 +1,4 @@
-
+"use client";
 import useMediaQuery from "@/hooks/useMediaQuery"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 

@@ -1,6 +1,6 @@
-import { Renderer } from "./Renderer";
+import { MiSkiEditingRenderer } from "./MiSkiRenderer";
 
-export class InputManager {
+export class EditInputManager {
   private isDrawing = false;
   private touchHitActive = false;
   private touchStart: { x: number; y: number } | null = null;
@@ -10,25 +10,24 @@ export class InputManager {
     if (document.hidden) this.onWindowBlur();
   }
 
-  constructor(private renderer: Renderer) {}
+  constructor(public renderer: MiSkiEditingRenderer) {}
 
   public mountListeners() {
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "pointerdown",
       this.onPointerDown,
-      true,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "pointermove",
       this.onPointerMove,
       true,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "pointerup",
       this.onPointerUp,
       true,
     );
-    this.renderer.backend.attachedCanvas?.addEventListener(
+    this.renderer.backend.canvas?.addEventListener(
       "pointercancel",
       this.onPointerUp,
       true,
@@ -40,8 +39,7 @@ export class InputManager {
   }
 
   private onPointerDown = (e: PointerEvent) => {
-    if (!this.renderer.backend.attachedCanvas) return;
-    if (this.renderer.state.getMode() === "Preview") return;
+    if (!this.renderer.backend.canvas) return;
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       // For touch, store initial position.
@@ -67,7 +65,7 @@ export class InputManager {
       // Otherwise (pixel or variation mode), proceed as before.
       if (this.renderer.getMeshHitAt(x, y)) {
         this.isDrawing = true;
-        this.renderer.backend.attachedCanvas.style.cursor = "crosshair";
+        this.renderer.backend.canvas.style.cursor = "crosshair";
         this.renderer.undoRedoManager?.beginBatch();
         if (this.renderer.state.getPaintMode() === "eraser") {
           this.renderer.eraseAt(x, y);
@@ -76,18 +74,17 @@ export class InputManager {
         } else {
           this.renderer.drawAt(x, y);
         }
-        this.renderer.backend.attachedCanvas?.setPointerCapture(e.pointerId);
+        this.renderer.backend.canvas?.setPointerCapture(e.pointerId);
         e.preventDefault();
         return;
       }
 
       this.isDrawing = false;
-      this.renderer.backend.attachedCanvas.style.cursor = "grab";
+      this.renderer.backend.canvas.style.cursor = "grab";
     }
   };
 
   private onPointerMove = (e: PointerEvent) => {
-    if (this.renderer.state.getMode() === "Preview") return;
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       // No drawing on touch move.
@@ -109,8 +106,7 @@ export class InputManager {
   };
 
   private onPointerUp = (e: PointerEvent) => {
-    if (!this.renderer.backend.attachedCanvas) return;
-    if (this.renderer.state.getMode() === "Preview") return;
+    if (!this.renderer.backend.canvas) return;
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       // For touch, check for color picker first.
@@ -146,13 +142,9 @@ export class InputManager {
       if (this.isDrawing) {
         this.isDrawing = false;
         this.renderer.undoRedoManager?.endBatch();
-        this.renderer.backend.attachedCanvas.style.cursor = "grab";
-        if (
-          this.renderer.backend.attachedCanvas.hasPointerCapture(e.pointerId)
-        ) {
-          this.renderer.backend.attachedCanvas.releasePointerCapture(
-            e.pointerId,
-          );
+        this.renderer.backend.canvas.style.cursor = "grab";
+        if (this.renderer.backend.canvas.hasPointerCapture(e.pointerId)) {
+          this.renderer.backend.canvas.releasePointerCapture(e.pointerId);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -161,21 +153,19 @@ export class InputManager {
   };
 
   private onWindowBlur = () => {
-    if (!this.renderer.backend.attachedCanvas) return;
-    if (this.renderer.state.getMode() === "Preview") return;
+    if (!this.renderer.backend.canvas) return;
     if (this.isDrawing) {
       this.isDrawing = false;
       this.renderer.undoRedoManager?.endBatch();
-      this.renderer.backend.attachedCanvas.style.cursor = "grab";
+      this.renderer.backend.canvas.style.cursor = "grab";
     }
   };
 
   private getPointerPos(e: PointerEvent): { x: number; y: number } {
-    if (!this.renderer.backend.attachedCanvas) return { x: 0, y: 0 };
-    if (this.renderer.state.getMode() === "Preview") return { x: 0, y: 0 };
-    const rect = this.renderer.backend.attachedCanvas.getBoundingClientRect();
-    const scaleX = this.renderer.backend.attachedCanvas.width / rect.width;
-    const scaleY = this.renderer.backend.attachedCanvas.height / rect.height;
+    if (!this.renderer.backend.canvas) return { x: 0, y: 0 };
+    const rect = this.renderer.backend.canvas.getBoundingClientRect();
+    const scaleX = this.renderer.backend.canvas.width / rect.width;
+    const scaleY = this.renderer.backend.canvas.height / rect.height;
     return {
       x: Math.floor((e.clientX - rect.left) * scaleX),
       y: Math.floor((e.clientY - rect.top) * scaleY),
@@ -183,23 +173,22 @@ export class InputManager {
   }
 
   public unmountListeners() {
-    if (!this.renderer.backend.attachedCanvas) return;
-    this.renderer.backend.attachedCanvas.removeEventListener(
+    if (!this.renderer.backend.canvas) return;
+    this.renderer.backend.canvas.removeEventListener(
       "pointerdown",
       this.onPointerDown,
-      true,
     );
-    this.renderer.backend.attachedCanvas.removeEventListener(
+    this.renderer.backend.canvas.removeEventListener(
       "pointermove",
       this.onPointerMove,
       true,
     );
-    this.renderer.backend.attachedCanvas.removeEventListener(
+    this.renderer.backend.canvas.removeEventListener(
       "pointerup",
       this.onPointerUp,
       true,
     );
-    this.renderer.backend.attachedCanvas.removeEventListener(
+    this.renderer.backend.canvas.removeEventListener(
       "pointercancel",
       this.onPointerUp,
       true,
@@ -210,10 +199,11 @@ export class InputManager {
       "visibilitychange",
       this.boundOnVisibilityChange,
     );
+    // Remove keydown listener to prevent memory leak
+    document.removeEventListener("keydown", this.onKeyDown);
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
-    if (this.renderer.state.getMode() === "Preview") return;
     // I for color picker
     if (e.key === "i") {
       this.renderer.state.setColorPickerActive(true);
@@ -243,8 +233,4 @@ export class InputManager {
       this.renderer.state.setPaintMode("variation");
     }
   };
-
-  public destroyListeners() {
-    document.removeEventListener("keydown", this.onKeyDown);
-  }
 }

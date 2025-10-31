@@ -1,43 +1,7 @@
-import { MinecraftSkinMaterial } from "./MeshMaterial";
-import { Renderer } from "./Renderer";
-
-interface Snapshot {
-  material: MinecraftSkinMaterial;
-  skinIsPocket: boolean;
-}
-
-export class Stack<T> {
-  private items: T[] = [];
-  constructor(private onChange: (count: number) => void) {
-    this.notify();
-  }
-  private notify() {
-    this.onChange(this.items.length);
-  }
-  public push(item: T): void {
-    this.items.push(item);
-    this.notify();
-  }
-  public pop(): T | undefined {
-    const item = this.items.pop();
-    this.notify();
-    return item;
-  }
-  public clear(): void {
-    this.items = [];
-    this.notify();
-  }
-  public get count(): number {
-    return this.items.length;
-  }
-  public peek(): T | undefined {
-    return this.items[this.items.length - 1];
-  }
-}
+import { MiSkiRenderer } from "./MiSkiRenderer";
+import { HistorySnapshot as Snapshot } from "./State";
 
 export class UndoRedoManager {
-  private undoStack: Stack<Snapshot>;
-  private redoStack: Stack<Snapshot>;
   private batching: boolean = false;
   private batchBaseline: Snapshot | null = null;
   private boundOnKeyDown = (e: KeyboardEvent) => {
@@ -55,14 +19,7 @@ export class UndoRedoManager {
     }
   };
 
-  constructor(private renderer: Renderer) {
-    this.undoStack = new Stack<Snapshot>((count: number) => {
-      this.renderer.state.setUndoCount(count - 1);
-    });
-    this.redoStack = new Stack<Snapshot>((count: number) => {
-      this.renderer.state.setRedoCount(count);
-    });
-  }
+  constructor(public renderer: MiSkiRenderer) {}
 
   public beginBatch() {
     if (!this.batching) {
@@ -90,8 +47,8 @@ export class UndoRedoManager {
       ) ||
         this.batchBaseline.skinIsPocket !== snapshot.skinIsPocket)
     ) {
-      this.undoStack.push(snapshot);
-      this.redoStack.clear();
+      this.renderer.state.undoStack.push(snapshot);
+      this.renderer.state.redoStack.clear();
 
       this.renderer.state.storeSkinImageData(
         snapshot.material.imageData,
@@ -111,13 +68,13 @@ export class UndoRedoManager {
   }
 
   public undo() {
-    if (this.renderer.state.getMode() === "Preview") {
+    if (this.renderer.getMode() === "Preview") {
       return;
     }
-    if (this.undoStack.count > 1) {
-      const current = this.undoStack.pop();
-      if (current) this.redoStack.push(current);
-      const prev = this.undoStack.peek();
+    if (this.renderer.state.undoStack.count > 1) {
+      const current = this.renderer.state.undoStack.pop();
+      if (current) this.renderer.state.redoStack.push(current);
+      const prev = this.renderer.state.undoStack.peek();
       if (prev) {
         const material = prev.material.clone();
         this.renderer.getMainSkin().material = material;
@@ -129,13 +86,13 @@ export class UndoRedoManager {
   }
 
   public redo() {
-    if (this.renderer.state.getMode() === "Preview") {
+    if (this.renderer.getMode() === "Preview") {
       return;
     }
-    if (this.redoStack.count > 0) {
-      const next = this.redoStack.pop();
+    if (this.renderer.state.redoStack.count > 0) {
+      const next = this.renderer.state.redoStack.pop();
       if (next) {
-        this.undoStack.push(next);
+        this.renderer.state.undoStack.push(next);
         const material = next.material.clone();
         this.renderer.getMainSkin().material = material;
 
@@ -147,20 +104,19 @@ export class UndoRedoManager {
 
   public mountListeners() {
     document.addEventListener("keydown", this.boundOnKeyDown);
-    this.undoStack.push({
+    this.renderer.state.undoStack.push({
       material: this.renderer.getMainSkin().material.clone(),
       skinIsPocket: this.renderer.state.getSkinIsPocket(),
     });
-    this.redoStack.clear();
+    this.renderer.state.redoStack.clear();
   }
 
   public unmountListeners() {
     document.removeEventListener("keydown", this.boundOnKeyDown);
-    this.reset();
   }
 
   public reset() {
-    this.undoStack.clear();
-    this.redoStack.clear();
+    this.renderer.state.undoStack.clear();
+    this.renderer.state.redoStack.clear();
   }
 }

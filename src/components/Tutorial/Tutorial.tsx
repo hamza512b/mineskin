@@ -1,5 +1,5 @@
 import useMediaQuery from "@/hooks/useMediaQuery";
-import { useTutorialState } from "@/hooks/useTutorialState";
+import { useRendererStore } from "@/hooks/useRendererState";
 import { useConfirmation } from "@/widgets/Confirmation/Confirmation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
@@ -18,7 +18,7 @@ import { steps as tutorialSteps } from "./tutorialSteps";
 const Tutorial: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const { setHasCompletedTutorial } = useTutorialState();
+  const setHasCompletedTutorial = useRendererStore((state) => state.setHasCompletedTutorial);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { getConfirmation } = useConfirmation();
   const filteredSteps = useMemo(() => {
@@ -225,8 +225,10 @@ const Tutorial: React.FC = () => {
               <Dialog.Title className="text-lg font-bold mb-2">
                 {step.title}
               </Dialog.Title>
-              <Dialog.Description className="text-sm">
-                {step.content}
+              <Dialog.Description asChild>
+                <div className="text-sm">
+                  {step.content}
+                </div>
               </Dialog.Description>
               <div className="flex justify-between gap-2 mt-4">
                 <span>

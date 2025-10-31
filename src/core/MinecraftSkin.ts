@@ -33,7 +33,8 @@ export class MinecraftSkin extends MeshGroup {
     material: MinecraftSkinMaterial,
     transformMatrix?: M44,
   ) {
-    super(name, parent, transformMatrix);
+    super(name, transformMatrix);
+    this.setParent(parent);
     this.material = material;
   }
 
@@ -51,8 +52,10 @@ export class MinecraftSkin extends MeshGroup {
     }
     const mesh = new MinecraftSkin(name, parent, material, transformMatrix);
     const isPocket = mesh.material.version === "slim";
-    const opaqueGroup = new MeshGroup("opaque", mesh);
-    const transparentGroup = new MeshGroup("transparent", mesh);
+    const opaqueGroup = new MeshGroup("opaque");
+    opaqueGroup.setParent(mesh);
+    const transparentGroup = new MeshGroup("transparent");
+    transparentGroup.setParent(mesh);
 
     // Create and store base layer parts
     mesh.baseHead = MinecraftPart.create(
@@ -62,6 +65,9 @@ export class MinecraftSkin extends MeshGroup {
       [0, 0],
       "head",
       opaqueGroup,
+      undefined,
+      undefined,
+      [0, 6, 0], // Joint at neck (bottom center of head)
     );
     opaqueGroup.addMesh(mesh.baseHead);
 
@@ -72,6 +78,9 @@ export class MinecraftSkin extends MeshGroup {
       [16, 16],
       "body",
       opaqueGroup,
+      undefined,
+      undefined,
+      [0, 0, 0], // Joint at center
     );
     opaqueGroup.addMesh(mesh.baseBody);
 
@@ -82,6 +91,9 @@ export class MinecraftSkin extends MeshGroup {
       [0, 16],
       "leftLeg",
       opaqueGroup,
+      undefined,
+      undefined,
+      [-2, -6, 0], // Joint at hip (top center of leg)
     );
     opaqueGroup.addMesh(mesh.baseLeftLeg);
 
@@ -92,6 +104,9 @@ export class MinecraftSkin extends MeshGroup {
       [16, 48],
       "rightLeg",
       opaqueGroup,
+      undefined,
+      undefined,
+      [2, -6, 0], // Joint at hip (top center of leg)
     );
     opaqueGroup.addMesh(mesh.baseRightLeg);
 
@@ -102,6 +117,9 @@ export class MinecraftSkin extends MeshGroup {
       [40, 16],
       "leftArm",
       opaqueGroup,
+      undefined,
+      undefined,
+      [-4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseLeftSlimArm);
 
@@ -112,6 +130,9 @@ export class MinecraftSkin extends MeshGroup {
       [32, 48],
       "rightArm",
       opaqueGroup,
+      undefined,
+      undefined,
+      [4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseRightSlimArm);
     mesh.baseLeftArm = MinecraftPart.create(
@@ -121,6 +142,9 @@ export class MinecraftSkin extends MeshGroup {
       [40, 16],
       "leftArm",
       opaqueGroup,
+      undefined,
+      undefined,
+      [-4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseLeftArm);
 
@@ -131,6 +155,9 @@ export class MinecraftSkin extends MeshGroup {
       [32, 48],
       "rightArm",
       opaqueGroup,
+      undefined,
+      undefined,
+      [4, 5, 0], // Joint at shoulder
     );
     opaqueGroup.addMesh(mesh.baseRightArm);
 
@@ -150,6 +177,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [0, 6, 0], // Joint at neck
     );
     transparentGroup.addMesh(mesh.overlayHead);
 
@@ -168,6 +196,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [0, 0, 0], // Joint at center
     );
     transparentGroup.addMesh(mesh.overlayBody);
 
@@ -186,6 +215,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [-2, -6, 0], // Joint at hip
     );
     transparentGroup.addMesh(mesh.overlayLeftLeg);
 
@@ -204,6 +234,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [2, -6, 0], // Joint at hip
     );
     transparentGroup.addMesh(mesh.overlayRightLeg);
 
@@ -222,6 +253,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [-4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayLeftSlimArm);
 
@@ -240,6 +272,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayRightSlimArm);
     mesh.overlayLeftArm = MinecraftPart.create(
@@ -257,6 +290,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [-4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayLeftArm);
 
@@ -275,6 +309,7 @@ export class MinecraftSkin extends MeshGroup {
       {
         overlay: true,
       },
+      [4, 5, 0], // Joint at shoulder
     );
     transparentGroup.addMesh(mesh.overlayRightArm);
 

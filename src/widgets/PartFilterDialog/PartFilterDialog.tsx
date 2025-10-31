@@ -1,46 +1,30 @@
-import { FormValues } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/hooks/useRendererState";
 import * as Dialog from "@radix-ui/react-dialog";
-import React from "react";
 import { PartButton } from "./PartButton";
 
 type PartFilterDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  baseheadVisible: boolean;
-  basebodyVisible: boolean;
-  baseleftArmVisible: boolean;
-  baserightArmVisible: boolean;
-  baseleftLegVisible: boolean;
-  baserightLegVisible: boolean;
-  overlayheadVisible: boolean;
-  overlaybodyVisible: boolean;
-  overlayleftArmVisible: boolean;
-  overlayrightArmVisible: boolean;
-  overlayleftLegVisible: boolean;
-  overlayrightLegVisible: boolean;
-  setValues: (
-    key: keyof FormValues,
-    value: FormValues[keyof FormValues],
-  ) => void;
 };
 
 export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   open,
-  baseheadVisible,
-  basebodyVisible,
-  baseleftArmVisible,
-  baserightArmVisible,
-  baseleftLegVisible,
-  baserightLegVisible,
-  overlayheadVisible,
-  overlaybodyVisible,
-  overlayleftArmVisible,
-  overlayrightArmVisible,
-  overlayleftLegVisible,
-  overlayrightLegVisible,
-  setValues,
   onOpenChange,
 }) => {
+  // Use Zustand store with selective subscriptions
+  const baseheadVisible = useRendererStore((state) => state.values.baseheadVisible);
+  const basebodyVisible = useRendererStore((state) => state.values.basebodyVisible);
+  const baseleftArmVisible = useRendererStore((state) => state.values.baseleftArmVisible);
+  const baserightArmVisible = useRendererStore((state) => state.values.baserightArmVisible);
+  const baseleftLegVisible = useRendererStore((state) => state.values.baseleftLegVisible);
+  const baserightLegVisible = useRendererStore((state) => state.values.baserightLegVisible);
+  const overlayheadVisible = useRendererStore((state) => state.values.overlayheadVisible);
+  const overlaybodyVisible = useRendererStore((state) => state.values.overlaybodyVisible);
+  const overlayleftArmVisible = useRendererStore((state) => state.values.overlayleftArmVisible);
+  const overlayrightArmVisible = useRendererStore((state) => state.values.overlayrightArmVisible);
+  const overlayleftLegVisible = useRendererStore((state) => state.values.overlayleftLegVisible);
+  const overlayrightLegVisible = useRendererStore((state) => state.values.overlayrightLegVisible);
+  const handleChange = useRendererStore((state) => state.handleChange);
   const scale = 6;
   const headWidth = 8 * scale;
   const headHeight = 8 * scale;
@@ -59,42 +43,42 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   ) => {
     if (layer === "base") {
       if (part === "head") {
-        setValues(`baseheadVisible`, !baseheadVisible);
+        handleChange(`baseheadVisible`, !baseheadVisible);
       }
       if (part === "body") {
-        setValues(`basebodyVisible`, !basebodyVisible);
+        handleChange(`basebodyVisible`, !basebodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`baseleftArmVisible`, !baseleftArmVisible);
+        handleChange(`baseleftArmVisible`, !baseleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`baserightArmVisible`, !baserightArmVisible);
+        handleChange(`baserightArmVisible`, !baserightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`baseleftLegVisible`, !baseleftLegVisible);
+        handleChange(`baseleftLegVisible`, !baseleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`baserightLegVisible`, !baserightLegVisible);
+        handleChange(`baserightLegVisible`, !baserightLegVisible);
       }
     }
     if (layer === "overlay") {
       if (part === "head") {
-        setValues(`overlayheadVisible`, !overlayheadVisible);
+        handleChange(`overlayheadVisible`, !overlayheadVisible);
       }
       if (part === "body") {
-        setValues(`overlaybodyVisible`, !overlaybodyVisible);
+        handleChange(`overlaybodyVisible`, !overlaybodyVisible);
       }
       if (part === "leftArm") {
-        setValues(`overlayleftArmVisible`, !overlayleftArmVisible);
+        handleChange(`overlayleftArmVisible`, !overlayleftArmVisible);
       }
       if (part === "rightArm") {
-        setValues(`overlayrightArmVisible`, !overlayrightArmVisible);
+        handleChange(`overlayrightArmVisible`, !overlayrightArmVisible);
       }
       if (part === "leftLeg") {
-        setValues(`overlayleftLegVisible`, !overlayleftLegVisible);
+        handleChange(`overlayleftLegVisible`, !overlayleftLegVisible);
       }
       if (part === "rightLeg") {
-        setValues(`overlayrightLegVisible`, !overlayrightLegVisible);
+        handleChange(`overlayrightLegVisible`, !overlayrightLegVisible);
       }
     }
   };
