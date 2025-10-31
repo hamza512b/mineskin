@@ -23,6 +23,15 @@ export const metadata: Metadata = {
     "minecraft avatar",
   ],
   authors: [{ name: "Hamza512b" }],
+  applicationName: "MineSkin",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MineSkin",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     url: "https://mineskin.pro/",
@@ -98,9 +107,7 @@ export default function RootLayout({
       <body>
         <GoogleAnalyticsScript />
         <TooltipProvider>
-          <ConfirmationDialogProvider>
-            {children}
-          </ConfirmationDialogProvider>
+          <ConfirmationDialogProvider>{children}</ConfirmationDialogProvider>
           <Toaster />
         </TooltipProvider>
         <CookiePopup />
@@ -110,4 +117,3 @@ export default function RootLayout({
     </html>
   );
 }
-

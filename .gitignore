@@ -29,3 +29,7 @@ prompt.
 
 .husky
 .eslintcache
+
+# Serwist
+public/sw*
+public/swe-worker*
