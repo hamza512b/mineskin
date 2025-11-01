@@ -7,7 +7,8 @@
     "lib": [
       "ESNext",
       "DOM",
-      "dom"
+      "dom",
+      "WebWorker"
     ],
     "moduleResolution": "Node",
     "strict": true,
@@ -33,16 +34,19 @@
       {
         "name": "next"
       }
+    ],
+    "types": [
+      "@serwist/next/typings"
     ]
   },
   "include": [
     "src",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     ".next\\dev/types/**/*.ts",
     ".next\\dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "public/sw.js"
   ]
 }
