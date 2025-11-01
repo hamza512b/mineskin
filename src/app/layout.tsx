@@ -7,6 +7,7 @@ import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation
 import { Toaster } from "../components/ui/toaster";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import CookiePopup from "@/widgets/CookiePopup";
+import PWAInstallPopup from "@/widgets/PWAInstallPopup";
 
 export const metadata: Metadata = {
   title: "Minecraft Skin Editor and Tester | Mineskin.pro",
@@ -113,6 +114,7 @@ export default function RootLayout({
         <CookiePopup />
         <SpeedInsights />
         <Analytics />
+        <PWAInstallPopup />
       </body>
     </html>
   );

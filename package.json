@@ -4,7 +4,7 @@
   "type": "module",
   "author": "Hamza512b",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --webpack  --experimental-https --port 3002",
     "build": "next build --webpack",
     "start": "next start",
     "format": "prettier --write .",
