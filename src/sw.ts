@@ -86,12 +86,6 @@ const serwist = new Serwist({
       handler: new NetworkFirst({
         cacheName: "apis",
         networkTimeoutSeconds: 10, // fallback to cache if API doesn't respond within 10s
-        plugins: [
-          new ExpirationPlugin({
-            maxEntries: 16,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
-          }),
-        ],
       }),
     },
     {
