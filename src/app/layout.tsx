@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
-import Script from "next/script";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
-import "../styles/global.css";
-import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
-import { Toaster } from "../components/ui/toaster";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
 import CookiePopup from "@/widgets/CookiePopup";
 import PWAInstallPopup from "@/widgets/PWAInstallPopup";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import type { Metadata } from "next";
+import Script from "next/script";
+import { Toaster } from "../components/ui/toaster";
+import "../styles/global.css";
+import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
 
 export const metadata: Metadata = {
   title: "Minecraft Skin Editor and Tester | Mineskin.pro",
@@ -112,8 +110,8 @@ export default function RootLayout({
           <Toaster />
         </TooltipProvider>
         <CookiePopup />
-        <SpeedInsights />
-        <Analytics />
+        {/* <SpeedInsights /> */}
+        {/* <Analytics /> */}
         <PWAInstallPopup />
       </body>
     </html>
