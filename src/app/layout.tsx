@@ -1,12 +1,11 @@
+import CookiePopup from "@/widgets/CookiePopup";
+import PWAInstallPopup from "@/widgets/PWAInstallPopup";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "../components/ui/toaster";
 import "../styles/global.css";
 import { ConfirmationDialogProvider } from "../widgets/Confirmation/Confirmation";
-import { Toaster } from "../components/ui/toaster";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import CookiePopup from "@/widgets/CookiePopup";
 
 export const metadata: Metadata = {
   title: "Minecraft Skin Editor and Tester | Mineskin.pro",
@@ -23,6 +22,15 @@ export const metadata: Metadata = {
     "minecraft avatar",
   ],
   authors: [{ name: "Hamza512b" }],
+  applicationName: "MineSkin",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MineSkin",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     url: "https://mineskin.pro/",
@@ -98,16 +106,14 @@ export default function RootLayout({
       <body>
         <GoogleAnalyticsScript />
         <TooltipProvider>
-          <ConfirmationDialogProvider>
-            {children}
-          </ConfirmationDialogProvider>
+          <ConfirmationDialogProvider>{children}</ConfirmationDialogProvider>
           <Toaster />
         </TooltipProvider>
         <CookiePopup />
-        <SpeedInsights />
-        <Analytics />
+        {/* <SpeedInsights /> */}
+        {/* <Analytics /> */}
+        <PWAInstallPopup />
       </body>
     </html>
   );
 }
-
