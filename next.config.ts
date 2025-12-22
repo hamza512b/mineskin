@@ -12,6 +12,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  // output: "export",
   redirects: async () => [
     {
       source: "/",

@@ -30,18 +30,22 @@ export default function PWAInstallPopup() {
 
     const cookieConsented = localStorage.getItem("consent-popup");
 
-    const handler = (e: Event) => {
+    const beforeIsntallHandler = (e: Event) => {
       if (cookieConsented) {
         e.preventDefault();
         setPopupOpen(true);
         setDeferredPrompt(e as BeforeInstallPromptEvent);
       }
     };
+    const installHandler = (_e: Event) => {
+      window.gtag("event", "pwa_installed");
+    };
 
-    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("beforeinstallprompt", beforeIsntallHandler);
+    window.addEventListener("appinstalled", installHandler);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("beforeinstallprompt", beforeIsntallHandler);
     };
   }, []);
 
@@ -54,13 +58,7 @@ export default function PWAInstallPopup() {
     await deferredPrompt.prompt();
 
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      console.log("User accepted the install prompt");
-    } else {
-      console.log("User dismissed the install prompt");
-    }
+    await deferredPrompt.userChoice;
 
     // Clear the deferredPrompt
     setDeferredPrompt(null);
