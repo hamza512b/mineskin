@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import Link from "next/link";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 export type Mode = "Preview" | "Editing";
 
@@ -19,7 +19,26 @@ interface TopBarProps {
   mode: "Editing" | "Preview";
 }
 
-function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarProps) {
+function ActionBar({
+  className,
+  downlodTexture,
+  uploadTexture,
+  mode,
+}: TopBarProps) {
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    // Check if running as installed PWA on mobile devices
+    const isInStandaloneMode =
+      "standalone" in window.navigator &&
+      (window.navigator as { standalone?: boolean }).standalone;
+    const isDisplayStandalone = window.matchMedia(
+      "(display-mode: standalone and max-width: 600px and pointer: coarse)",
+    ).matches;
+
+    setIsStandalone(isInStandaloneMode || isDisplayStandalone);
+  }, []);
+
   const modeOptions = [
     {
       label: "Preview",
@@ -56,6 +75,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
     <div
       className={clsx(
         "p-2 w-full flex items-center justify-between gap-4 rounded-lg pointer-events-none [&_>_*]:pointer-events-auto select-none",
+        isStandalone && "px-4 p-6",
         className,
       )}
     >
