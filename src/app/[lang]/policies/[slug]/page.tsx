@@ -8,10 +8,13 @@ import {
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import { locales } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 
 interface PolicyPageProps {
   params: Promise<{
     slug: string;
+    lang: string;
   }>;
 }
 
@@ -24,12 +27,15 @@ interface PolicyData {
   toc: TableOfContentsType;
 }
 
-async function getPolicyData(slug: string): Promise<PolicyData | null> {
+async function getPolicyData(
+  slug: string,
+  lang: string,
+): Promise<PolicyData | null> {
   const policy = getDocBySlug(
     slug,
     ["title", "slug", "content", "description"],
     `policies`,
-    "en",
+    lang,
   );
 
   if (!policy || !policy.content) {
@@ -49,8 +55,8 @@ async function getPolicyData(slug: string): Promise<PolicyData | null> {
 export async function generateMetadata({
   params,
 }: PolicyPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const policy = await getPolicyData(slug);
+  const { slug, lang } = await params;
+  const policy = await getPolicyData(slug, lang);
 
   if (!policy) {
     return {
@@ -65,16 +71,22 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const policies = getAllDocs(["slug"], "policies", ["en"]);
+  const params: { lang: string; slug: string }[] = [];
 
-  return policies.map((policy) => ({
-    slug: policy.slug,
-  }));
+  for (const lang of locales) {
+    const policies = getAllDocs(["slug"], "policies", [lang]);
+    for (const policy of policies) {
+      params.push({ lang, slug: policy.slug });
+    }
+  }
+
+  return params;
 }
 
 export default async function PolicyPage({ params }: PolicyPageProps) {
-  const { slug } = await params;
-  const policy = await getPolicyData(slug);
+  const { slug, lang } = await params;
+  const policy = await getPolicyData(slug, lang);
+  const dict = await getDictionary(lang as "en" | "ar");
 
   if (!policy) {
     notFound();
@@ -86,12 +98,12 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
         <article>
           <div className="mb-6">
             <Link
-              href="/"
+              href={`/${lang}/preview`}
               className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mr-2 h-4 w-4"
+                className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2 rtl:rotate-180"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -103,7 +115,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              Back to Home
+              {dict.common.backToHome}
             </Link>
           </div>
           <div className={"space-y-4"}>
@@ -128,4 +140,3 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
     </div>
   );
 }
-

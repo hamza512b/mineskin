@@ -1,5 +1,6 @@
 import animations from "@/core/animations";
 import { useRendererStore } from "@/hooks/useRendererState";
+import { useDictionary } from "@/i18n";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -24,7 +25,7 @@ import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 const isMac =
   typeof window !== "undefined" &&
   window.navigator.userAgent.includes("Macintosh");
-const cmdKey = isMac ? "⌘" : "Ctrl";
+const cmdKey = isMac ? "\u2318" : "Ctrl";
 
 interface FloatingToolbarProps {
   redo: (() => void) | undefined;
@@ -57,6 +58,9 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   onAnimationSelect,
   mode,
 }) => {
+  const { dictionary: dict, locale } = useDictionary();
+  const isRtl = locale === "ar";
+  const tooltipSide = isRtl ? "left" : "right";
   const colorPickerActive = useRendererStore(
     (state) => state.values.colorPickerActive,
   );
@@ -90,7 +94,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   }, [dialogOpen, settingsOpen, setSettingsOpen]);
 
   return (
-    <div className="absolute top-0 left-0 mt-2 ml-2 transform bg-gray-50 dark:bg-gray-800 rounded-lg items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-transparent dark:border-gray-700 dark:shadow-none">
+    <div className="absolute top-0 left-0 mt-2 ml-2 rtl:ml-0 rtl:mr-2 rtl:left-auto rtl:right-0 transform bg-gray-50 dark:bg-gray-800 rounded-lg items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-transparent dark:border-gray-700 dark:shadow-none">
       <ScrollArea.Root className="max-h-[calc(100dvh-80px)] h-min overflow-y-auto">
         <ScrollArea.Viewport>
           <div className="p-2">
@@ -101,7 +105,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   data-tutorial-id="color-picker-tools"
                 >
                   <ColorPicker
-                    label="Color picker"
+                    label={dict.toolbar.colorPicker}
                     id="color-picker"
                     getUniqueColors={getUniqueColors}
                   />
@@ -111,7 +115,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div>
                           <IconButton
-                            label="Color picker"
+                            label={dict.toolbar.colorPicker}
                             onClick={() =>
                               setColorPickerActive(!colorPickerActive)
                             }
@@ -124,10 +128,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          Color p<span className="underline">i</span>cker{" "}
+                          {dict.toolbar.colorPicker}{" "}
                           <span className="text-gray-400">(I)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -142,7 +146,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div data-tutorial-id="pen-tool">
                           <IconButton
-                            label="Pen tool"
+                            label={dict.toolbar.penTool}
                             onClick={() => {
                               setPaintMode("pixel");
                               setColorPickerActive(false);
@@ -156,10 +160,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          <span className="underline">P</span>en tool{" "}
+                          {dict.toolbar.penTool}{" "}
                           <span className="text-gray-400">(P)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -172,7 +176,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div>
                           <IconButton
-                            label="Bulk paint"
+                            label={dict.toolbar.bulkPaint}
                             onClick={() => {
                               setPaintMode("bulk");
                               setColorPickerActive(false);
@@ -186,10 +190,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          B<span className="underline">u</span>lk paint{" "}
+                          {dict.toolbar.bulkPaint}{" "}
                           <span className="text-gray-400">(U)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -202,7 +206,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div data-tutorial-id="eraser-tool">
                           <IconButton
-                            label="Eraser"
+                            label={dict.toolbar.eraser}
                             onClick={() => {
                               setPaintMode("eraser");
                               setColorPickerActive(false);
@@ -218,10 +222,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          <span className="underline">E</span>raser{" "}
+                          {dict.toolbar.eraser}{" "}
                           <span className="text-gray-400">(E)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -234,7 +238,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div>
                           <IconButton
-                            label="Variation/shading"
+                            label={dict.toolbar.variation}
                             onClick={() => {
                               setPaintMode("variation");
                               setColorPickerActive(false);
@@ -250,10 +254,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          <span className="underline">V</span>ariation/Shading{" "}
+                          {dict.toolbar.variation}{" "}
                           <span className="text-gray-400">(V)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -268,7 +272,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div>
                           <IconButton
-                            label="Undo"
+                            label={dict.toolbar.undo}
                             onClick={undo || (() => {})}
                             disabled={undoCount === 0 && !!undo}
                           >
@@ -279,10 +283,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          Undo{" "}
+                          {dict.toolbar.undo}{" "}
                           <span className="text-gray-400">({cmdKey}+Z)</span>
                           <Tooltip.Arrow className="fill-gray-800" />
                         </Tooltip.Content>
@@ -295,7 +299,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Trigger asChild>
                         <div>
                           <IconButton
-                            label="Redo"
+                            label={dict.toolbar.redo}
                             onClick={redo || (() => {})}
                             disabled={redoCount === 0 && !!redo}
                           >
@@ -306,10 +310,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       <Tooltip.Portal>
                         <Tooltip.Content
                           className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side="right"
+                          side={tooltipSide}
                           sideOffset={5}
                         >
-                          Redo{" "}
+                          {dict.toolbar.redo}{" "}
                           <span className="text-gray-400">
                             ({cmdKey}+Shift+Z)
                           </span>
@@ -331,7 +335,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         <Tooltip.Trigger asChild>
                           <IconButton
                             active={currentAnimation !== null}
-                            label={"Animations"}
+                            label={dict.toolbar.animations}
                           >
                             <div className="w-6 h-6">
                               <AnimationIcon className="w-full h-full dark:text-white" />
@@ -340,7 +344,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         </Tooltip.Trigger>
                       }
                       align="start"
-                      side="right"
+                      side={tooltipSide}
                     >
                       <DropdownItem
                         onClick={() => onAnimationSelect(null)}
@@ -350,7 +354,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                             : ""
                         }
                       >
-                        No Animation
+                        {dict.toolbar.noAnimation}
                       </DropdownItem>
                       {animations.map((animation) => (
                         <DropdownItem
@@ -370,10 +374,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                     <Tooltip.Portal>
                       <Tooltip.Content
                         className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                        side="right"
+                        side={tooltipSide}
                         sideOffset={5}
                       >
-                        Animations
+                        {dict.toolbar.animations}
                         <Tooltip.Arrow className="fill-gray-800" />
                       </Tooltip.Content>
                     </Tooltip.Portal>
@@ -385,7 +389,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Trigger asChild>
                     <div data-tutorial-id="mobile-part-filter">
                       <IconButton
-                        label="Parts Filter"
+                        label={dict.toolbar.partsFilter}
                         onClick={() => setDialogOpen(true)}
                         active={dialogOpen}
                       >
@@ -396,10 +400,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Portal>
                     <Tooltip.Content
                       className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side="right"
+                      side={tooltipSide}
                       sideOffset={5}
                     >
-                      Parts Filter
+                      {dict.toolbar.partsFilter}
                       <Tooltip.Arrow className="fill-gray-800" />
                     </Tooltip.Content>
                   </Tooltip.Portal>
@@ -412,7 +416,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                     <Tooltip.Trigger asChild>
                       <div>
                         <IconButton
-                          label="Grid"
+                          label={dict.toolbar.grid}
                           onClick={() => toggleGrid()}
                           active={gridVisible}
                         >
@@ -423,10 +427,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                     <Tooltip.Portal>
                       <Tooltip.Content
                         className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                        side="right"
+                        side={tooltipSide}
                         sideOffset={5}
                       >
-                        Grid
+                        {dict.toolbar.grid}
                         <Tooltip.Arrow className="fill-gray-800" />
                       </Tooltip.Content>
                     </Tooltip.Portal>
@@ -439,7 +443,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Trigger asChild>
                     <div>
                       <IconButton
-                        label="Settings"
+                        label={dict.common.settings}
                         onClick={() => setSettingsOpen(!settingsOpen)}
                         active={settingsOpen}
                       >
@@ -450,10 +454,10 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   <Tooltip.Portal>
                     <Tooltip.Content
                       className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side="right"
+                      side={tooltipSide}
                       sideOffset={5}
                     >
-                      Settings
+                      {dict.common.settings}
                       <Tooltip.Arrow className="fill-gray-800" />
                     </Tooltip.Content>
                   </Tooltip.Portal>

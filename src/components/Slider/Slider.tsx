@@ -1,5 +1,6 @@
 import * as RadixSlider from "@radix-ui/react-slider";
 import { initialState } from "@/core/State";
+import { useDictionary } from "@/i18n";
 
 interface SliderProps {
   label: string;
@@ -26,6 +27,8 @@ export default function Slider({
   formatValue = (v) => v.toFixed(2),
   editKey: key,
 }: SliderProps) {
+  const { dictionary: dict } = useDictionary();
+
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
@@ -33,7 +36,7 @@ export default function Slider({
           {label}
         </label>
         <span
-          className={`text-sm w-12 text-right ${
+          className={`text-sm w-12 text-right rtl:text-left ${
             error ? "text-red-500" : "text-slate-300"
           }`}
         >
@@ -77,7 +80,7 @@ export default function Slider({
               onChange(initialState[key as keyof typeof initialState] as number)
             }
           >
-            Reset
+            {dict.common.reset}
           </button>
         )}
     </div>

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useCallback, ChangeEvent } from "react";
+import { useDictionary } from "@/i18n";
 import { ColorPickerContentProps } from "./ColorPickerContent";
 import { hsvToHex, expandShorthand, hexToHsv } from "./colorUtils";
 import { PickerSlider } from "./PickerSlider";
@@ -6,6 +7,7 @@ import { PickerSlider } from "./PickerSlider";
 export const ColorChooser: React.FC<ColorPickerContentProps> = ({
   hsv, setHsv, visualPosition, setVisualPosition, lastValidHue, setLastValidHue, hexInput, setHexInput, inputError, setInputError, isMobile, onChange, setDragging, setRecentlyDragged,
 }) => {
+  const { dictionary: dict } = useDictionary();
   const svCanvasRef = useRef<HTMLCanvasElement>(null);
   const isInternalUpdateRef = useRef(false);
 
@@ -94,7 +96,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
         return newHSV;
       });
     },
-    [setHsv, setVisualPosition]
+    [setHsv, setVisualPosition, setHexInput]
   );
 
   const handleHexInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +110,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
     if (/^#([0-9A-Fa-f]{3})$/.test(newHex)) newHex = expandShorthand(newHex);
     const isValid = /^#([0-9A-Fa-f]{6})$/.test(newHex);
     if (!isValid && newHex.length > 0) {
-      setInputError("Invalid hex code");
+      setInputError(dict.colorPicker.invalidHexCode);
       setHexInput(hsvToHex(hsv));
     } else {
       setInputError("");
@@ -134,7 +136,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
     <>
       <div className="mb-4 md:flex-grow-0">
         <label className="block text-sm dark:text-slate-300 text-slate-900 mb-2 font-semibold">
-          Saturation & Lightness
+          {dict.colorPicker.saturationLightness}
         </label>
         <div className="relative w-full aspect-square">
           <canvas
@@ -145,7 +147,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
             onPointerUp={handleSVPointerUp}
             role="slider"
             tabIndex={0}
-            aria-label="Saturation and Value selector" />
+            aria-label={dict.colorPicker.saturationValueSelector} />
           <div
             className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-slate-700 outline-none ring-1 ring-black"
             style={{
@@ -185,7 +187,7 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
           htmlFor="hexInput"
           className="block text-sm dark:text-slate-300 text-slate-900 mb-1 font-semibold"
         >
-          Hex Code
+          {dict.colorPicker.hexCode}
         </label>
         <input
           id="hexInput"
@@ -203,8 +205,8 @@ export const ColorChooser: React.FC<ColorPickerContentProps> = ({
         )}
         <p className="text-xs dark:text-slate-400 text-slate-700 mt-1">
           {isMobile
-            ? "Tap to confirm"
-            : "Press Enter to confirm or Escape to cancel"}
+            ? dict.colorPicker.tapToConfirm
+            : dict.colorPicker.pressEnterToConfirm}
         </p>
       </div>
       <div className="md:hidden h-8 w-full bg-transparent" />

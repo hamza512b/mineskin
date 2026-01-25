@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/i18n";
 import React, { useMemo } from "react";
 
 function PickerSliderComponent({
@@ -16,6 +17,8 @@ function PickerSliderComponent({
   type: "h" | "s" | "v";
   className?: string;
 }) {
+  const { dictionary: dict } = useDictionary();
+
   const handleHuePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragging(true);
@@ -40,23 +43,23 @@ function PickerSliderComponent({
       pos = visualPosition.hue / 360;
       background =
         "linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red)";
-      label = "Hue";
-      ariaLabel = "Hue selector";
+      label = dict.colorPicker.hue;
+      ariaLabel = dict.colorPicker.hueSelector;
     }
     if (type === "s") {
       pos = visualPosition.s / 100;
       background = `linear-gradient(to right, hsl(${visualPosition.hue}, 100%, 100%), hsl(${visualPosition.hue}, 100%, 50%))`;
-      label = "Saturation";
-      ariaLabel = "Saturation selector";
+      label = dict.colorPicker.saturation;
+      ariaLabel = dict.colorPicker.saturationSelector;
     }
     if (type === "v") {
       pos = visualPosition.v / 100;
       background = `linear-gradient(to right, hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 0%), hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 50%), hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) 100%))`;
-      label = "Lightness";
-      ariaLabel = "Lightness selector";
+      label = dict.colorPicker.lightness;
+      ariaLabel = dict.colorPicker.lightnessSelector;
     }
     return { pos, background, label, ariaLabel };
-  }, [visualPosition, type]);
+  }, [visualPosition, type, dict]);
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>

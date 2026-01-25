@@ -1,4 +1,5 @@
 import { useRendererStore } from "@/hooks/useRendererState";
+import { useDictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 import React from "react";
@@ -11,6 +12,7 @@ type PartsComponentProps = {
 const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   className,
 }) => {
+  const { dictionary: dict } = useDictionary();
   // Use Zustand store with selective subscriptions
   const baseheadVisible = useRendererStore((state) => state.values.baseheadVisible);
   const basebodyVisible = useRendererStore((state) => state.values.basebodyVisible);
@@ -35,7 +37,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
     pointerEvents: "auto",
     cursor: "pointer",
   } as React.CSSProperties;
-  const scale = 1.2;
+  const scale = 1;
 
   const toggleVisibility = (
     layer: "base" | "overlay",
@@ -85,7 +87,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
 
   return (
     <div
-      className={clsx("relative flex justify-around gap-2", className)}
+      className={clsx("relative flex justify-around gap-2 scale-[1.2]", className)}
       style={containerStyle}
       data-tutorial-id="desktop-part-filter"
     >
@@ -101,7 +103,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
           <div
             className="relative inline-block w-[32px] h-[64px] box-border"
             style={{
-              transform: `translate(4px, 6px) scale(${scale})`,
+              transform: `scale(${scale})`,
             }}
           >
             {/* Head */}
@@ -112,9 +114,9 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
               )}
               onClick={() => toggleVisibility("base", "head")}
               style={{ ...partBgStyle }}
-              tooltip="Toggle head"
+              tooltip={dict.partFilter.toggleHead}
             >
-              <span className="sr-only">Toggle head</span>
+              <span className="sr-only">{dict.partFilter.toggleHead}</span>
             </PartButton>
             {/* Body */}
             <PartButton
@@ -123,10 +125,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !basebodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle body"
+              tooltip={dict.partFilter.toggleBody}
               onClick={() => toggleVisibility("base", "body")}
             >
-              <span className="sr-only">Toggle body</span>
+              <span className="sr-only">{dict.partFilter.toggleBody}</span>
             </PartButton>
             {/* Right Arm */}
             <PartButton
@@ -135,10 +137,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !baserightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle right arm"
+              tooltip={dict.partFilter.toggleRightArm}
               onClick={() => toggleVisibility("base", "rightArm")}
             >
-              <span className="sr-only">Toggle right arm</span>
+              <span className="sr-only">{dict.partFilter.toggleRightArm}</span>
             </PartButton>
             {/* Right Leg */}
             <PartButton
@@ -147,10 +149,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !baserightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle right leg"
+              tooltip={dict.partFilter.toggleRightLeg}
               onClick={() => toggleVisibility("base", "rightLeg")}
             >
-              <span className="sr-only">Toggle right leg</span>
+              <span className="sr-only">{dict.partFilter.toggleRightLeg}</span>
             </PartButton>
             {/* Left Arm */}
             <PartButton
@@ -159,10 +161,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !baseleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle left arm"
+              tooltip={dict.partFilter.toggleLeftArm}
               onClick={() => toggleVisibility("base", "leftArm")}
             >
-              <span className="sr-only">Toggle left arm</span>
+              <span className="sr-only">{dict.partFilter.toggleLeftArm}</span>
             </PartButton>
             {/* Left Leg */}
             <PartButton
@@ -171,10 +173,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !baseleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle left leg"
+              tooltip={dict.partFilter.toggleLeftLeg}
               onClick={() => toggleVisibility("base", "leftLeg")}
             >
-              <span className="sr-only">Toggle left leg</span>
+              <span className="sr-only">{dict.partFilter.toggleLeftLeg}</span>
             </PartButton>
           </div>
         </div>
@@ -190,7 +192,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
           <div
             className="relative inline-block w-[32px] h-[64px] box-border"
             style={{
-              transform: `translate(4px, 6px) scale(${scale})`,
+              transform: `scale(${scale})`,
             }}
           >
             {/* Helmet */}
@@ -200,10 +202,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlayheadVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle helmet"
+              tooltip={dict.partFilter.toggleHelmet}
               onClick={() => toggleVisibility("overlay", "head")}
             >
-              <span className="sr-only">Toggle helmet</span>
+              <span className="sr-only">{dict.partFilter.toggleHelmet}</span>
             </PartButton>
             {/* Jacket */}
             <PartButton
@@ -212,10 +214,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlaybodyVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle jacket"
+              tooltip={dict.partFilter.toggleJacket}
               onClick={() => toggleVisibility("overlay", "body")}
             >
-              <span className="sr-only">Toggle jacket</span>
+              <span className="sr-only">{dict.partFilter.toggleJacket}</span>
             </PartButton>
             {/* Right Sleeve */}
             <PartButton
@@ -224,10 +226,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlayrightArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle right sleeve"
+              tooltip={dict.partFilter.toggleRightSleeve}
               onClick={() => toggleVisibility("overlay", "rightArm")}
             >
-              <span className="sr-only">Toggle right sleeve</span>
+              <span className="sr-only">{dict.partFilter.toggleRightSleeve}</span>
             </PartButton>
             {/* Right Pants */}
             <PartButton
@@ -236,10 +238,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlayrightLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle right pants"
+              tooltip={dict.partFilter.toggleRightPants}
               onClick={() => toggleVisibility("overlay", "rightLeg")}
             >
-              <span className="sr-only">Toggle right pants</span>
+              <span className="sr-only">{dict.partFilter.toggleRightPants}</span>
             </PartButton>
             {/* Left Sleeve*/}
             <PartButton
@@ -248,10 +250,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlayleftArmVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle left sleeve"
+              tooltip={dict.partFilter.toggleLeftSleeve}
               onClick={() => toggleVisibility("overlay", "leftArm")}
             >
-              <span className="sr-only">Toggle left sleeve</span>
+              <span className="sr-only">{dict.partFilter.toggleLeftSleeve}</span>
             </PartButton>
             {/* Left Pants */}
             <PartButton
@@ -260,10 +262,10 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                 !overlayleftLegVisible && "opacity-40",
               )}
               style={{ ...partBgStyle }}
-              tooltip="Toggle left pants"
+              tooltip={dict.partFilter.toggleLeftPants}
               onClick={() => toggleVisibility("overlay", "leftLeg")}
             >
-              <span className="sr-only">Toggle left pants</span>
+              <span className="sr-only">{dict.partFilter.toggleLeftPants}</span>
             </PartButton>
           </div>
         </div>

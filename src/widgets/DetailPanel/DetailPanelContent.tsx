@@ -3,7 +3,9 @@ import Button from "@/components/Button";
 import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { useRendererStore } from "@/hooks/useRendererState";
+import { locales, useDictionary, type Locale } from "@/i18n";
 import clsx from "clsx";
+import { usePathname, useRouter } from "next/navigation";
 import { useConfirmation } from "../Confirmation/Confirmation";
 
 export interface DetailPanelProps {
@@ -21,6 +23,15 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
   setOpen,
   mode,
 }) => {
+  const { dictionary: dict, locale } = useDictionary();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const switchLanguage = (newLocale: Locale) => {
+    if (newLocale === locale) return;
+    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
+    router.push(newPath);
+  };
   // Use Zustand store with selective subscriptions
   const errors = useRendererStore((state) => state.errors);
   const handleChange = useRendererStore((state) => state.handleChange);
@@ -87,24 +98,25 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold dark:text-slate-100 text-slate-900">
-          Settings
+          {dict.common.settings}
         </h3>
         {exitButton}
       </div>
 
       <fieldset className="mb-4 p-4 border border-slate-700 rounded-lg">
-        <legend className="text-lg font-semibold px-2">Mode</legend>
+        <legend className="text-lg font-semibold px-2">
+          {dict.detailPanel.mode}
+        </legend>
         <ToggleSwitch
-          label="Slim mode"
+          label={dict.detailPanel.slimMode}
           id="pocket-mode"
           checked={skinIsPocket}
           onCheckedChange={(checked) => {
             getConfirmation({
-              title: "Change skin mode",
-              description:
-                "This will change the skin mode to slim mode. This will modify the skin texture.",
-              confirmText: "Change",
-              cancelText: "Cancel",
+              title: dict.detailPanel.changeSkinMode,
+              description: dict.detailPanel.changeSkinModeDescription,
+              confirmText: dict.common.change,
+              cancelText: dict.common.cancel,
             }).then((confirmed) => {
               if (confirmed)
                 handleChange("skinIsPocket", checked, "PocketSwitch");
@@ -114,9 +126,9 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       </fieldset>
 
       {mode === "Editing" && (
-        <Accordion label="Paint">
+        <Accordion label={dict.detailPanel.paint}>
           <Slider
-            label="Variation Tool Intensity"
+            label={dict.detailPanel.variationToolIntensity}
             value={variationIntensity}
             onChange={(value) => handleChange("variationIntensity", value)}
             max={1}
@@ -128,9 +140,9 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         </Accordion>
       )}
 
-      <Accordion label="Skin">
+      <Accordion label={dict.detailPanel.skin}>
         <Slider
-          label="Surface Brightness"
+          label={dict.detailPanel.surfaceBrightness}
           value={diffuseStrength}
           onChange={(value) => handleChange("diffuseStrength", value)}
           max={1}
@@ -141,7 +153,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Shine/Glossiness"
+          label={dict.detailPanel.shineGlossiness}
           value={specularStrength}
           onChange={(value) => handleChange("specularStrength", value)}
           max={1}
@@ -154,7 +166,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
 
         <Slider
-          label="Move Left/Right"
+          label={dict.detailPanel.moveLeftRight}
           value={objectTranslationX}
           onChange={(value) => handleChange("objectTranslationX", value)}
           error={errors.objectTranslationX}
@@ -165,7 +177,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           editKey="objectTranslationX"
         />
         <Slider
-          label="Move Forward/Back"
+          label={dict.detailPanel.moveForwardBack}
           value={objectTranslationZ}
           onChange={(value) => handleChange("objectTranslationZ", value)}
           error={errors.objectTranslationZ}
@@ -176,7 +188,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           editKey="objectTranslationZ"
         />
         <Slider
-          label="Move Up/Down"
+          label={dict.detailPanel.moveUpDown}
           onChange={(value) => handleChange("objectTranslationY", value)}
           error={errors.objectTranslationY}
           value={objectTranslationY}
@@ -190,7 +202,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" />
 
         <Slider
-          label="Tilt Up/Down"
+          label={dict.detailPanel.tiltUpDown}
           value={objectRotationX}
           onChange={(value) => handleChange("objectRotationX", value)}
           max={Math.PI}
@@ -200,7 +212,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Turn Left/Right"
+          label={dict.detailPanel.turnLeftRight}
           value={objectRotationY}
           onChange={(value) => handleChange("objectRotationY", value)}
           max={Math.PI}
@@ -210,7 +222,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Roll"
+          label={dict.detailPanel.roll}
           value={objectRotationZ}
           onChange={(value) => handleChange("objectRotationZ", value)}
           max={Math.PI}
@@ -220,9 +232,9 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
       </Accordion>
 
-      <Accordion label="Camera">
+      <Accordion label={dict.detailPanel.camera}>
         <Slider
-          label="Field Of View"
+          label={dict.detailPanel.fieldOfView}
           value={cameraFieldOfView}
           onChange={(value) => handleChange("cameraFieldOfView", value)}
           max={Math.PI - 0.1}
@@ -234,7 +246,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Movement Speed"
+          label={dict.detailPanel.movementSpeed}
           value={cameraSpeed}
           onChange={(value) => handleChange("cameraSpeed", value)}
           max={0.5}
@@ -244,7 +256,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           editKey="cameraSpeed"
         />
         <Slider
-          label="Damping"
+          label={dict.detailPanel.damping}
           value={cameraDampingFactor}
           onChange={(value) => handleChange("cameraDampingFactor", value)}
           max={1}
@@ -253,44 +265,11 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           error={errors.cameraDampingFactor}
           editKey="cameraDampingFactor"
         />
-
-        {/* <hr className="my-4 h-px bg-slate-300 dark:bg-slate-600 w-full border-none" /> */}
-
-        {/* <Slider
-          label="Zoom Radius"
-          value={cameraRadius}
-          onChange={(v) => handleChange("cameraRadius", v)}
-          min={30}
-          max={100}
-          step={0.1}
-          error={errors.cameraRadius}
-        />
-        <Slider
-          label="Theta angle (ϴ)"
-          loop={true}
-          value={cameraTheta}
-          onChange={(v) => handleChange("cameraTheta", v)}
-          min={0}
-          max={Math.PI}
-          step={0.01}
-          formatValue={(v) => `${v.toFixed(1)}°`}
-        />
-
-        <Slider
-          label="Phi angle (φ)"
-          loop={true}
-          value={cameraPhi}
-          onChange={(v) => handleChange("cameraPhi", v)}
-          min={0}
-          max={Math.PI}
-          step={0.01}
-          formatValue={(v) => `${v.toFixed(1)}°`}
-        /> */}
       </Accordion>
 
-      <Accordion label="Light">
+      <Accordion label={dict.detailPanel.light}>
         <Slider
-          label="Main Light"
+          label={dict.detailPanel.mainLight}
           value={directionalLightIntensity}
           onChange={(value) => handleChange("directionalLightIntensity", value)}
           max={1}
@@ -301,7 +280,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Light Left/Right"
+          label={dict.detailPanel.lightLeftRight}
           value={diffuseLightPositionX}
           onChange={(value) => handleChange("diffuseLightPositionX", value)}
           max={10}
@@ -311,7 +290,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           editKey="diffuseLightPositionX"
         />
         <Slider
-          label="Light Up/Down"
+          label={dict.detailPanel.lightUpDown}
           value={diffuseLightPositionY}
           onChange={(value) => handleChange("diffuseLightPositionY", value)}
           max={10}
@@ -321,7 +300,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
           editKey="diffuseLightPositionY"
         />
         <Slider
-          label="Light Forward/Back"
+          label={dict.detailPanel.lightForwardBack}
           value={diffuseLightPositionZ}
           onChange={(value) => handleChange("diffuseLightPositionZ", value)}
           error={errors.diffuseLightPositionZ}
@@ -333,7 +312,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         />
 
         <Slider
-          label="Overall Brightness (Ambient Light)"
+          label={dict.detailPanel.overallBrightness}
           value={ambientLight}
           onChange={(value) => handleChange("ambientLight", value)}
           max={1}
@@ -345,10 +324,10 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       </Accordion>
 
       {mode == "Editing" && (
-        <Accordion label="Interactive Tutorial">
+        <Accordion label={dict.detailPanel.interactiveTutorial}>
           <div className="flex flex-col gap-2 -mt-3">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Restart the tutorial to see the onboarding instructions again.
+              {dict.detailPanel.restartTutorialDescription}
             </p>
             <Button
               variant={"outlined"}
@@ -357,7 +336,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
                 setHasCompletedTutorial(false);
               }}
             >
-              Restart Tutorial
+              {dict.detailPanel.restartTutorial}
             </Button>
           </div>
         </Accordion>
@@ -367,32 +346,32 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <div className="text-sm text-slate-600 dark:text-slate-400">
           <ul className="mt-4">
             <li className="mb-1">
-              If you want to report a bug, you can file an issue on the{" "}
+              {dict.detailPanel.reportBug}{" "}
               <a
                 href="https://github.com/hamza512b/minskin/issues"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
                 target="_blank"
                 rel="noreferrer"
               >
-                GitHub Repository
+                {dict.detailPanel.githubRepository}
               </a>
               .
             </li>
             <li className="mb-1">
-              Or if you prefer, you can join the{" "}
+              {dict.detailPanel.orJoinDiscord}{" "}
               <a
                 href="https://discord.gg/2egvhmqdza"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
                 target="_blank"
                 rel="noreferrer"
               >
-                Discord server
+                {dict.detailPanel.discordServer}
               </a>
               .
             </li>
           </ul>
           <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-            You can refer to the{" "}
+            {dict.detailPanel.referToUsageGuide}{" "}
             <a
               href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
               target="_blank"
@@ -400,12 +379,12 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
-              usage guide
+              {dict.detailPanel.usageGuide}
             </a>{" "}
-            for more information.
+            {dict.detailPanel.forMoreInfo}
           </p>
           <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-            Made with ❤️ by{" "}
+            {dict.detailPanel.madeWithLove}{" "}
             <a
               href="https://hamza.se"
               className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -415,6 +394,36 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
               Hamza
             </a>
           </p>
+
+          <div className="mt-4 flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-slate-500 dark:text-slate-400"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+            <select
+              value={locale}
+              onChange={(e) => switchLanguage(e.target.value as Locale)}
+              className="bg-transparent text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {locales.map((loc) => (
+                <option key={loc} value={loc}>
+                  {dict.languageSwitcher[loc]}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
     </div>
