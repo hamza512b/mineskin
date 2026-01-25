@@ -34,3 +34,5 @@ prompt.
 public/sw*
 public/swe-worker*
 certificates
+
+out

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@variant standalone (@media (display-mode: standalone));
+
 html,
 body {
   margin: 0;

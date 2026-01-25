@@ -55,7 +55,8 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
   return (
     <div
       className={clsx(
-        "p-2 w-full flex items-center justify-between gap-4 rounded-lg pointer-events-none [&_>_*]:pointer-events-auto select-none",
+        "w-full flex items-center justify-between gap-4 rounded-lg pointer-events-none [&_>_*]:pointer-events-auto select-none",
+        "p-2 standalone:pb-8",
         className,
       )}
     >
