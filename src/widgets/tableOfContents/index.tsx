@@ -15,9 +15,10 @@ export type TableOfContentsType = Items;
 
 interface TocProps {
   toc: TableOfContentsType;
+  title?: string;
 }
 
-export function TableOfContents({ toc }: TocProps) {
+export function TableOfContents({ toc, title = "Table of contents" }: TocProps) {
   const itemIds = React.useMemo(
     () =>
       toc.items
@@ -38,7 +39,7 @@ export function TableOfContents({ toc }: TocProps) {
 
   return mounted ? (
     <div className="space-y-2">
-      <p className="font-medium">Table of contents</p>
+      <p className="font-medium">{title}</p>
       <Tree tree={toc} activeItem={activeHeading} />
     </div>
   ) : (

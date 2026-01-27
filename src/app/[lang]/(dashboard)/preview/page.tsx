@@ -1,22 +1,27 @@
-"use client";
-import { MiSkPreviewRenderer } from "@/core/MiSkiRenderer";
-import { useRendererStore } from "@/hooks/useRendererState";
-import { useRef } from "react";
-import { Dashboard } from "../MineskinDashboard";
+import { Metadata } from "next";
+import { generateAlternates, hasLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+import PreviewClient from "./PreviewClient";
+
+interface PreviewPageProps {
+  params: Promise<{ lang: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PreviewPageProps): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = hasLocale(lang) ? lang : "en";
+  const dict = await getDictionary(locale);
+  const alternates = generateAlternates("/preview", locale);
+
+  return {
+    title: dict.metadata.previewTitle ?? `${dict.metadata.title} - Preview`,
+    description: dict.metadata.previewDescription ?? dict.metadata.description,
+    alternates,
+  };
+}
 
 export default function PreviewPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const state = useRendererStore((state) => state.state);
-
-  if (!state) {
-    return null;
-  }
-  return (
-    <Dashboard
-      rendererClass={MiSkPreviewRenderer}
-      canvasRef={canvasRef}
-      state={state}
-      mode="Preview"
-    />
-  );
+  return <PreviewClient />;
 }

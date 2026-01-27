@@ -1,9 +1,11 @@
 import Accordion from "@/components/Accordion/Accordion";
 import Button from "@/components/Button";
+import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { useRendererStore } from "@/hooks/useRendererState";
-import { locales, useDictionary, type Locale } from "@/i18n";
+import { locales, tJsx, useDictionary, type Locale } from "@/i18n";
+import { GlobeIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
 import { useConfirmation } from "../Confirmation/Confirmation";
@@ -346,83 +348,87 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
         <div className="text-sm text-slate-600 dark:text-slate-400">
           <ul className="mt-4">
             <li className="mb-1">
-              {dict.detailPanel.reportBug}{" "}
-              <a
-                href="https://github.com/hamza512b/minskin/issues"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {dict.detailPanel.githubRepository}
-              </a>
-              .
+              {tJsx(dict.detailPanel.reportBug, {
+                link: (
+                  <a
+                    key="github-link"
+                    href="https://github.com/hamza512b/minskin/issues"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {dict.detailPanel.githubRepository}
+                  </a>
+                ),
+              })}
             </li>
             <li className="mb-1">
-              {dict.detailPanel.orJoinDiscord}{" "}
-              <a
-                href="https://discord.gg/2egvhmqdza"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {dict.detailPanel.discordServer}
-              </a>
-              .
+              {tJsx(dict.detailPanel.orJoinDiscord, {
+                link: (
+                  <a
+                    key="discord-link"
+                    href="https://discord.gg/2egvhmqdza"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {dict.detailPanel.discordServer}
+                  </a>
+                ),
+              })}
             </li>
           </ul>
           <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-            {dict.detailPanel.referToUsageGuide}{" "}
-            <a
-              href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
-              target="_blank"
-              title="Usage Guide"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              {dict.detailPanel.usageGuide}
-            </a>{" "}
-            {dict.detailPanel.forMoreInfo}
+            {tJsx(dict.detailPanel.referToUsageGuide, {
+              link: (
+                <a
+                  key="usage-guide-link"
+                  href={`/${locale}/guides/usage_guide`}
+                  title={dict.detailPanel.usageGuide}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {dict.detailPanel.usageGuide}
+                </a>
+              ),
+            })}
           </p>
           <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-            {dict.detailPanel.madeWithLove}{" "}
-            <a
-              href="https://hamza.se"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Hamza
-            </a>
+            {tJsx(dict.detailPanel.madeWithLove, {
+              link: (
+                <a
+                  key="author-link"
+                  href="https://hamza.se"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Hamza
+                </a>
+              ),
+            })}
           </p>
 
           <div className="mt-4 flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-slate-500 dark:text-slate-400"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-              <path d="M2 12h20" />
-            </svg>
-            <select
-              value={locale}
-              onChange={(e) => switchLanguage(e.target.value as Locale)}
-              className="bg-transparent text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            <Dropdown
+              size="sm"
+              align="start"
+              trigger={
+                <button className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <GlobeIcon className="w-4 h-4" />
+                  {dict.languageSwitcher[locale]}
+                </button>
+              }
             >
               {locales.map((loc) => (
-                <option key={loc} value={loc}>
+                <DropdownItem
+                  key={loc}
+                  onSelect={() => switchLanguage(loc)}
+                  rightIcon={loc === locale ? <CheckIcon /> : undefined}
+                >
                   {dict.languageSwitcher[loc]}
-                </option>
+                </DropdownItem>
               ))}
-            </select>
+            </Dropdown>
           </div>
         </div>
       </div>

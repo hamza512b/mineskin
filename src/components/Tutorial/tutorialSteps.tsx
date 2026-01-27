@@ -1,4 +1,4 @@
-import { useDictionary } from "@/i18n";
+import { t, tJsx, useDictionary } from "@/i18n";
 import { useMemo } from "react";
 
 export interface TutorialStep {
@@ -15,7 +15,7 @@ const isMac =
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
 export function useTutorialSteps(): TutorialStep[] {
-  const { dictionary: dict } = useDictionary();
+  const { dictionary: dict, locale } = useDictionary();
 
   return useMemo(() => [
     {
@@ -59,7 +59,9 @@ export function useTutorialSteps(): TutorialStep[] {
             {dict.tutorial.undoRedoContent}{" "}
             {isMobile
               ? ""
-              : `${dict.tutorial.undoRedoShortcuts} (${isMac ? "⌘ + Shift + Z or ⌘ + Z" : "Ctrl + Y or Ctrl + Z"})`}
+              : t(dict.tutorial.undoRedoShortcuts, {
+                  shortcuts: isMac ? "⌘ + Shift + Z or ⌘ + Z" : "Ctrl + Y or Ctrl + Z",
+                })}
           </p>
           <p className="mt-2 text-sm text-gray-400">
             {dict.tutorial.undoRedoNote}
@@ -95,18 +97,19 @@ export function useTutorialSteps(): TutorialStep[] {
       title: dict.tutorial.finishTitle,
       content: (
         <p>
-          {dict.tutorial.finishContent}{" "}
-          <a
-            href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            {dict.detailPanel.usageGuide}
-          </a>
-          {dict.tutorial.finishContentEnd}
+          {tJsx(dict.tutorial.finishContent, {
+            link: (
+              <a
+                key="usage-guide-link"
+                href={`/${locale}/guides/usage_guide`}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {dict.detailPanel.usageGuide}
+              </a>
+            ),
+          })}
         </p>
       ),
     },
-  ], [dict]);
+  ], [dict, locale]);
 }

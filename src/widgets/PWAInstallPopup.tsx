@@ -2,6 +2,7 @@
 import Button from "@/components/Button/index";
 import IconButton from "@/components/IconButton/IconButton";
 import * as Icons from "@/components/Icons/Icons";
+import { usePopupQueue } from "@/contexts/PopupQueueContext";
 import { useDictionary } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -13,11 +14,12 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function PWAInstallPopup() {
-  const [popupOpen, setPopupOpen] = useState(false);
   const path = usePathname();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const { dictionary: dict } = useDictionary();
+  const { registerPopup, unregisterPopup, isActivePopup } = usePopupQueue();
+  const isVisible = isActivePopup("pwaInstall");
 
   useEffect(() => {
     // Check if user has already dismissed or installed
@@ -35,7 +37,7 @@ export default function PWAInstallPopup() {
     const beforeIsntallHandler = (e: Event) => {
       if (cookieConsented) {
         e.preventDefault();
-        setPopupOpen(true);
+        registerPopup("pwaInstall");
         setDeferredPrompt(e as BeforeInstallPromptEvent);
       }
     };
@@ -49,7 +51,7 @@ export default function PWAInstallPopup() {
     return () => {
       window.removeEventListener("beforeinstallprompt", beforeIsntallHandler);
     };
-  }, []);
+  }, [registerPopup]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
@@ -64,12 +66,12 @@ export default function PWAInstallPopup() {
 
     // Clear the deferredPrompt
     setDeferredPrompt(null);
-    setPopupOpen(false);
+    unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
   const handleDismiss = () => {
-    setPopupOpen(false);
+    unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
@@ -86,9 +88,9 @@ export default function PWAInstallPopup() {
 
   return (
     <AnimatePresence>
-      {popupOpen && deferredPrompt && (
+      {isVisible && deferredPrompt && (
         <motion.div
-          className="z-2000 fixed bottom-2 left-2 right-2 md:left-2 md:bottom-2 pointer-events-auto! standalone:bottom-8"
+          className="z-2000 fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 pointer-events-auto! standalone:bottom-8"
           initial="hidden"
           animate="visible"
           exit="exit"

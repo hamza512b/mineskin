@@ -11,14 +11,14 @@ import { Metadata } from "next";
 import { locales, generateAlternates, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 
-interface PolicyPageProps {
+interface GuidePageProps {
   params: Promise<{
     slug: string;
     lang: string;
   }>;
 }
 
-interface PolicyData {
+interface GuideData {
   title: string;
   slug: string;
   content: string;
@@ -27,26 +27,26 @@ interface PolicyData {
   toc: TableOfContentsType;
 }
 
-async function getPolicyData(
+async function getGuideData(
   slug: string,
   lang: string,
-): Promise<PolicyData | null> {
-  const policy = getDocBySlug(
+): Promise<GuideData | null> {
+  const guide = getDocBySlug(
     slug,
     ["title", "slug", "content", "description"],
-    `policies`,
+    `guides`,
     lang,
   );
 
-  if (!policy || !policy.content) {
+  if (!guide || !guide.content) {
     return null;
   }
 
-  const html = await markdownToHtml(policy.content);
-  const toc = await getTableOfContents(policy.content);
+  const html = await markdownToHtml(guide.content);
+  const toc = await getTableOfContents(guide.content);
 
   return {
-    ...policy,
+    ...guide,
     html,
     toc,
   };
@@ -54,22 +54,22 @@ async function getPolicyData(
 
 export async function generateMetadata({
   params,
-}: PolicyPageProps): Promise<Metadata> {
+}: GuidePageProps): Promise<Metadata> {
   const { slug, lang } = await params;
-  const policy = await getPolicyData(slug, lang);
+  const guide = await getGuideData(slug, lang);
   const dict = await getDictionary(lang as Locale);
 
-  if (!policy) {
+  if (!guide) {
     return {
       title: dict.common.notFound,
     };
   }
 
-  const alternates = generateAlternates(`/policies/${slug}`, lang as Locale);
+  const alternates = generateAlternates(`/guides/${slug}`, lang as Locale);
 
   return {
-    title: policy.title,
-    description: policy.description,
+    title: guide.title,
+    description: guide.description,
     alternates,
   };
 }
@@ -78,21 +78,21 @@ export async function generateStaticParams() {
   const params: { lang: string; slug: string }[] = [];
 
   for (const lang of locales) {
-    const policies = getAllDocs(["slug"], "policies", [lang]);
-    for (const policy of policies) {
-      params.push({ lang, slug: policy.slug });
+    const guides = getAllDocs(["slug"], "guides", [lang]);
+    for (const guide of guides) {
+      params.push({ lang, slug: guide.slug });
     }
   }
 
   return params;
 }
 
-export default async function PolicyPage({ params }: PolicyPageProps) {
+export default async function GuidePage({ params }: GuidePageProps) {
   const { slug, lang } = await params;
-  const policy = await getPolicyData(slug, lang);
+  const guide = await getGuideData(slug, lang);
   const dict = await getDictionary(lang as Locale);
 
-  if (!policy) {
+  if (!guide) {
     notFound();
   }
 
@@ -124,20 +124,22 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
           </div>
           <div className={"space-y-4"}>
             <h1 className="inline-block text-4xl font-black tracking-tight dark:text-white text-slate-900 lg:text-5xl">
-              {policy.title}
+              {guide.title}
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400">
-              {policy.description}
-            </p>
+            {guide.description && (
+              <p className="text-xl text-slate-600 dark:text-slate-400">
+                {guide.description}
+              </p>
+            )}
           </div>
           <hr className="my-4 border-slate-200" />
           <div className="prose prose-blue prose-headings:scroll-m-20 dark:prose-invert">
-            <div dangerouslySetInnerHTML={{ __html: policy.html }} />
+            <div dangerouslySetInnerHTML={{ __html: guide.html }} />
           </div>{" "}
         </article>
         <div className="hidden text-sm lg:block">
           <div className="sticky top-8 -mt-10 max-h-[calc(var(--vh)-4rem)] overflow-y-auto pt-10">
-            <TableOfContents toc={policy.toc} title={dict.policies.tableOfContents} />
+            <TableOfContents toc={guide.toc} title={dict.policies.tableOfContents} />
           </div>
         </div>
       </div>

@@ -27,7 +27,8 @@ export default function Slider({
   formatValue = (v) => v.toFixed(2),
   editKey: key,
 }: SliderProps) {
-  const { dictionary: dict } = useDictionary();
+  const { dictionary: dict, locale } = useDictionary();
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
     <div className="mb-4">
@@ -54,6 +55,7 @@ export default function Slider({
           min={min}
           max={max}
           step={step}
+          dir={dir}
           onValueChange={([val]) => onChange(val)}
         >
           <RadixSlider.Track className="bg-slate-800 relative grow rounded-full h-[3px]">

@@ -1,5 +1,7 @@
 import CookiePopup from "@/widgets/CookiePopup";
+import LanguageDetectionPopup from "@/widgets/LanguageDetectionPopup";
 import PWAInstallPopup from "@/widgets/PWAInstallPopup";
+import { PopupQueueProvider } from "@/contexts/PopupQueueContext";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { Metadata } from "next";
 import Script from "next/script";
@@ -7,7 +9,14 @@ import { notFound } from "next/navigation";
 import { Toaster } from "../../components/ui/toaster";
 import "../../styles/global.css";
 import { ConfirmationDialogProvider } from "../../widgets/Confirmation/Confirmation";
-import { hasLocale, locales, type Locale, DictionaryProvider } from "@/i18n";
+import {
+  hasLocale,
+  locales,
+  generateAlternates,
+  baseUrl,
+  type Locale,
+  DictionaryProvider,
+} from "@/i18n";
 import { getDictionary } from "@/i18n/dictionaries";
 
 export async function generateStaticParams() {
@@ -22,6 +31,8 @@ export async function generateMetadata({
   const { lang } = await params;
   const locale = hasLocale(lang) ? lang : "en";
   const dict = await getDictionary(locale);
+
+  const alternates = generateAlternates("", locale);
 
   return {
     title: dict.metadata.title,
@@ -38,6 +49,7 @@ export async function generateMetadata({
     ],
     authors: [{ name: "Hamza512b" }],
     applicationName: "MineSkin",
+    alternates,
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
@@ -48,16 +60,16 @@ export async function generateMetadata({
     },
     openGraph: {
       type: "website",
-      url: "https://mineskin.pro/",
+      url: `${baseUrl}/${locale}/`,
       title: dict.metadata.title,
       description: dict.metadata.description,
-      images: [{ url: "https://mineskin.pro/og-image.jpg" }],
+      images: [{ url: `${baseUrl}/og-image.jpg` }],
     },
     twitter: {
       card: "summary_large_image",
       title: dict.metadata.title,
       description: dict.metadata.description,
-      images: ["https://mineskin.pro/og-image.jpg"],
+      images: [`${baseUrl}/og-image.jpg`],
     },
   };
 }
@@ -106,7 +118,6 @@ export default async function LangLayout({
   return (
     <html lang={lang} dir={dir}>
       <head>
-        <link rel="canonical" href="https://mineskin.pro/" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -115,10 +126,11 @@ export default async function LangLayout({
               "@type": "WebApplication",
               name: "MineSkin - Minecraft Skin Editor & Tester",
               description: dictionary.metadata.description,
-              image: "https://mineskin.pro/og-image.jpg",
-              url: "https://mineskin.pro/",
+              image: `${baseUrl}/og-image.jpg`,
+              url: `${baseUrl}/${lang}/`,
               applicationCategory: "GameApplication",
               operatingSystem: "Any",
+              inLanguage: lang,
               author: {
                 "@type": "Person",
                 name: "Hamza512b",
@@ -136,8 +148,11 @@ export default async function LangLayout({
             </ConfirmationDialogProvider>
             <Toaster />
           </TooltipProvider>
-          <CookiePopup />
-          <PWAInstallPopup />
+          <PopupQueueProvider>
+            <CookiePopup />
+            <LanguageDetectionPopup />
+            <PWAInstallPopup />
+          </PopupQueueProvider>
         </DictionaryProvider>
       </body>
     </html>

@@ -356,20 +356,26 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       >
                         {dict.toolbar.noAnimation}
                       </DropdownItem>
-                      {animations.map((animation) => (
-                        <DropdownItem
-                          key={animation.name}
-                          onClick={() => onAnimationSelect(animation.name)}
-                          className={clsx(
-                            currentAnimation === animation.name
-                              ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
-                              : "",
-                            "capitalize",
-                          )}
-                        >
-                          {animation.label}
-                        </DropdownItem>
-                      ))}
+                      {animations.map((animation) => {
+                        const labelKey =
+                          `${animation.name}Animation` as keyof typeof dict.toolbar;
+                        const label =
+                          dict.toolbar[labelKey] || animation.label;
+                        return (
+                          <DropdownItem
+                            key={animation.name}
+                            onClick={() => onAnimationSelect(animation.name)}
+                            className={clsx(
+                              currentAnimation === animation.name
+                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                                : "",
+                              "capitalize",
+                            )}
+                          >
+                            {label}
+                          </DropdownItem>
+                        );
+                      })}
                     </Dropdown>
                     <Tooltip.Portal>
                       <Tooltip.Content

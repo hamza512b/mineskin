@@ -30,7 +30,7 @@ export default function ToggleSwitch({
         id={id}
         disabled={disabled}
       >
-        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg transition-transform duration-100 will-change-transform ltr:translate-x-0.5 ltr:data-[state=checked]:translate-x-[18px] rtl:translate-x-[17px] rtl:data-[state=checked]:translate-x-0.5 hover:bg-slate-50" />
+        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-lg transition-transform duration-100 will-change-transform ltr:translate-x-0.5 ltr:data-[state=checked]:translate-x-[18px] rtl:-translate-x-0.5 rtl:data-[state=checked]:-translate-x-[18px] hover:bg-slate-50" />
       </Switch.Root>
     </div>
   );

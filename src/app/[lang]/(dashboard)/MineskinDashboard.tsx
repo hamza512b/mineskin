@@ -113,7 +113,7 @@ export function Dashboard({
           <div className="absolute top-0 right-0 rtl:right-auto rtl:left-0 p-2 pointer-events-none z-0 flex gap-2">
             <div className="flex flex-col gap-6 p-2">
               <GlobalRotationGizmo />
-              <DesktopPartFilter className="hidden md:flex" />
+              <DesktopPartFilter className="hidden md:block" />
             </div>
           </div>
 

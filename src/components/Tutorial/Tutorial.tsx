@@ -22,7 +22,8 @@ const Tutorial: React.FC = () => {
   const setHasCompletedTutorial = useRendererStore((state) => state.setHasCompletedTutorial);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { getConfirmation } = useConfirmation();
-  const { dictionary: dict } = useDictionary();
+  const { dictionary: dict, locale } = useDictionary();
+  const isRTL = locale === "ar";
   const tutorialSteps = useTutorialSteps();
 
   const filteredSteps = useMemo(() => {
@@ -53,7 +54,16 @@ const Tutorial: React.FC = () => {
 
       const parent = tooltipRef.current?.parentElement?.getBoundingClientRect();
       if (step.placement && targetRect) {
-        switch (step.placement) {
+        // Swap left/right placement for RTL
+        const placement = isRTL
+          ? step.placement === "left"
+            ? "right"
+            : step.placement === "right"
+              ? "left"
+              : step.placement
+          : step.placement;
+
+        switch (placement) {
           case "top":
             top = `calc(${targetRect.top}px - 100% - ${padding})`;
             left = `calc(${targetRect.left + targetRect.width / 2}px - 50%)`;
@@ -106,7 +116,7 @@ const Tutorial: React.FC = () => {
     return () => {
       window.removeEventListener("resize", calculatePosition);
     };
-  }, [step, targetRect]);
+  }, [step, targetRect, isRTL]);
 
   useEffect(() => {
     if (!step) return;

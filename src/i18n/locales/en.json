@@ -1,7 +1,11 @@
 {
   "metadata": {
     "title": "Minecraft Skin Editor and Tester | Mineskin.pro",
-    "description": "Upload and test your Minecraft skins in real-time with MineSkin's 3D viewer. Test, edit, and see your skin from every angle before using it in-game."
+    "description": "Upload and test your Minecraft skins in real-time with MineSkin's 3D viewer. Test, edit, and see your skin from every angle before using it in-game.",
+    "editorTitle": "Minecraft Skin Editor | Mineskin.pro",
+    "editorDescription": "Edit and customize your Minecraft skins with MineSkin's powerful editor. Draw pixel by pixel, use color palettes, and see changes in real-time.",
+    "previewTitle": "Minecraft Skin Previewer | Mineskin.pro",
+    "previewDescription": "Preview your Minecraft skins in 3D before using them in-game. Upload, rotate, and view your skin from every angle."
   },
   "common": {
     "preview": "Preview",
@@ -15,7 +19,8 @@
     "close": "Close",
     "actionsMenu": "Actions menu",
     "reset": "Reset",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "notFound": "Not Found"
   },
   "toolbar": {
     "colorPicker": "Color picker",
@@ -27,6 +32,8 @@
     "redo": "Redo",
     "animations": "Animations",
     "noAnimation": "No Animation",
+    "idleAnimation": "Idle animation",
+    "walkingAnimation": "Walking animation",
     "partsFilter": "Parts Filter",
     "grid": "Grid"
   },
@@ -59,18 +66,17 @@
     "interactiveTutorial": "Interactive Tutorial",
     "restartTutorialDescription": "Restart the tutorial to see the onboarding instructions again.",
     "restartTutorial": "Restart Tutorial",
-    "reportBug": "If you want to report a bug, you can file an issue on the",
+    "reportBug": "If you want to report a bug, you can file an issue on the {{link}}.",
     "githubRepository": "GitHub Repository",
-    "orJoinDiscord": "Or if you prefer, you can join the",
+    "orJoinDiscord": "Or if you prefer, you can join the {{link}}.",
     "discordServer": "Discord server",
-    "referToUsageGuide": "You can refer to the",
+    "referToUsageGuide": "You can refer to the {{link}} for more information.",
     "usageGuide": "usage guide",
-    "forMoreInfo": "for more information.",
-    "madeWithLove": "Made with love by"
+    "madeWithLove": "Made with love by {{link}}"
   },
   "cookie": {
     "title": "Cookie Settings",
-    "description": "We use cookies to enhance your browsing experience. Learn more in our",
+    "description": "We use cookies to enhance your browsing experience. Learn more in our {{link}}.",
     "cookiePolicy": "cookie policy",
     "essentialCookies": "Essential Cookies",
     "analytics": "Analytics",
@@ -107,7 +113,7 @@
     "eraserNote": "Note: The eraser will erase the top layer of the skin if both are active.",
     "undoRedoTitle": "Undo and Redo",
     "undoRedoContent": "Made a mistake? No worries! You can easily undo and redo your actions here.",
-    "undoRedoShortcuts": "You can also use the keyboard shortcuts",
+    "undoRedoShortcuts": "You can also use the keyboard shortcuts ({{shortcuts}})",
     "undoRedoNote": "Note: The undo/redo actions are not persistent after reload.",
     "colorPickerTitle": "Color Picker",
     "colorPickerContent": "You can choose any color you want from the picker, or select from the palette of colors already used in your skin.",
@@ -116,8 +122,7 @@
     "partFilterMobileTitle": "Body Part Visibility",
     "partFilterMobileContent": "Click this button to open the visibility settings. You can toggle the visibility of different body parts for both layers.",
     "finishTitle": "You're all set!",
-    "finishContent": "That's it for the basics! For more advanced features and information, you can refer to the",
-    "finishContentEnd": ". Happy skin editing!"
+    "finishContent": "That's it for the basics! For more advanced features and information, you can refer to the {{link}}. Happy skin editing!"
   },
   "colorPicker": {
     "chooseColor": "Choose Color",
@@ -176,6 +181,26 @@
   "languageSwitcher": {
     "language": "Language",
     "en": "English",
-    "ar": "Arabic | العربية"
+    "ar": "Arabic | العربية",
+    "zh": "Chinese | 中文",
+    "es": "Spanish | Español",
+    "pt-BR": "Portuguese (Brazil) | Português (Brasil)"
+  },
+  "policies": {
+    "tableOfContents": "Table of contents"
+  },
+  "changelog": {
+    "viewChangelog": "View changelog",
+    "title": "Changelog",
+    "closeChangelog": "Close changelog",
+    "helpText": "Need help? Join our discord server on",
+    "discord": "Discord"
+  },
+  "languageDetection": {
+    "title": "Language Available",
+    "description": "Good news! MineSkin is now available in {{language}}.",
+    "instructions": "You can change your language anytime in the settings panel.",
+    "switchLanguage": "Switch Language",
+    "stayInCurrent": "Stay in English"
   }
 }

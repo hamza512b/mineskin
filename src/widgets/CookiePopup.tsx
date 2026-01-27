@@ -1,7 +1,8 @@
 "use client";
 import Button from "@/components/Button/index";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
-import { useDictionary } from "@/i18n";
+import { usePopupQueue } from "@/contexts/PopupQueueContext";
+import { tJsx, useDictionary } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -45,13 +46,14 @@ function parseCookePreferences() {
   }
 }
 export default function CookiePopup() {
-  const [popupOpen, setPopupOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>(() =>
     parseCookePreferences(),
   );
   const path = usePathname();
   const { dictionary: dict, locale } = useDictionary();
+  const { registerPopup, unregisterPopup, isActivePopup } = usePopupQueue();
+  const isVisible = isActivePopup("cookie");
 
   function handleToggle(key: keyof CookiePreferences) {
     setPreferences((prev) => ({
@@ -61,7 +63,7 @@ export default function CookiePopup() {
   }
 
   function acceptAll() {
-    setPopupOpen(false);
+    unregisterPopup("cookie");
 
     localStorage.setItem("consent-popup", "false");
     localStorage.setItem("cookie-preferences", JSON.stringify(preferences));
@@ -74,7 +76,7 @@ export default function CookiePopup() {
     });
   }
   function savePreferences() {
-    setPopupOpen(false);
+    unregisterPopup("cookie");
     localStorage.setItem("consent-popup", "false");
     localStorage.setItem("cookie-preferences", JSON.stringify(preferences));
 
@@ -89,7 +91,9 @@ export default function CookiePopup() {
 
   useEffect(() => {
     const consented = window.localStorage.getItem("consent-popup");
-    setPopupOpen(!consented);
+    if (!consented) {
+      registerPopup("cookie");
+    }
 
     const cookiePreferences = parseCookePreferences();
     const allowAnalytics = cookiePreferences.analytics === "granted";
@@ -99,7 +103,7 @@ export default function CookiePopup() {
       ad_personalization: "denied",
       analytics_storage: allowAnalytics ? "granted" : "denied",
     });
-  }, []);
+  }, [registerPopup]);
 
   function toggleDetails() {
     setDetailsOpen(!detailsOpen);
@@ -129,9 +133,9 @@ export default function CookiePopup() {
 
   return (
     <AnimatePresence>
-      {popupOpen && (
+      {isVisible && (
         <motion.div
-          className="z-[2000] fixed bottom-2 left-2 right-2 md:left-2 md:bottom-2 standalone:bottom-8 !pointer-events-auto"
+          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 !pointer-events-auto"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -151,14 +155,17 @@ export default function CookiePopup() {
             {/* Main content */}
             <div className="px-4 pt-4">
               <p id="cookie-settings-description" className="text-sm">
-                {dict.cookie.description}{" "}
-                <Link
-                  href={`/${locale}/policies/cookie-policy`}
-                  className="text-blue-600 dark:text-blue-400 underline focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-sm"
-                >
-                  {dict.cookie.cookiePolicy}
-                </Link>
-                .
+                {tJsx(dict.cookie.description, {
+                  link: (
+                    <Link
+                      key="cookie-link"
+                      href={`/${locale}/policies/cookie-policy`}
+                      className="text-blue-600 dark:text-blue-400 underline focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-sm"
+                    >
+                      {dict.cookie.cookiePolicy}
+                    </Link>
+                  ),
+                })}
               </p>
 
               {/* Cookie preferences panel */}
