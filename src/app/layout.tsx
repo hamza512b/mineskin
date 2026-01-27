@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: "Minecraft Skin Editor and Tester | Mineskin.pro",
@@ -11,5 +13,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <>{ }
+    {children}
+    <SpeedInsights />
+    <Analytics />
+  </>
 }
