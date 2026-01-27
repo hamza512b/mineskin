@@ -6,7 +6,7 @@ import { useDictionary } from "@/i18n";
 import { locales, type Locale } from "@/i18n/config";
 import { GlobeIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "language-detection-dismissed";

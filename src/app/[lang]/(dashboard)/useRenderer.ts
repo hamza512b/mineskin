@@ -50,7 +50,7 @@ export default function useRenderer(
         rendererRef.current = null;
       }
     };
-  }, []);
+  }, [KlassRenderer, state]);
 
   return rendererRef.current;
 }
