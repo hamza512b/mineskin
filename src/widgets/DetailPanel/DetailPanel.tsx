@@ -23,44 +23,46 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
     return (
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <AnimatePresence>
-          <Dialog.Portal>
-            <Dialog.Overlay asChild>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/50"
-              />
-            </Dialog.Overlay>
-            <Dialog.Content asChild>
-              <motion.div
-                initial={{ x: slideDirection }}
-                animate={{ x: 0 }}
-                exit={{ x: slideDirection }}
-                transition={{ duration: 0.3 }}
-                className="fixed right-0 rtl:right-auto rtl:left-0 top-0 h-full max-w-[300px] w-full overflow-y-auto"
-              >
-                <VisuallyHidden.Root>
-                  <Dialog.Title>{dict.common.settings}</Dialog.Title>
-                </VisuallyHidden.Root>
-                <DetailPanelContent
-                  open={open}
-                  setOpen={setOpen}
-                  reset={reset}
-                  mode={mode}
-                  className="p-0"
-                  exitButton={
-                    <Dialog.Close asChild>
-                      <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800">
-                        <Cross1Icon className="w-4 h-4" />
-                      </button>
-                    </Dialog.Close>
-                  }
+          {open && (
+            <Dialog.Portal forceMount>
+              <Dialog.Overlay asChild forceMount>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 bg-black/50"
                 />
-              </motion.div>
-            </Dialog.Content>
-          </Dialog.Portal>
+              </Dialog.Overlay>
+              <Dialog.Content asChild forceMount>
+                <motion.div
+                  initial={{ x: slideDirection }}
+                  animate={{ x: 0 }}
+                  exit={{ x: slideDirection }}
+                  transition={{ duration: 0.3 }}
+                  className="fixed right-0 rtl:right-auto rtl:left-0 top-0 h-full max-w-75 w-full overflow-y-auto"
+                >
+                  <VisuallyHidden.Root>
+                    <Dialog.Title>{dict.common.settings}</Dialog.Title>
+                  </VisuallyHidden.Root>
+                  <DetailPanelContent
+                    open={open}
+                    setOpen={setOpen}
+                    reset={reset}
+                    mode={mode}
+                    className="p-0"
+                    exitButton={
+                      <Dialog.Close asChild>
+                        <button className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800">
+                          <Cross1Icon className="w-4 h-4" />
+                        </button>
+                      </Dialog.Close>
+                    }
+                  />
+                </motion.div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          )}
         </AnimatePresence>
       </Dialog.Root>
     );
