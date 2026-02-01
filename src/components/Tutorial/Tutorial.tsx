@@ -84,6 +84,9 @@ const Tutorial: React.FC = () => {
           case "left": {
             top = `${targetRect.top - padding}px`;
             right = `calc(100% - ${targetRect.left - padding * 2}px)`;
+            if (parent) {
+              width = `${targetRect.left - padding * 3}px`;
+            }
             break;
           }
         }
