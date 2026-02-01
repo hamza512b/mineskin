@@ -6,6 +6,7 @@ import useMediaQuery from "../../hooks/useMediaQuery";
 import { useRendererStore } from "../../hooks/useRendererState";
 import ColorPickerContent from "./ColorPickerContent";
 import { hexToHsv, hsvToHex } from "./colorUtils";
+import { useDictionary } from "@/i18n/DictionaryContext";
 
 interface ColorPickerProps {
   label: string;
@@ -20,6 +21,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 }) => {
   const value = useRendererStore((state) => state.values.paintColor);
   const handleChange = useRendererStore((state) => state.handleChange);
+  const { dictionary } = useDictionary();
   
   const onChange = useCallback((color: string) => {
     handleChange("paintColor", color);
@@ -98,7 +100,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
               type="button"
               className="w-8 h-8 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:ring-2 hover:ring-blue-500/10 transition-all"
               style={{ backgroundColor: hsvToHex(hsv) }}
-              aria-label="Choose color"
+              aria-label={dictionary.colorPicker.chooseColor}
             />
           </Dialog.Trigger>
           <Dialog.Portal>
@@ -138,7 +140,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
               type="button"
               className="w-8 h-8 rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:ring-2 hover:ring-blue-500/10 transition-all"
               style={{ backgroundColor: hsvToHex(hsv) }}
-              aria-label="Choose color"
+              aria-label={dictionary.colorPicker.chooseColor}
             />
           </Popover.Trigger>
           <Popover.Portal>

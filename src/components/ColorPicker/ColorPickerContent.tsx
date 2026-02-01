@@ -1,6 +1,7 @@
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import clsx from "clsx";
+import { useDictionary } from "@/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { hexToHsv } from "./colorUtils";
 import { ColorChooser } from "./ColorChooser";
@@ -45,6 +46,8 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = (props) => {
     selectedTab,
     setSelectedTab,
   } = props;
+  const { dictionary: dict } = useDictionary();
+
   const handleColorSelect = (color: string) => {
     const newHSV = hexToHsv(color);
     if (newHSV.s === 0 || newHSV.v === 0) newHSV.h = lastValidHue;
@@ -62,7 +65,7 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = (props) => {
     >
       <div className="flex justify-between items-center mb-4 md:hidden">
         <h2 className="text-lg font-medium dark:text-slate-100 text-slate-900">
-          Choose Color
+          {dict.colorPicker.chooseColor}
         </h2>
         {isMobile && (
           <Dialog.Close asChild>
@@ -70,7 +73,7 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = (props) => {
               className="dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-slate-100 py-2 rounded-md font-medium transition-colors px-4 cursor-pointer hover:bg-blue-600 hover:ring-2 hover:ring-blue-600 text-slate-900 bg-blue-100"
               autoFocus
             >
-              Close
+              {dict.common.close}
             </button>
           </Dialog.Close>
         )}
@@ -82,8 +85,8 @@ const ColorPickerContent: React.FC<ColorPickerContentProps> = (props) => {
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="picker">Color Picker</TabsTrigger>
-          <TabsTrigger value="palette">Palette</TabsTrigger>
+          <TabsTrigger value="picker">{dict.colorPicker.colorPickerTab}</TabsTrigger>
+          <TabsTrigger value="palette">{dict.colorPicker.paletteTab}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="picker" className="space-y-4">

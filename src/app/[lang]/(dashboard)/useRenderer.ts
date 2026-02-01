@@ -31,7 +31,7 @@ export default function useRenderer(
         renderer.unmount();
         return;
       }
-      
+
       rendererRef.current = renderer;
       rendererRef.current.mount();
       rendererRef.current.start();
@@ -50,7 +50,7 @@ export default function useRenderer(
         rendererRef.current = null;
       }
     };
-  }, []);
+  }, [KlassRenderer, state]);
 
   return rendererRef.current;
 }

@@ -7,6 +7,7 @@ import {
 } from "@radix-ui/react-dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { createContext, useCallback, useContext, useState } from "react";
+import { useDictionary } from "@/i18n/DictionaryContext";
 
 interface DialogContextProps {
   getConfirmation: ({
@@ -37,6 +38,7 @@ export function ConfirmationDialogProvider({
   const [dialogCancelText, setDialogCancelText] = useState("");
   const [dialogConfirmText, setDialogConfirmText] = useState("");
   const [confirm, setConfirm] = useState<(value: boolean) => void>(() => {});
+  const { dictionary } = useDictionary();
   const getConfirmation = useCallback(
     ({
       title,
@@ -84,7 +86,7 @@ export function ConfirmationDialogProvider({
                 confirm(false);
               }}
             >
-              {dialogCancelText || "Cancel"}
+              {dialogCancelText || dictionary.confirmation.cancel}
             </button>
 
             <button
@@ -95,7 +97,7 @@ export function ConfirmationDialogProvider({
                 confirm(true);
               }}
             >
-              {dialogConfirmText || "Confirm"}
+              {dialogConfirmText || dictionary.confirmation.confirm}
             </button>
           </div>
         </DialogContent>

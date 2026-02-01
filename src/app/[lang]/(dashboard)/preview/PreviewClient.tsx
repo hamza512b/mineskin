@@ -4,7 +4,7 @@ import { useRendererStore } from "@/hooks/useRendererState";
 import { useRef } from "react";
 import { Dashboard } from "../MineskinDashboard";
 
-export default function PreviewPage() {
+export default function PreviewClient() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const state = useRendererStore((state) => state.state);
 

@@ -1,5 +1,6 @@
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { useRendererStore } from "@/hooks/useRendererState";
+import { useDictionary } from "@/i18n";
 import { useConfirmation } from "@/widgets/Confirmation/Confirmation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
@@ -13,7 +14,7 @@ import React, {
 } from "react";
 import Button from "../Button";
 import IconButton from "../IconButton/IconButton";
-import { steps as tutorialSteps } from "./tutorialSteps";
+import { useTutorialSteps } from "./tutorialSteps";
 
 const Tutorial: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -21,6 +22,10 @@ const Tutorial: React.FC = () => {
   const setHasCompletedTutorial = useRendererStore((state) => state.setHasCompletedTutorial);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { getConfirmation } = useConfirmation();
+  const { dictionary: dict, locale } = useDictionary();
+  const isRTL = locale === "ar";
+  const tutorialSteps = useTutorialSteps();
+
   const filteredSteps = useMemo(() => {
     return tutorialSteps.filter((step) => {
       if (isMobile) {
@@ -29,7 +34,7 @@ const Tutorial: React.FC = () => {
         return step.id !== "part-filter-mobile";
       }
     });
-  }, [isMobile]);
+  }, [isMobile, tutorialSteps]);
 
   const step = filteredSteps[currentStep];
 
@@ -49,7 +54,16 @@ const Tutorial: React.FC = () => {
 
       const parent = tooltipRef.current?.parentElement?.getBoundingClientRect();
       if (step.placement && targetRect) {
-        switch (step.placement) {
+        // Swap left/right placement for RTL
+        const placement = isRTL
+          ? step.placement === "left"
+            ? "right"
+            : step.placement === "right"
+              ? "left"
+              : step.placement
+          : step.placement;
+
+        switch (placement) {
           case "top":
             top = `calc(${targetRect.top}px - 100% - ${padding})`;
             left = `calc(${targetRect.left + targetRect.width / 2}px - 50%)`;
@@ -70,6 +84,9 @@ const Tutorial: React.FC = () => {
           case "left": {
             top = `${targetRect.top - padding}px`;
             right = `calc(100% - ${targetRect.left - padding * 2}px)`;
+            if (parent) {
+              width = `${targetRect.left - padding * 3}px`;
+            }
             break;
           }
         }
@@ -102,7 +119,7 @@ const Tutorial: React.FC = () => {
     return () => {
       window.removeEventListener("resize", calculatePosition);
     };
-  }, [step, targetRect]);
+  }, [step, targetRect, isRTL]);
 
   useEffect(() => {
     if (!step) return;
@@ -144,9 +161,8 @@ const Tutorial: React.FC = () => {
 
   const handleSkip = async () => {
     const confirmed = await getConfirmation({
-      title: "Are you sure?",
-      description:
-        "Are you sure you want to skip the tutorial? You can always restart it later in the settings.",
+      title: dict.tutorial.skipConfirmTitle,
+      description: dict.tutorial.skipConfirmDescription,
     });
     if (confirmed) setHasCompletedTutorial(true);
   };
@@ -216,9 +232,9 @@ const Tutorial: React.FC = () => {
               key={step.id}
             >
               <IconButton
-                label="Skip"
+                label={dict.tutorial.skip}
                 onClick={handleSkip}
-                className="absolute top-3 right-3"
+                className="absolute top-3 right-3 rtl:right-auto rtl:left-3"
               >
                 <Cross1Icon className="w-4 h-4 m-1" />
               </IconButton>
@@ -238,26 +254,26 @@ const Tutorial: React.FC = () => {
                   <Button
                     onClick={handleSkip}
                     variant={"outlined"}
-                    className="ml-auto"
+                    className="ml-auto rtl:ml-0 rtl:mr-auto"
                   >
-                    Skip tutorial
+                    {dict.tutorial.skipTutorial}
                   </Button>
                 ) : (
                   <Button
                     onClick={handlePrev}
                     variant={"outlined"}
-                    className="ml-auto"
+                    className="ml-auto rtl:ml-0 rtl:mr-auto"
                   >
-                    Previous
+                    {dict.tutorial.previous}
                   </Button>
                 )}
                 {isLastStep ? (
                   <Button onClick={handleFinish} variant={"primary"}>
-                    Finish
+                    {dict.tutorial.finish}
                   </Button>
                 ) : (
                   <Button onClick={handleNext} variant={"primary"}>
-                    Next
+                    {dict.tutorial.next}
                   </Button>
                 )}
               </div>

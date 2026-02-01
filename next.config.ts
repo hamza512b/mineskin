@@ -7,19 +7,12 @@ const withSerwist = withSerwistInit({
   cacheOnNavigation: true,
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
-  additionalPrecacheEntries: [{ url: "/~offline", revision }],
+  additionalPrecacheEntries: [{ url: "/en/~offline", revision }],
   register: true,
 });
 
 const nextConfig: NextConfig = {
   output: "export",
-  redirects: async () => [
-    {
-      source: "/",
-      destination: "/preview",
-      permanent: false,
-    },
-  ],
 };
 
 export default withSerwist(nextConfig);

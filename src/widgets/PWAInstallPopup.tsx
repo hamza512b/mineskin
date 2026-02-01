@@ -2,6 +2,8 @@
 import Button from "@/components/Button/index";
 import IconButton from "@/components/IconButton/IconButton";
 import * as Icons from "@/components/Icons/Icons";
+import { usePopupQueue } from "@/contexts/PopupQueueContext";
+import { useDictionary } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,10 +14,12 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function PWAInstallPopup() {
-  const [popupOpen, setPopupOpen] = useState(false);
   const path = usePathname();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
+  const { dictionary: dict } = useDictionary();
+  const { registerPopup, unregisterPopup, isActivePopup } = usePopupQueue();
+  const isVisible = isActivePopup("pwaInstall");
 
   useEffect(() => {
     // Check if user has already dismissed or installed
@@ -33,7 +37,7 @@ export default function PWAInstallPopup() {
     const beforeIsntallHandler = (e: Event) => {
       if (cookieConsented) {
         e.preventDefault();
-        setPopupOpen(true);
+        registerPopup("pwaInstall");
         setDeferredPrompt(e as BeforeInstallPromptEvent);
       }
     };
@@ -47,7 +51,7 @@ export default function PWAInstallPopup() {
     return () => {
       window.removeEventListener("beforeinstallprompt", beforeIsntallHandler);
     };
-  }, []);
+  }, [registerPopup]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) {
@@ -62,12 +66,12 @@ export default function PWAInstallPopup() {
 
     // Clear the deferredPrompt
     setDeferredPrompt(null);
-    setPopupOpen(false);
+    unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
   const handleDismiss = () => {
-    setPopupOpen(false);
+    unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
@@ -78,15 +82,15 @@ export default function PWAInstallPopup() {
   };
 
   // Don't show on policy pages
-  if (path.startsWith("/policies")) {
+  if (path.includes("/policies")) {
     return null;
   }
 
   return (
     <AnimatePresence>
-      {popupOpen && deferredPrompt && (
+      {isVisible && deferredPrompt && (
         <motion.div
-          className="z-2000 fixed bottom-2 left-2 right-2 md:left-2 md:bottom-2 pointer-events-auto! standalone:bottom-8"
+          className="z-2000 fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 pointer-events-auto! standalone:bottom-8"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -116,12 +120,12 @@ export default function PWAInstallPopup() {
                   <line x1={12} x2={12} y1={15} y2={3} />
                 </svg>
                 <h2 id="pwa-install-title" className="text-lg font-semibold">
-                  Install App
+                  {dict.pwa.title}
                 </h2>
               </div>
               <IconButton
                 onClick={handleDismiss}
-                label="Close install prompt"
+                label={dict.pwa.closePrompt}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <Icons.Close />
@@ -131,9 +135,7 @@ export default function PWAInstallPopup() {
             {/* Main content */}
             <div className="px-4 pt-4 pb-4">
               <p id="pwa-install-description" className="text-sm mb-4">
-                Install MineSkin on your device for a faster, app-like
-                experience with offline support and quick access from your home
-                screen.
+                {dict.pwa.description}
               </p>
 
               {/* Actions */}
@@ -141,16 +143,16 @@ export default function PWAInstallPopup() {
                 <Button
                   variant="outlined"
                   onClick={handleDismiss}
-                  aria-label="Dismiss install prompt"
+                  aria-label={dict.pwa.notNow}
                 >
-                  Not now
+                  {dict.pwa.notNow}
                 </Button>
                 <Button
                   variant="primary"
                   onClick={handleInstall}
-                  aria-label="Install MineSkin app"
+                  aria-label={dict.pwa.install}
                 >
-                  Install
+                  {dict.pwa.install}
                 </Button>
               </div>
             </div>

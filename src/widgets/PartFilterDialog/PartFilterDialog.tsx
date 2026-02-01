@@ -1,4 +1,5 @@
 import { useRendererStore } from "@/hooks/useRendererState";
+import { useDictionary } from "@/i18n";
 import * as Dialog from "@radix-ui/react-dialog";
 import { PartButton } from "./PartButton";
 
@@ -11,6 +12,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   open,
   onOpenChange,
 }) => {
+  const { dictionary: dict } = useDictionary();
   // Use Zustand store with selective subscriptions
   const baseheadVisible = useRendererStore((state) => state.values.baseheadVisible);
   const basebodyVisible = useRendererStore((state) => state.values.basebodyVisible);
@@ -85,12 +87,12 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
 
   // Conventional tooltip texts for each part.
   const tooltips = {
-    head: "Head",
-    body: "Torso",
-    leftArm: "Left Arm",
-    rightArm: "Right Arm",
-    leftLeg: "Left Leg",
-    rightLeg: "Right Leg",
+    head: dict.partFilter.head,
+    body: dict.partFilter.torso,
+    leftArm: dict.partFilter.leftArm,
+    rightArm: dict.partFilter.rightArm,
+    leftLeg: dict.partFilter.leftLeg,
+    rightLeg: dict.partFilter.rightLeg,
   };
 
 
@@ -103,16 +105,16 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
           aria-describedby="dialog-description"
         >
           <Dialog.Title className="text-2xl font-semibold mb-6 dark:text-slate-100 text-slate-900">
-            Visibility Settings
+            {dict.partFilter.visibilitySettings}
           </Dialog.Title>
           <div id="dialog-description" className="sr-only">
-            Configure visibility settings for different parts of the skin model.
+            {dict.partFilter.visibilityDescription}
           </div>
           <div className="flex flex-col md:flex-row justify-around gap-8 max-w-lg mx-auto">
             {/* Base Layer Panel */}
             <div>
               <h3 className="text-xl font-medium mb-4 text-center dark:text-slate-100 text-slate-900">
-                First Layer
+                {dict.partFilter.firstLayer}
               </h3>
               <div
                 className="relative mx-auto"
@@ -229,7 +231,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
             {/* Overlay Layer Panel */}
             <div>
               <h3 className="text-xl font-medium mb-4 text-center dark:text-slate-100 text-slate-900">
-                Second Layer
+                {dict.partFilter.secondLayer}
               </h3>
               <div
                 className="relative mx-auto"
@@ -350,7 +352,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                 className=" dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-slate-100 py-2 rounded-md font-medium transition-colors px-4 cursor-pointer hover:bg-blue-200 text-slate-900 bg-blue-100"
                 autoFocus
               >
-                Close
+                {dict.common.close}
               </button>
             </Dialog.Close>
           </div>

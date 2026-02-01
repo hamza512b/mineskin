@@ -1,6 +1,8 @@
 "use client";
 import Button from "@/components/Button/index";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
+import { usePopupQueue } from "@/contexts/PopupQueueContext";
+import { tJsx, useDictionary } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -44,12 +46,14 @@ function parseCookePreferences() {
   }
 }
 export default function CookiePopup() {
-  const [popupOpen, setPopupOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>(() =>
     parseCookePreferences(),
   );
   const path = usePathname();
+  const { dictionary: dict, locale } = useDictionary();
+  const { registerPopup, unregisterPopup, isActivePopup } = usePopupQueue();
+  const isVisible = isActivePopup("cookie");
 
   function handleToggle(key: keyof CookiePreferences) {
     setPreferences((prev) => ({
@@ -59,7 +63,7 @@ export default function CookiePopup() {
   }
 
   function acceptAll() {
-    setPopupOpen(false);
+    unregisterPopup("cookie");
 
     localStorage.setItem("consent-popup", "false");
     localStorage.setItem("cookie-preferences", JSON.stringify(preferences));
@@ -72,7 +76,7 @@ export default function CookiePopup() {
     });
   }
   function savePreferences() {
-    setPopupOpen(false);
+    unregisterPopup("cookie");
     localStorage.setItem("consent-popup", "false");
     localStorage.setItem("cookie-preferences", JSON.stringify(preferences));
 
@@ -87,7 +91,9 @@ export default function CookiePopup() {
 
   useEffect(() => {
     const consented = window.localStorage.getItem("consent-popup");
-    setPopupOpen(!consented);
+    if (!consented) {
+      registerPopup("cookie");
+    }
 
     const cookiePreferences = parseCookePreferences();
     const allowAnalytics = cookiePreferences.analytics === "granted";
@@ -97,7 +103,7 @@ export default function CookiePopup() {
       ad_personalization: "denied",
       analytics_storage: allowAnalytics ? "granted" : "denied",
     });
-  }, []);
+  }, [registerPopup]);
 
   function toggleDetails() {
     setDetailsOpen(!detailsOpen);
@@ -121,15 +127,15 @@ export default function CookiePopup() {
     exit: { opacity: 0, height: "auto", transition: { duration: 0.3 } },
   };
 
-  if (path.startsWith("/policies")) {
+  if (path.includes("/policies")) {
     return null;
   }
 
   return (
     <AnimatePresence>
-      {popupOpen && (
+      {isVisible && (
         <motion.div
-          className="z-[2000] fixed bottom-2 left-2 right-2 md:left-2 md:bottom-2 standalone:bottom-8 !pointer-events-auto"
+          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 !pointer-events-auto"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -142,22 +148,24 @@ export default function CookiePopup() {
             {/* Header */}
             <div className="flex justify-between items-center px-4 pt-4">
               <h2 id="cookie-settings-title" className="text-lg font-semibold">
-                Cookie Settings
+                {dict.cookie.title}
               </h2>
             </div>
 
             {/* Main content */}
             <div className="px-4 pt-4">
               <p id="cookie-settings-description" className="text-sm">
-                We use cookies to enhance your browsing experience. Learn more
-                in our{" "}
-                <Link
-                  href="/policies/cookie-policy"
-                  className="text-blue-600 dark:text-blue-400 underline focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-sm"
-                >
-                  cookie policy
-                </Link>
-                .
+                {tJsx(dict.cookie.description, {
+                  link: (
+                    <Link
+                      key="cookie-link"
+                      href={`/${locale}/policies/cookie-policy`}
+                      className="text-blue-600 dark:text-blue-400 underline focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-sm"
+                    >
+                      {dict.cookie.cookiePolicy}
+                    </Link>
+                  ),
+                })}
               </p>
 
               {/* Cookie preferences panel */}
@@ -174,14 +182,14 @@ export default function CookiePopup() {
                     <div className="space-y-4">
                       <ToggleSwitch
                         id="essential_cookies"
-                        label="Essential Cookies"
+                        label={dict.cookie.essentialCookies}
                         checked={true}
                         disabled={true}
                       />
 
                       <ToggleSwitch
                         id="analytics"
-                        label="Analytics"
+                        label={dict.cookie.analytics}
                         checked={preferences.analytics === "granted"}
                         onCheckedChange={() => handleToggle("analytics")}
                       />
@@ -200,9 +208,9 @@ export default function CookiePopup() {
                     <Button
                       variant="primary"
                       onClick={savePreferences}
-                      aria-label="Save my cookie preferences"
+                      aria-label={dict.cookie.savePreferences}
                     >
-                      Save preferences
+                      {dict.cookie.savePreferences}
                     </Button>
                   </motion.div>
                 ) : (
@@ -213,16 +221,16 @@ export default function CookiePopup() {
                     <Button
                       variant="outlined"
                       onClick={toggleDetails}
-                      aria-label="Customize cookie preferences"
+                      aria-label={dict.cookie.customize}
                     >
-                      Customize
+                      {dict.cookie.customize}
                     </Button>
                     <Button
                       variant="primary"
                       onClick={acceptAll}
-                      aria-label="Accept all cookies"
+                      aria-label={dict.cookie.acceptAll}
                     >
-                      Accept all
+                      {dict.cookie.acceptAll}
                     </Button>
                   </motion.div>
                 )}

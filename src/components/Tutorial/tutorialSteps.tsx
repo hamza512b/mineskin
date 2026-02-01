@@ -1,3 +1,5 @@
+import { t, tJsx, useDictionary } from "@/i18n";
+import { useMemo } from "react";
 
 export interface TutorialStep {
   id: string;
@@ -12,103 +14,102 @@ const isMac =
   window.navigator.userAgent.includes("Macintosh");
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-export const steps: TutorialStep[] = [
-  {
-    id: "intro",
-    title: "Welcome to the Mineskin.pro editor!",
-    content:
-      "This quick tutorial will walk you through the basic editing features of Mineskin.pro.",
-  },
-  {
-    id: "pen-tool",
-    title: "Drawing Tool",
-    content: (
-      <p>
-        This is your main drawing tool. Use the <strong>Pen tool</strong> to
-        draw on your skin pixel by pixel.
-      </p>
-    ),
-    target: '[data-tutorial-id="pen-tool"]',
-    placement: "right",
-  },
-  {
-    id: "eraser-tool",
-    title: "Erasing Tool",
-    content: (
-      <>
+export function useTutorialSteps(): TutorialStep[] {
+  const { dictionary: dict, locale } = useDictionary();
+
+  return useMemo(() => [
+    {
+      id: "intro",
+      title: dict.tutorial.welcomeTitle,
+      content: dict.tutorial.welcomeContent,
+    },
+    {
+      id: "pen-tool",
+      title: dict.tutorial.penToolTitle,
+      content: (
         <p>
-          Use the <strong>Eraser</strong> to remove pixels from your skin.
+          {dict.tutorial.penToolContent}
         </p>
-        <p className="mt-2 text-sm text-gray-400">
-          Note: The eraser will erase the top layer of the skin if both are
-          active.
-        </p>
-      </>
-    ),
-    target: '[data-tutorial-id="eraser-tool"]',
-    placement: "right",
-  },
-  {
-    id: "undo-redo",
-    title: "Undo and Redo",
-    content: (
-      <>
+      ),
+      target: '[data-tutorial-id="pen-tool"]',
+      placement: "right",
+    },
+    {
+      id: "eraser-tool",
+      title: dict.tutorial.eraserTitle,
+      content: (
+        <>
+          <p>
+            {dict.tutorial.eraserContent}
+          </p>
+          <p className="mt-2 text-sm text-gray-400">
+            {dict.tutorial.eraserNote}
+          </p>
+        </>
+      ),
+      target: '[data-tutorial-id="eraser-tool"]',
+      placement: "right",
+    },
+    {
+      id: "undo-redo",
+      title: dict.tutorial.undoRedoTitle,
+      content: (
+        <>
+          <p>
+            {dict.tutorial.undoRedoContent}{" "}
+            {isMobile
+              ? ""
+              : t(dict.tutorial.undoRedoShortcuts, {
+                  shortcuts: isMac ? "⌘ + Shift + Z or ⌘ + Z" : "Ctrl + Y or Ctrl + Z",
+                })}
+          </p>
+          <p className="mt-2 text-sm text-gray-400">
+            {dict.tutorial.undoRedoNote}
+          </p>
+        </>
+      ),
+      target: '[data-tutorial-id="undo-redo-tools"]',
+      placement: "right",
+    },
+    {
+      id: "color-picker",
+      title: dict.tutorial.colorPickerTitle,
+      content: dict.tutorial.colorPickerContent,
+      target: '[data-tutorial-id="color-picker-tools"]',
+      placement: "right",
+    },
+    {
+      id: "part-filter-desktop",
+      title: dict.tutorial.partFilterDesktopTitle,
+      content: dict.tutorial.partFilterDesktopContent,
+      target: '[data-tutorial-id="desktop-part-filter"]',
+      placement: "left",
+    },
+    {
+      id: "part-filter-mobile",
+      title: dict.tutorial.partFilterMobileTitle,
+      content: dict.tutorial.partFilterMobileContent,
+      target: '[data-tutorial-id="mobile-part-filter"]',
+      placement: "right",
+    },
+    {
+      id: "finish",
+      title: dict.tutorial.finishTitle,
+      content: (
         <p>
-          Made a mistake? No worries! You can easily undo and redo your actions
-          here.{" "}
-          {isMobile
-            ? ""
-            : ` You can also use the keyboard shortcuts (${isMac ? "⌘ + Shift + Z or  ⌘ + Z" : "Ctrl + Y or Ctrl + Z"})`}
+          {tJsx(dict.tutorial.finishContent, {
+            link: (
+              <a
+                key="usage-guide-link"
+                href={`/${locale}/guides/usage_guide`}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {dict.detailPanel.usageGuide}
+              </a>
+            ),
+          })}
         </p>
-        <p className="mt-2 text-sm text-gray-400">
-          Note: The undo/redo actions are not persistent after reload.
-        </p>
-      </>
-    ),
-    target: '[data-tutorial-id="undo-redo-tools"]',
-    placement: "right",
-  },
-  {
-    id: "color-picker",
-    title: "Color Picker",
-    content:
-      "You can choose any color you want from the picker, or select from the palette of colors already used in your skin.",
-    target: '[data-tutorial-id="color-picker-tools"]',
-    placement: "right",
-  },
-  {
-    id: "part-filter-desktop",
-    title: "Body Part Visibility",
-    content:
-      "Here you can toggle the visibility of different body parts for both layers. This is useful for editing parts that are hard to reach.",
-    target: '[data-tutorial-id="desktop-part-filter"]',
-    placement: "left",
-  },
-  {
-    id: "part-filter-mobile",
-    title: "Body Part Visibility",
-    content:
-      "Click this button to open the visibility settings. You can toggle the visibility of different body parts for both layers.",
-    target: '[data-tutorial-id="mobile-part-filter"]',
-    placement: "right",
-  },
-  {
-    id: "finish",
-    title: "You're all set 🎉!",
-    content: (
-      <p>
-        That&apos;s it for the basics! For more advanced features and information,
-        you can refer to the{" "}
-        <a
-          href="https://github.com/hamza512b/mineskin/blob/main/USAGE_GUIDE.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:underline"
-        >
-          usage guide
-        </a>
-        . Happy skin editing!
-      </p>
-    ),
-  },
-];
+      ),
+    },
+  ], [dict, locale]);
+}

@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import { EditorIcon, PreviewIcon } from "@/components/Icons/Icons";
+import { useDictionary } from "@/i18n";
 import {
   DotsVerticalIcon,
   DownloadIcon,
@@ -19,10 +20,17 @@ interface TopBarProps {
   mode: "Editing" | "Preview";
 }
 
-function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarProps) {
+function ActionBar({
+  className,
+  downlodTexture,
+  uploadTexture,
+  mode,
+}: TopBarProps) {
+  const { dictionary: dict, locale } = useDictionary();
+
   const modeOptions = [
     {
-      label: "Preview",
+      label: dict.common.preview,
       value: "Preview",
       icon: (
         <PreviewIcon
@@ -32,7 +40,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
       ),
     },
     {
-      label: "Editing",
+      label: dict.common.editing,
       value: "Editing",
 
       icon: (
@@ -52,6 +60,9 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
     downlodTexture?.();
   }, [downlodTexture]);
 
+  const currentModeLabel =
+    mode === "Preview" ? dict.common.preview : dict.common.editing;
+
   return (
     <div
       className={clsx(
@@ -65,11 +76,11 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
           <Button variant={"secondary"} size={"sm"}>
             {modeOptions.find((option) => option.value === mode)?.icon ||
               modeOptions[0].icon}
-            <span className="ml-2">{mode || "Preview"}</span>
+            <span className="ml-2 rtl:ml-0 rtl:mr-2">{currentModeLabel}</span>
           </Button>
         }
       >
-        <Link href="/preview">
+        <Link href={`/${locale}/preview`}>
           <DropdownItem
             leftIcon={<PreviewIcon className="h-4 w-4" />}
             className={clsx(
@@ -77,10 +88,10 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
                 "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
             )}
           >
-            Preview
+            {dict.common.preview}
           </DropdownItem>
         </Link>
-        <Link href="/editor">
+        <Link href={`/${locale}/editor`}>
           <DropdownItem
             leftIcon={<EditorIcon className="h-4 w-4" />}
             className={clsx(
@@ -88,7 +99,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
                 "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium",
             )}
           >
-            Editor
+            {dict.common.editor}
           </DropdownItem>
         </Link>
       </Dropdown>
@@ -101,7 +112,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
             onClick={handleUploadTexture}
             leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
           >
-            Upload
+            {dict.common.upload}
           </Button>
           {mode === "Editing" && (
             <Button
@@ -110,7 +121,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
               onClick={handleDownloadTexture}
               leftIcon={<DownloadIcon className="h-4 w-4" aria-hidden="true" />}
             >
-              Save
+              {dict.common.save}
             </Button>
           )}
         </div>
@@ -121,7 +132,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
               trigger={
                 <Button variant={"ghost"} size={"sm"}>
                   <DotsVerticalIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                  <span className="sr-only">Actions menu</span>
+                  <span className="sr-only">{dict.common.actionsMenu}</span>
                 </Button>
               }
             >
@@ -129,13 +140,13 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
                 onClick={handleUploadTexture}
                 leftIcon={<UploadIcon className="h-4 w-4" />}
               >
-                Upload
+                {dict.common.upload}
               </DropdownItem>
               <DropdownItem
                 onClick={downlodTexture}
                 leftIcon={<DownloadIcon className="h-4 w-4" />}
               >
-                Save
+                {dict.common.save}
               </DropdownItem>
             </Dropdown>
           ) : (
@@ -145,7 +156,7 @@ function ActionBar({ className, downlodTexture, uploadTexture, mode }: TopBarPro
               leftIcon={<UploadIcon className="h-4 w-4" aria-hidden="true" />}
               size={"sm"}
             >
-              Upload
+              {dict.common.upload}
             </Button>
           )}
         </div>

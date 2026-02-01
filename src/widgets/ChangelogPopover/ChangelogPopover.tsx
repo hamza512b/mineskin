@@ -4,6 +4,7 @@ import * as Popover from "@radix-ui/react-popover";
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/i18n/DictionaryContext";
 
 interface ChangelogPopoverProps {
   content: string;
@@ -14,12 +15,13 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
   className,
 }) => {
   const [open, setOpen] = React.useState(false);
+  const { dictionary } = useDictionary();
 
   return (
     <div className={cn("hidden md:block", className)}>
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger asChild>
-          <IconButton aria-label="View changelog" label={"Changelog"}>
+          <IconButton aria-label={dictionary.changelog.viewChangelog} label={dictionary.changelog.title}>
             <Icons.InfoCircle />
           </IconButton>
         </Popover.Trigger>
@@ -31,9 +33,9 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
             align="end"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Changelog</h2>
-              <Popover.Close aria-label="Close" asChild>
-                <IconButton aria-label="Close changelog" label={"Close"}>
+              <h2 className="text-lg font-semibold">{dictionary.changelog.title}</h2>
+              <Popover.Close aria-label={dictionary.common.close} asChild>
+                <IconButton aria-label={dictionary.changelog.closeChangelog} label={dictionary.common.close}>
                   <Icons.Close />
                 </IconButton>
               </Popover.Close>
@@ -41,13 +43,13 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
 
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <div>
-                Need help? Join our discord server on{" "}
+                {dictionary.changelog.helpText}{" "}
                 <a
                   href="https://discord.gg/2egvhmqdza"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Discord
+                  {dictionary.changelog.discord}
                 </a>
               </div>
               <div
