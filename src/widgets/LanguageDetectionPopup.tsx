@@ -4,8 +4,10 @@ import Button from "@/components/Button/index";
 import { usePopupQueue } from "@/contexts/PopupQueueContext";
 import { useDictionary } from "@/i18n";
 import { locales, type Locale } from "@/i18n/config";
+import { LOCALE_COOKIE_NAME } from "@/middleware";
 import { GlobeIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
+import Cookies from "js-cookie";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -61,6 +63,8 @@ export default function LanguageDetectionPopup() {
   function handleDismiss() {
     unregisterPopup("languageDetection");
     localStorage.setItem(STORAGE_KEY, "true");
+    // Store current locale in cookie (user chose to stay in this language)
+    Cookies.set(LOCALE_COOKIE_NAME, currentLocale, { expires: 365, sameSite: "lax" });
   }
 
   function handleSwitchLanguage() {
@@ -69,6 +73,8 @@ export default function LanguageDetectionPopup() {
     // Replace the current locale in the path with the detected one
     const newPath = pathname.replace(`/${currentLocale}`, `/${detectedLocale}`);
     localStorage.setItem(STORAGE_KEY, "true");
+    // Store locale in cookie for middleware access
+    Cookies.set(LOCALE_COOKIE_NAME, detectedLocale, { expires: 365, sameSite: "lax" });
     unregisterPopup("languageDetection");
     router.push(newPath);
   }

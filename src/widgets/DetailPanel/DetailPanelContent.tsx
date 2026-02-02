@@ -5,8 +5,10 @@ import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { useRendererStore } from "@/hooks/useRendererState";
 import { locales, tJsx, useDictionary, type Locale } from "@/i18n";
+import { LOCALE_COOKIE_NAME } from "@/middleware";
 import { CheckIcon, GlobeIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import Cookies from "js-cookie";
 import { usePathname, useRouter } from "next/navigation";
 import { useConfirmation } from "../Confirmation/Confirmation";
 
@@ -33,6 +35,8 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
     if (newLocale === locale) return;
     // Mark language detection as dismissed when user actively switches language
     localStorage.setItem("language-detection-dismissed", "true");
+    // Store locale in cookie for middleware access
+    Cookies.set(LOCALE_COOKIE_NAME, newLocale, { expires: 365, sameSite: "lax" });
     const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
     router.push(newPath);
   };

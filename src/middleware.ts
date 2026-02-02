@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { locales, defaultLocale, type Locale } from "./i18n/config";
 
-function getPreferredLocale(request: NextRequest): Locale {
+export const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
+
+function getLocaleFromAcceptLanguage(request: NextRequest): Locale {
   const acceptLanguage = request.headers.get("accept-language");
   if (!acceptLanguage) return defaultLocale;
 
@@ -23,6 +25,17 @@ function getPreferredLocale(request: NextRequest): Locale {
   }
 
   return defaultLocale;
+}
+
+function getPreferredLocale(request: NextRequest): Locale {
+  // First, check the cookie for user's saved preference
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value as Locale | undefined;
+  if (cookieLocale && locales.includes(cookieLocale)) {
+    return cookieLocale;
+  }
+
+  // Fall back to Accept-Language header
+  return getLocaleFromAcceptLanguage(request);
 }
 
 export function middleware(request: NextRequest) {
