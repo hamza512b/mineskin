@@ -9,10 +9,12 @@ const withSerwist = withSerwistInit({
   swDest: "public/sw.js",
   additionalPrecacheEntries: [{ url: "/en/~offline", revision }],
   register: true,
+  disable: process.env.NODE_ENV !== "production",
 });
 
 const nextConfig: NextConfig = {
-  // output: "export",
+  output: "export",
+  turbopack: {},
 };
 
 export default withSerwist(nextConfig);

@@ -18,6 +18,7 @@ import {
   DictionaryProvider,
 } from "@/i18n";
 import { getDictionary } from "@/i18n/dictionaries";
+import { HtmlLangSetter } from "./HtmlLangSetter";
 
 export async function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -116,45 +117,42 @@ export default async function LangLayout({
   const dir = lang === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={lang} dir={dir}>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: "MineSkin - Minecraft Skin Editor & Tester",
-              description: dictionary.metadata.description,
-              image: `${baseUrl}/og-image.jpg`,
-              url: `${baseUrl}/${lang}/`,
-              applicationCategory: "GameApplication",
-              operatingSystem: "Any",
-              inLanguage: lang,
-              author: {
-                "@type": "Person",
-                name: "Hamza512b",
-              },
-            }),
-          }}
-        />
-      </head>
-      <body>
-        <GoogleAnalyticsScript />
-        <DictionaryProvider dictionary={dictionary} locale={lang as Locale}>
-          <TooltipProvider>
-            <ConfirmationDialogProvider>
-              {children}
-            </ConfirmationDialogProvider>
-            <Toaster />
-          </TooltipProvider>
-          <PopupQueueProvider>
-            <CookiePopup />
-            <LanguageDetectionPopup />
-            <PWAInstallPopup />
-          </PopupQueueProvider>
-        </DictionaryProvider>
-      </body>
-    </html>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "MineSkin - Minecraft Skin Editor & Tester",
+            description: dictionary.metadata.description,
+            image: `${baseUrl}/og-image.jpg`,
+            url: `${baseUrl}/${lang}/`,
+            applicationCategory: "GameApplication",
+            operatingSystem: "Any",
+            inLanguage: lang,
+            author: {
+              "@type": "Person",
+              name: "Hamza512b",
+            },
+          }),
+        }}
+      />
+      <HtmlLangSetter lang={lang} dir={dir} />
+      <GoogleAnalyticsScript />
+      <DictionaryProvider dictionary={dictionary} locale={lang as Locale}>
+        <TooltipProvider>
+          <ConfirmationDialogProvider>
+            {children}
+          </ConfirmationDialogProvider>
+          <Toaster />
+        </TooltipProvider>
+        <PopupQueueProvider>
+          <CookiePopup />
+          <LanguageDetectionPopup />
+          <PWAInstallPopup />
+        </PopupQueueProvider>
+      </DictionaryProvider>
+    </>
   );
 }

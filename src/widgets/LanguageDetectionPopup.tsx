@@ -3,8 +3,7 @@
 import Button from "@/components/Button/index";
 import { usePopupQueue } from "@/contexts/PopupQueueContext";
 import { useDictionary } from "@/i18n";
-import { locales, type Locale } from "@/i18n/config";
-import { LOCALE_COOKIE_NAME } from "@/middleware";
+import { locales, type Locale, LOCALE_COOKIE_NAME } from "@/i18n/config";
 import { GlobeIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Cookies from "js-cookie";
@@ -93,7 +92,7 @@ export default function LanguageDetectionPopup() {
     <AnimatePresence>
       {isVisible && detectedLocale && (
         <motion.div
-          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 !pointer-events-auto"
+          className="z-2000 fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 pointer-events-auto!"
           initial="hidden"
           animate="visible"
           exit="exit"

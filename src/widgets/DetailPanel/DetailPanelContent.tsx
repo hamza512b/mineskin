@@ -4,8 +4,7 @@ import Dropdown, { DropdownItem } from "@/components/Dropdown";
 import Slider from "@/components/Slider/Slider";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { useRendererStore } from "@/hooks/useRendererState";
-import { locales, tJsx, useDictionary, type Locale } from "@/i18n";
-import { LOCALE_COOKIE_NAME } from "@/middleware";
+import { locales, tJsx, useDictionary, type Locale, LOCALE_COOKIE_NAME } from "@/i18n";
 import { CheckIcon, GlobeIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import Cookies from "js-cookie";
@@ -419,7 +418,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
               size="sm"
               align="start"
               trigger={
-                <button className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-[200px]">
+                <button className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 cursor-pointer hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 max-w-50">
                   <GlobeIcon className="w-4 h-4 shrink-0" />
                   <span className="truncate">{dict.languageSwitcher[locale]}</span>
                 </button>
