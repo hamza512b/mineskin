@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<network-security-config>
+    <!--
+        Dev only: trust the mkcert development CA so the WebView can load the
+        HTTPS LAN dev server pointed to by CAP_SERVER_URL (npm run dev:host).
+        <debug-overrides> only applies when the build is debuggable, so release
+        builds keep the default (system CAs only) trust store.
+    -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+            <certificates src="@raw/mineskin_dev_ca" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

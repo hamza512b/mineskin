@@ -1,0 +1,10 @@
+# fastlane Appfile — shared app identifiers.
+# Secrets come from fastlane/.env (gitignored); see fastlane/.env.example.
+
+app_identifier("pro.mineskin.app") # iOS bundle id
+team_id("98V5CH5383")              # Apple Developer team
+
+for_platform :android do
+  package_name("pro.mineskin.app")
+  json_key_data_raw(ENV["PLAY_JSON_KEY"]) if ENV["PLAY_JSON_KEY"]
+end

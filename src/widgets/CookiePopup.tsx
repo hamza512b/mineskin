@@ -2,6 +2,7 @@
 import Button from "@/components/Button/index";
 import ToggleSwitch from "@/components/ToggleSwtich/ToggleSwtich";
 import { usePopupQueue } from "@/contexts/PopupQueueContext";
+import { isNativeWebview } from "@/hooks/useNativeWebview";
 import { tJsx, useDictionary } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -15,6 +16,8 @@ type CookiePreferences = {
 const DEFAULT_COOKIE_PERF: CookiePreferences = {
   analytics: "granted",
 };
+
+const ONBOARDING_STORAGE_KEY = "ios-onboarding-completed";
 function parseCookePreferences() {
   try {
     if (typeof window === "undefined") {
@@ -90,6 +93,10 @@ export default function CookiePopup() {
   }
 
   useEffect(() => {
+    // Don't show if onboarding is in progress (it handles cookie consent)
+    const onboardingCompleted = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (!onboardingCompleted && isNativeWebview()) return;
+
     const consented = window.localStorage.getItem("consent-popup");
     if (!consented) {
       registerPopup("cookie");
@@ -135,7 +142,8 @@ export default function CookiePopup() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 !pointer-events-auto"
+          // className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 !pointer-events-auto"
+          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 safe-area-bottom safe-area-leftrtl:safe-area-right pointer-events-auto!"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -144,7 +152,7 @@ export default function CookiePopup() {
           aria-labelledby="cookie-settings-title"
           aria-describedby="cookie-settings-description"
         >
-          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center px-4 pt-4">
               <h2 id="cookie-settings-title" className="text-lg font-semibold">
@@ -160,6 +168,8 @@ export default function CookiePopup() {
                     <Link
                       key="cookie-link"
                       href={`/${locale}/policies/cookie-policy`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-blue-600 dark:text-blue-400 underline focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-sm"
                     >
                       {dict.cookie.cookiePolicy}
@@ -198,7 +208,7 @@ export default function CookiePopup() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="dark:bg-slate-800 bg-white mt-4 px-4 pb-4 z-0 relative">
+            <div className="dark:bg-neutral-800 bg-white mt-4 px-4 pb-4 z-0 relative">
               <AnimatePresence>
                 {detailsOpen ? (
                   <motion.div

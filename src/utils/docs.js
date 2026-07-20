@@ -1,6 +1,9 @@
 import fs from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import matter from "gray-matter";
+
+const rootDir = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 function getDocSlugs(guidesDirectory) {
   const slugs = fs
@@ -16,13 +19,13 @@ export function getDocBySlug(slug, fields = [], directory, locale) {
   let fileContents;
   try {
     fileContents = fs.readFileSync(
-      join(process.cwd(), directory, `${slug}.${locale}.md`),
+      join(rootDir, directory, `${slug}.${locale}.md`),
       "utf8",
     );
   } catch {
     try {
       fileContents = fs.readFileSync(
-        join(process.cwd(), directory, `${slug}.en.md`),
+        join(rootDir, directory, `${slug}.en.md`),
         "utf8",
       );
     } catch {
@@ -54,7 +57,7 @@ export function getDocBySlug(slug, fields = [], directory, locale) {
 }
 
 export function getAllDocs(fields = [], directory, locales) {
-  const slugs = getDocSlugs(join(process.cwd(), directory));
+  const slugs = getDocSlugs(join(rootDir, directory));
   const guides = slugs
     .map((slug) =>
       locales.map((locale) => getDocBySlug(slug, fields, directory, locale)),

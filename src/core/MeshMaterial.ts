@@ -1,5 +1,6 @@
 import { hexToRgb } from "./utils";
 import { v4 as uuidv4 } from "uuid";
+import { flipSkinTexelFrontBack } from "./skinMirror";
 
 export class MeshMaterial {
   private _uuid: string;
@@ -58,11 +59,11 @@ export class MeshImageMaterial extends MeshMaterial {
     }
     super();
 
-    this.image = new ImageData(
-      initialData as any,
-      width,
-      height,
-    );
+    const data =
+      initialData !== undefined
+        ? new Uint8ClampedArray(initialData)
+        : new Uint8ClampedArray(width * height * 4);
+    this.image = new ImageData(data, width, height);
     this._isDirty = true;
   }
 
@@ -437,26 +438,57 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
 
   public convertToSlim() {
     const copy = this.clone();
-    copy.clearRect(46, 52, 1, 12);
-    copy.clearRect(47, 52, 1, 12);
-    copy.clearRect(55, 20, 1, 12);
-    copy.clearRect(54, 20, 1, 12);
+    const mul = this.width === 128 ? 2 : 1;
+    copy.clearRect(46 * mul, 52 * mul, 1 * mul, 12 * mul);
+    copy.clearRect(47 * mul, 52 * mul, 1 * mul, 12 * mul);
+    copy.clearRect(55 * mul, 20 * mul, 1 * mul, 12 * mul);
+    copy.clearRect(54 * mul, 20 * mul, 1 * mul, 12 * mul);
     return copy;
   }
 
   public convertToClassic() {
     const copy = this.clone();
-    copy.fillRect(46, 52, 1, 12, 255, 255, 255);
-    copy.fillRect(47, 52, 1, 12, 255, 255, 255);
-    copy.fillRect(55, 20, 1, 12, 255, 255, 255);
-    copy.fillRect(54, 20, 1, 12, 255, 255, 255);
+    const mul = this.width === 128 ? 2 : 1;
+    copy.fillRect(46 * mul, 52 * mul, 1 * mul, 12 * mul, 255, 255, 255);
+    copy.fillRect(47 * mul, 52 * mul, 1 * mul, 12 * mul, 255, 255, 255);
+    copy.fillRect(55 * mul, 20 * mul, 1 * mul, 12 * mul, 255, 255, 255);
+    copy.fillRect(54 * mul, 20 * mul, 1 * mul, 12 * mul, 255, 255, 255);
+    return copy;
+  }
+
+  /**
+   * Returns a copy with every skin box flipped front↔back (reflected across the
+   * model's depth center plane): what faced forward now faces backward. Texels
+   * outside the skin faces are left untouched. `slim` selects the 3px arm
+   * unwrap so the arm faces are remapped at the right width.
+   */
+  public flipFrontToBack(slim: boolean) {
+    const copy = this.clone();
+    const src = this.imageData.data;
+    const dst = copy.imageData.data;
+    const { width, height } = this;
+    const scale = width === 128 ? 2 : 1;
+    for (let v = 0; v < height; v++) {
+      for (let u = 0; u < width; u++) {
+        const t = flipSkinTexelFrontBack(u, v, { scale, slim });
+        if (!t) continue;
+        const s = (v * width + u) * 4;
+        const d = (t.v * width + t.u) * 4;
+        dst[d] = src[s];
+        dst[d + 1] = src[s + 1];
+        dst[d + 2] = src[s + 2];
+        dst[d + 3] = src[s + 3];
+      }
+    }
     return copy;
   }
 
   public get version() {
     const { data, width } = this.imageData;
+    const mul = width === 128 ? 2 : 1;
+    const colHeight = 12 * mul;
     const checkColumn = (x: number, startY: number): boolean => {
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < colHeight; i++) {
         const y = startY + i;
         const idx = (y * width + x) * 4;
         if (data[idx] || data[idx + 1] || data[idx + 2] || data[idx + 3])
@@ -464,16 +496,16 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
       }
       return true;
     };
-    if (!checkColumn(46, 52)) {
+    if (!checkColumn(46 * mul, 52 * mul)) {
       return "classic";
     }
-    if (!checkColumn(47, 52)) {
+    if (!checkColumn(47 * mul, 52 * mul)) {
       return "classic";
     }
-    if (!checkColumn(55, 20)) {
+    if (!checkColumn(55 * mul, 20 * mul)) {
       return "classic";
     }
-    if (!checkColumn(54, 20)) {
+    if (!checkColumn(54 * mul, 20 * mul)) {
       return "classic";
     }
     return "slim";
@@ -586,12 +618,77 @@ export class MinecraftSkinMaterial extends MeshImageMaterial {
     return new MinecraftSkinMaterial(64, 64, imageData.data);
   }
 
+  static createFrom128Image(img: HTMLImageElement): MinecraftSkinMaterial {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Could not get 2D context from canvas");
+    }
+
+    canvas.width = 128;
+    canvas.height = 128;
+
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, 128, 128);
+
+    return new MinecraftSkinMaterial(128, 128, imageData.data);
+  }
+
   static createFromImageData(imageData: ImageData) {
     const width = imageData.width;
     const height = imageData.height;
 
     // Create a new with the same dimensions and data
     return new MinecraftSkinMaterial(width, height, imageData.data);
+  }
+
+  static upscale64to128(imageData: ImageData): ImageData {
+    const result = new ImageData(128, 128);
+    const src = imageData.data;
+    const dst = result.data;
+    for (let y = 0; y < 64; y++) {
+      const rowStart = y * 64 * 4;
+      const dstRow0 = y * 2 * 128 * 4;
+      const dstRow1 = dstRow0 + 128 * 4;
+      for (let x = 0; x < 64; x++) {
+        const srcIdx = rowStart + x * 4;
+        const r = src[srcIdx];
+        const g = src[srcIdx + 1];
+        const b = src[srcIdx + 2];
+        const a = src[srcIdx + 3];
+        const dx = x * 2 * 4;
+        const p0 = dstRow0 + dx;
+        const p1 = p0 + 4;
+        const p2 = dstRow1 + dx;
+        const p3 = p2 + 4;
+        dst[p0] = r; dst[p0 + 1] = g; dst[p0 + 2] = b; dst[p0 + 3] = a;
+        dst[p1] = r; dst[p1 + 1] = g; dst[p1 + 2] = b; dst[p1 + 3] = a;
+        dst[p2] = r; dst[p2 + 1] = g; dst[p2 + 2] = b; dst[p2 + 3] = a;
+        dst[p3] = r; dst[p3 + 1] = g; dst[p3 + 2] = b; dst[p3 + 3] = a;
+      }
+    }
+    return result;
+  }
+
+  static downscale128to64(imageData: ImageData): ImageData {
+    const result = new ImageData(64, 64);
+    const src = imageData.data;
+    const dst = result.data;
+    for (let y = 0; y < 64; y++) {
+      const srcRow = y * 2 * 128 * 4;
+      const dstRow = y * 64 * 4;
+      for (let x = 0; x < 64; x++) {
+        const srcIdx = srcRow + x * 2 * 4;
+        const dstIdx = dstRow + x * 4;
+        dst[dstIdx] = src[srcIdx];
+        dst[dstIdx + 1] = src[srcIdx + 1];
+        dst[dstIdx + 2] = src[srcIdx + 2];
+        dst[dstIdx + 3] = src[srcIdx + 3];
+      }
+    }
+    return result;
   }
 
   /**

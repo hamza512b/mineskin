@@ -16,7 +16,7 @@ import {
   scaleVector,
   translateM44,
 } from "./maths";
-import { createTriangleLine } from "./meshUtils";
+import { appendTriangleLine } from "./meshUtils";
 
 type MeshMetadata = {
   [key: string]: string | number | boolean | Record<string, string | number>;
@@ -50,7 +50,6 @@ export class Mesh extends Base {
   public vertexOffset: number = 0;
   readonly metadata: MeshMetadata;
   private transformMatrix = identityM44();
-  public query: WebGLQuery | null = null;
   private _visible = true;
   get visible() {
     return !!this.parent?.visible && this._visible;
@@ -176,10 +175,6 @@ export class MeshGroup extends Base {
   public mergedVertices: number[] = [];
   public mergedNormals: number[] = [];
   public mergedUVs: number[] = [];
-  public mergedVerticesBuffer: WebGLBuffer | null = null;
-  public mergedNormalsBuffer: WebGLBuffer | null = null;
-  public mergedUVsBuffer: WebGLBuffer | null = null;
-  public vao: WebGLVertexArrayObject | null = null;
   public linesOffset: number = 0;
 
   // Cached bounding box
@@ -404,31 +399,13 @@ export class MeshGroup extends Base {
     return results;
   }
 
-  cleanup(gl: WebGL2RenderingContext | null) {
-    if (
-      !gl ||
-      !this.mergedNormals.length ||
-      !this.mergedUVs.length ||
-      !this.mergedVertices.length
-    ) {
-      return;
-    }
-
-    if (this.mergedVerticesBuffer) gl.deleteBuffer(this.mergedVerticesBuffer);
-    if (this.mergedNormalsBuffer) gl.deleteBuffer(this.mergedNormalsBuffer);
-    if (this.mergedUVsBuffer) gl.deleteBuffer(this.mergedUVsBuffer);
-    if (this.vao) gl.deleteVertexArray(this.vao);
-    this.meshes.forEach((child) => {
-      if (child instanceof MeshGroup) child.cleanup(gl);
-    });
-
+  clearCompiledData() {
+    this.mergedVertices = [];
     this.mergedNormals = [];
     this.mergedUVs = [];
-    this.mergedVertices = [];
-    this.mergedVerticesBuffer = null;
-    this.mergedNormalsBuffer = null;
-    this.mergedUVsBuffer = null;
-    this.vao = null;
+    this.meshes.forEach((child) => {
+      if (child instanceof MeshGroup) child.clearCompiledData();
+    });
   }
 
   public compileData() {
@@ -437,79 +414,113 @@ export class MeshGroup extends Base {
     this.mergedNormals = [];
     this.mergedUVs = [];
 
-    function gatherMeshes(meshGroup: MeshGroup): Mesh[] {
-      const meshes: Mesh[] = [];
+    function gatherMeshes(meshGroup: MeshGroup, out: Mesh[]): Mesh[] {
       for (const mesh of meshGroup.getChildren()) {
         if (mesh instanceof Mesh) {
-          meshes.push(mesh);
+          out.push(mesh);
         } else if (mesh instanceof MeshGroup) {
-          meshes.push(...gatherMeshes(mesh));
+          gatherMeshes(mesh, out);
         }
       }
-      return meshes;
+      return out;
     }
 
-    const meshes = gatherMeshes(this);
+    const meshes: Mesh[] = [];
+    gatherMeshes(this, meshes);
+
+    const mv = this.mergedVertices;
+    const mn = this.mergedNormals;
+    const mu = this.mergedUVs;
 
     for (const mesh of meshes) {
-      mesh.vertexOffset = this.mergedVertices.length / 3;
-      this.mergedVertices.push(...mesh.vertices);
-      this.mergedNormals.push(...mesh.normals);
-      this.mergedUVs.push(...mesh.uvs);
+      mesh.vertexOffset = mv.length / 3;
+      const vs = mesh.vertices;
+      const ns = mesh.normals;
+      const us = mesh.uvs;
+      for (let k = 0; k < vs.length; k++) mv.push(vs[k]);
+      for (let k = 0; k < ns.length; k++) mn.push(ns[k]);
+      for (let k = 0; k < us.length; k++) mu.push(us[k]);
     }
 
-    this.linesOffset = this.mergedVertices.length / 3;
+    this.linesOffset = mv.length / 3;
     const cubeCenter = this.calculateCentroid();
 
-    // Render lines outside of the cube
-    const moveMatrix = multiplyM44(
-      translateM44(cubeCenter[0], cubeCenter[1], cubeCenter[2]),
-      scaleM44(1.01, 1.01, 1.01),
-      translateM44(-cubeCenter[0], -cubeCenter[1], -cubeCenter[2]),
-    );
+    // Render lines outside of the cube. moveMatrix is translate × uniformScale ×
+    // translate, so each row picks a single axis — we only need its diagonal +
+    // translation components, avoiding a full 4x4 multiply per vertex.
+    const s = 1.01;
+    const tx = cubeCenter[0] * (1 - s);
+    const ty = cubeCenter[1] * (1 - s);
+    const tz = cubeCenter[2] * (1 - s);
+
+    // Bucket of unique transformed vertices for the current mesh.
+    const ux: number[] = [];
+    const uy: number[] = [];
+    const uz: number[] = [];
+
+    // Dedupe edges across cells: interior grid edges are otherwise emitted by
+    // both adjacent quads, producing overlapping tubes for no visual benefit.
+    const seenEdges = new Set<string>();
+
     for (const mesh of meshes) {
-      // First, collect unique vertices
-      const uniqueVertices: number[] = [];
+      ux.length = 0;
+      uy.length = 0;
+      uz.length = 0;
 
-      for (let i = 0; i < mesh.vertices.length; i += 3) {
-        const v = mesh.vertices.slice(i, i + 3) as V3;
-
+      const verts = mesh.vertices;
+      for (let i = 0; i < verts.length; i += 3) {
+        const vx = verts[i] * s + tx;
+        const vy = verts[i + 1] * s + ty;
+        const vz = verts[i + 2] * s + tz;
         let exists = false;
-        for (let j = 0; j < uniqueVertices.length; j += 3) {
-          const uv = uniqueVertices.slice(j, j + 3) as V3;
-          if (uv[0] === v[0] && uv[1] === v[1] && uv[2] === v[2]) {
+        for (let j = 0; j < ux.length; j++) {
+          if (ux[j] === vx && uy[j] === vy && uz[j] === vz) {
             exists = true;
             break;
           }
         }
-        if (exists) continue;
-        uniqueVertices.push(...multiplyM4V3(moveMatrix, v));
+        if (!exists) {
+          ux.push(vx);
+          uy.push(vy);
+          uz.push(vz);
+        }
       }
 
-      // TODO this part should overloaded and moved to minecraft part
-      // Create edges between vertices that share coordinates
-      // This creates both horizontal and vertical lines for the grid
-      for (let i = 0; i < uniqueVertices.length; i += 3) {
-        for (let j = i + 3; j < uniqueVertices.length; j += 3) {
-          const v1 = uniqueVertices.slice(i, i + 3) as V3;
-          const v2 = uniqueVertices.slice(j, j + 3) as V3;
+      const n = ux.length;
+      for (let i = 0; i < n; i++) {
+        const v1x = ux[i];
+        const v1y = uy[i];
+        const v1z = uz[i];
+        for (let j = i + 1; j < n; j++) {
+          const v2x = ux[j];
+          const v2y = uy[j];
+          const v2z = uz[j];
 
-          // If two vertices share two coordinates (meaning they're adjacent in a grid)
-          // Create a line between them
-
-          // Count how many coordinates are the same
           const sameCoords =
-            (v1[0] === v2[0] ? 1 : 0) +
-            (v1[1] === v2[1] ? 1 : 0) +
-            (v1[2] === v2[2] ? 1 : 0);
+            (v1x === v2x ? 1 : 0) +
+            (v1y === v2y ? 1 : 0) +
+            (v1z === v2z ? 1 : 0);
+          if (sameCoords !== 2) continue;
 
-          // If exactly two coordinates are the same, these vertices should be connected
-          if (sameCoords === 2) {
-            const triangleLine = createTriangleLine(v1, v2, 0.025);
-            this.mergedVertices.push(...triangleLine.vertices);
-            this.mergedNormals.push(...triangleLine.normals);
-            this.mergedUVs.push(...triangleLine.uvs);
+          // Canonical key — order endpoints so a shared edge hashes the same
+          // regardless of which adjacent cell encounters it first.
+          let a1x: number, a1y: number, a1z: number;
+          let a2x: number, a2y: number, a2z: number;
+          if (
+            v1x < v2x ||
+            (v1x === v2x && (v1y < v2y || (v1y === v2y && v1z < v2z)))
+          ) {
+            a1x = v1x; a1y = v1y; a1z = v1z;
+            a2x = v2x; a2y = v2y; a2z = v2z;
+          } else {
+            a1x = v2x; a1y = v2y; a1z = v2z;
+            a2x = v1x; a2y = v1y; a2z = v1z;
           }
+          const key = `${a1x},${a1y},${a1z}|${a2x},${a2y},${a2z}`;
+          if (seenEdges.has(key)) continue;
+          seenEdges.add(key);
+
+          appendTriangleLine(v1x, v1y, v1z, v2x, v2y, v2z, 0.025, mv, mn, mu);
         }
       }
     }
@@ -528,6 +539,7 @@ export class MinecraftPart extends MeshGroup {
     name: string,
     transformMatrix?: M44,
     jointPosition?: V3,
+    pixelSize: number = 1.0,
   ) {
     super(name);
     if (jointPosition) {
@@ -549,7 +561,7 @@ export class MinecraftPart extends MeshGroup {
     const faces: Face[] = [
       {
         label: "Front",
-        faceCenter: addV3(position, [0, 0, depth / 2]),
+        faceCenter: addV3(position, [0, 0, depth * pixelSize / 2]),
         uAxis: [1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -559,7 +571,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Back",
-        faceCenter: addV3(position, [0, 0, -depth / 2]),
+        faceCenter: addV3(position, [0, 0, -depth * pixelSize / 2]),
         uAxis: [-1, 0, 0],
         vAxis: [0, -1, 0],
         subdivisionsU: width,
@@ -569,7 +581,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Right",
-        faceCenter: addV3(position, [-width / 2, 0, 0]),
+        faceCenter: addV3(position, [-width * pixelSize / 2, 0, 0]),
         uAxis: [0, 0, 1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -579,7 +591,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Left",
-        faceCenter: addV3(position, [width / 2, 0, 0]),
+        faceCenter: addV3(position, [width * pixelSize / 2, 0, 0]),
         uAxis: [0, 0, -1],
         vAxis: [0, -1, 0],
         subdivisionsU: depth,
@@ -589,7 +601,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Top",
-        faceCenter: addV3(position, [0, height / 2, 0]),
+        faceCenter: addV3(position, [0, height * pixelSize / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -599,7 +611,7 @@ export class MinecraftPart extends MeshGroup {
       },
       {
         label: "Bottom",
-        faceCenter: addV3(position, [0, -height / 2, 0]),
+        faceCenter: addV3(position, [0, -height * pixelSize / 2, 0]),
         uAxis: [1, 0, 0],
         vAxis: [0, 0, 1],
         subdivisionsU: width,
@@ -632,8 +644,8 @@ export class MinecraftPart extends MeshGroup {
 
       for (let i = 0; i < face.subdivisionsU; i++) {
         for (let j = 0; j < face.subdivisionsV; j++) {
-          const localX = i + 0.5 - face.subdivisionsU / 2;
-          const localY = j + 0.5 - face.subdivisionsV / 2;
+          const localX = (i + 0.5 - face.subdivisionsU / 2) * pixelSize;
+          const localY = (j + 0.5 - face.subdivisionsV / 2) * pixelSize;
           const offset = addV3(
             scaleVector(face.uAxis, localX),
             scaleVector(face.vAxis, localY),
@@ -657,7 +669,7 @@ export class MinecraftPart extends MeshGroup {
           ];
           const mesh = Mesh.createPlane(
             worldPos,
-            [1, 1],
+            [pixelSize, pixelSize],
             face.plnaeFace,
             cellUVs,
             faceGroup,
@@ -837,6 +849,7 @@ export class MinecraftPart extends MeshGroup {
     transformMatrix?: M44,
     metadata?: MeshMetadata,
     jointPosition?: V3,
+    pixelSize: number = 1.0,
   ) {
     const part = new MinecraftPart(
       size,
@@ -846,6 +859,7 @@ export class MinecraftPart extends MeshGroup {
       name,
       transformMatrix,
       jointPosition,
+      pixelSize,
     );
     part.setParent(parent);
     part.metadata = { ...part.metadata, ...metadata };

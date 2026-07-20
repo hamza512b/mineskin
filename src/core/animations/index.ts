@@ -1,6 +1,11 @@
 import { MinecraftPart } from "../mesh";
 import idle from "./idle.json";
 import walking from "./walking.json";
+import running from "./running.json";
+import flying from "./flying.json";
+import wave from "./wave.json";
+import crouch from "./crouch.json";
+import hit from "./hit.json";
 
 export interface AnimationKeyframe {
   time: number;
@@ -36,4 +41,17 @@ export interface AnimationBodyPart {
 
 export const walkingAnimation = walking as AnimationDefinition;
 export const idleAnimation = idle as AnimationDefinition;
-export default [walkingAnimation, idleAnimation];
+export const runningAnimation = running as AnimationDefinition;
+export const flyingAnimation = flying as AnimationDefinition;
+export const waveAnimation = wave as AnimationDefinition;
+export const crouchAnimation = crouch as AnimationDefinition;
+export const hitAnimation = hit as AnimationDefinition;
+export default [
+  walkingAnimation,
+  idleAnimation,
+  runningAnimation,
+  flyingAnimation,
+  waveAnimation,
+  crouchAnimation,
+  hitAnimation,
+];

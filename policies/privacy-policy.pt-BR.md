@@ -2,7 +2,7 @@
 title: "Política de Privacidade"
 ---
 
-_Última atualização: 30 de outubro de 2025_
+_Última atualização: 7 de fevereiro de 2026_
 
 Esta Política de Privacidade descreve as políticas e procedimentos relativos à coleta, uso e divulgação de suas informações pessoais quando você usa nossos serviços. Nesta política, "Nós", "Nos", "Nosso" refere-se ao mineskin.pro.
 
@@ -50,6 +50,7 @@ Usamos os seguintes serviços de terceiros para coletar e analisar dados de uso:
 - **Google Analytics:** Coleta informações sobre como você usa nosso Serviço para nos ajudar a entender o comportamento do usuário e melhorar a funcionalidade.
 - **Vercel Analytics:** Coleta dados anônimos de visualização de página e métricas básicas de visitantes para entender padrões de tráfego.
 - **Vercel Speed Insights:** Monitora métricas de desempenho do site, como tempos de carregamento de página e Core Web Vitals, para garantir uma experiência de usuário ideal.
+- **Sentry:** Coleta relatórios de erros, dados de desempenho e gravações de replay de sessão para nos ajudar a identificar e corrigir problemas. Os replays de sessão capturam gravações anonimizadas das interações do usuário (como cliques e navegação de páginas) para uma amostra de sessões. O Sentry também pode coletar informações do dispositivo, tipo de navegador e endereços IP.
 
 Esses serviços podem usar cookies e tecnologias de rastreamento similares. Você pode gerenciar suas preferências de cookies através do nosso banner de consentimento de cookies ou nas configurações do seu navegador.
 
@@ -67,7 +68,7 @@ Suas Informações são usadas para:
 Podemos compartilhar suas Informações com:
 
 - **Provedores de Serviços em Nuvem:** ex., Vercel, PlanetScale, AWS, Google Cloud Platform, para hospedagem e armazenamento de dados.
-- **Provedores de Analytics:** ex., Google Analytics, Vercel Analytics e Vercel Speed Insights, para melhorar e entender o uso do Serviço e monitoramento de desempenho.
+- **Provedores de Analytics:** ex., Google Analytics, Vercel Analytics, Vercel Speed Insights e Sentry, para melhorar e entender o uso do Serviço, monitoramento de desempenho e rastreamento de erros.
 - **Provedores de Comunicações:** ex., SendGrid, MailChimp, para envio de comunicações e newsletters.
 - **Requisitos Legais:** quando legalmente compelidos por autoridades, forças policiais ou ordens judiciais.
 - **Com Seu Consentimento:** para outros fins explicitamente aprovados por você.

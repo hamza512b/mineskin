@@ -6,6 +6,9 @@ export {
   hasLocale,
   generateAlternates,
   LOCALE_COOKIE_NAME,
+  LOCALE_STORAGE_KEY,
+  LOCALE_TO_FLAG,
+  setPreferredLocale,
   type Locale,
 } from "./config";
 

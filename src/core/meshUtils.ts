@@ -296,3 +296,134 @@ export function createTriangleLine(
 
   return { vertices, normals, uvs };
 }
+
+/**
+ * Same geometry as createTriangleLine, but writes directly into the supplied
+ * arrays — no intermediate V3 allocations, no spread pushes. Used by the
+ * mesh-compile hot path where this gets called tens of thousands of times.
+ */
+export function appendTriangleLine(
+  v1x: number,
+  v1y: number,
+  v1z: number,
+  v2x: number,
+  v2y: number,
+  v2z: number,
+  lineWidth: number,
+  outVertices: number[],
+  outNormals: number[],
+  outUVs: number[],
+): void {
+  const dx = v2x - v1x;
+  const dy = v2y - v1y;
+  const dz = v2z - v1z;
+  const lenSq = dx * dx + dy * dy + dz * dz;
+  if (lenSq === 0) return;
+  const invLen = 1 / Math.sqrt(lenSq);
+  const ndx = dx * invLen;
+  const ndy = dy * invLen;
+  const ndz = dz * invLen;
+
+  // Pick an initial perpendicular axis, mirroring createTriangleLine.
+  let px: number, py: number, pz: number;
+  if (Math.abs(ndx) < 0.9) {
+    px = 1;
+    py = 0;
+    pz = 0;
+  } else {
+    px = 0;
+    py = 1;
+    pz = 0;
+  }
+
+  // cross1 = normalize(dir × perp)
+  let c1x = ndy * pz - ndz * py;
+  let c1y = ndz * px - ndx * pz;
+  let c1z = ndx * py - ndy * px;
+  const c1LenSq = c1x * c1x + c1y * c1y + c1z * c1z;
+  if (c1LenSq === 0) return;
+  const invC1 = 1 / Math.sqrt(c1LenSq);
+  c1x *= invC1;
+  c1y *= invC1;
+  c1z *= invC1;
+
+  // cross2 = normalize(dir × cross1)
+  let c2x = ndy * c1z - ndz * c1y;
+  let c2y = ndz * c1x - ndx * c1z;
+  let c2z = ndx * c1y - ndy * c1x;
+  const c2LenSq = c2x * c2x + c2y * c2y + c2z * c2z;
+  if (c2LenSq === 0) return;
+  const invC2 = 1 / Math.sqrt(c2LenSq);
+  c2x *= invC2;
+  c2y *= invC2;
+  c2z *= invC2;
+
+  const h = lineWidth * 0.5;
+  const o1x = c1x * h;
+  const o1y = c1y * h;
+  const o1z = c1z * h;
+  const o2x = c2x * h;
+  const o2y = c2y * h;
+  const o2z = c2z * h;
+
+  const v1p1x = v1x + o1x, v1p1y = v1y + o1y, v1p1z = v1z + o1z;
+  const v1n1x = v1x - o1x, v1n1y = v1y - o1y, v1n1z = v1z - o1z;
+  const v1p2x = v1x + o2x, v1p2y = v1y + o2y, v1p2z = v1z + o2z;
+  const v1n2x = v1x - o2x, v1n2y = v1y - o2y, v1n2z = v1z - o2z;
+
+  const v2p1x = v2x + o1x, v2p1y = v2y + o1y, v2p1z = v2z + o1z;
+  const v2n1x = v2x - o1x, v2n1y = v2y - o1y, v2n1z = v2z - o1z;
+  const v2p2x = v2x + o2x, v2p2y = v2y + o2y, v2p2z = v2z + o2z;
+  const v2n2x = v2x - o2x, v2n2y = v2y - o2y, v2n2z = v2z - o2z;
+
+  outVertices.push(
+    // Face 1: +perp1 side
+    v1p1x, v1p1y, v1p1z,
+    v2p1x, v2p1y, v2p1z,
+    v1p2x, v1p2y, v1p2z,
+    v2p1x, v2p1y, v2p1z,
+    v2p2x, v2p2y, v2p2z,
+    v1p2x, v1p2y, v1p2z,
+    // Face 2: -perp1 side
+    v1n1x, v1n1y, v1n1z,
+    v1n2x, v1n2y, v1n2z,
+    v2n1x, v2n1y, v2n1z,
+    v2n1x, v2n1y, v2n1z,
+    v1n2x, v1n2y, v1n2z,
+    v2n2x, v2n2y, v2n2z,
+    // Face 3: +perp2 side
+    v1p2x, v1p2y, v1p2z,
+    v2p2x, v2p2y, v2p2z,
+    v1n1x, v1n1y, v1n1z,
+    v2p2x, v2p2y, v2p2z,
+    v2n1x, v2n1y, v2n1z,
+    v1n1x, v1n1y, v1n1z,
+    // Face 4: -perp2 side
+    v1p1x, v1p1y, v1p1z,
+    v1n2x, v1n2y, v1n2z,
+    v2p1x, v2p1y, v2p1z,
+    v2p1x, v2p1y, v2p1z,
+    v1n2x, v1n2y, v1n2z,
+    v2n2x, v2n2y, v2n2z,
+  );
+
+  const nc1x = -c1x, nc1y = -c1y, nc1z = -c1z;
+  const nc2x = -c2x, nc2y = -c2y, nc2z = -c2z;
+  outNormals.push(
+    c1x, c1y, c1z, c1x, c1y, c1z, c1x, c1y, c1z,
+    c1x, c1y, c1z, c1x, c1y, c1z, c1x, c1y, c1z,
+    nc1x, nc1y, nc1z, nc1x, nc1y, nc1z, nc1x, nc1y, nc1z,
+    nc1x, nc1y, nc1z, nc1x, nc1y, nc1z, nc1x, nc1y, nc1z,
+    c2x, c2y, c2z, c2x, c2y, c2z, c2x, c2y, c2z,
+    c2x, c2y, c2z, c2x, c2y, c2z, c2x, c2y, c2z,
+    nc2x, nc2y, nc2z, nc2x, nc2y, nc2z, nc2x, nc2y, nc2z,
+    nc2x, nc2y, nc2z, nc2x, nc2y, nc2z, nc2x, nc2y, nc2z,
+  );
+
+  outUVs.push(
+    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
+    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
+    0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1,
+    0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1,
+  );
+}

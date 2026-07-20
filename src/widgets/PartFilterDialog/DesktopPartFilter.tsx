@@ -1,4 +1,4 @@
-import { useRendererStore } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/store";
 import { useDictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
@@ -50,43 +50,19 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
 }) => {
   const { dictionary: dict } = useDictionary();
   // Use Zustand store with selective subscriptions
-  const baseheadVisible = useRendererStore(
-    (state) => state.values.baseheadVisible,
-  );
-  const basebodyVisible = useRendererStore(
-    (state) => state.values.basebodyVisible,
-  );
-  const baseleftArmVisible = useRendererStore(
-    (state) => state.values.baseleftArmVisible,
-  );
-  const baserightArmVisible = useRendererStore(
-    (state) => state.values.baserightArmVisible,
-  );
-  const baseleftLegVisible = useRendererStore(
-    (state) => state.values.baseleftLegVisible,
-  );
-  const baserightLegVisible = useRendererStore(
-    (state) => state.values.baserightLegVisible,
-  );
-  const overlayheadVisible = useRendererStore(
-    (state) => state.values.overlayheadVisible,
-  );
-  const overlaybodyVisible = useRendererStore(
-    (state) => state.values.overlaybodyVisible,
-  );
-  const overlayleftArmVisible = useRendererStore(
-    (state) => state.values.overlayleftArmVisible,
-  );
-  const overlayrightArmVisible = useRendererStore(
-    (state) => state.values.overlayrightArmVisible,
-  );
-  const overlayleftLegVisible = useRendererStore(
-    (state) => state.values.overlayleftLegVisible,
-  );
-  const overlayrightLegVisible = useRendererStore(
-    (state) => state.values.overlayrightLegVisible,
-  );
-  const handleChange = useRendererStore((state) => state.handleChange);
+  const baseheadVisible = useRendererStore((state) => state.baseheadVisible);
+  const basebodyVisible = useRendererStore((state) => state.basebodyVisible);
+  const baseleftArmVisible = useRendererStore((state) => state.baseleftArmVisible);
+  const baserightArmVisible = useRendererStore((state) => state.baserightArmVisible);
+  const baseleftLegVisible = useRendererStore((state) => state.baseleftLegVisible);
+  const baserightLegVisible = useRendererStore((state) => state.baserightLegVisible);
+  const overlayheadVisible = useRendererStore((state) => state.overlayheadVisible);
+  const overlaybodyVisible = useRendererStore((state) => state.overlaybodyVisible);
+  const overlayleftArmVisible = useRendererStore((state) => state.overlayleftArmVisible);
+  const overlayrightArmVisible = useRendererStore((state) => state.overlayrightArmVisible);
+  const overlayleftLegVisible = useRendererStore((state) => state.overlayleftLegVisible);
+  const overlayrightLegVisible = useRendererStore((state) => state.overlayrightLegVisible);
+  const setValue = useRendererStore((state) => state.setValue);
 
   // Compute scaled dimensions (floor to avoid subpixel clipping)
   const scaled = useMemo(() => {
@@ -134,42 +110,42 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   ) => {
     if (layer === "base") {
       if (part === "head") {
-        handleChange(`baseheadVisible`, !baseheadVisible);
+        setValue(`baseheadVisible`, !baseheadVisible);
       }
       if (part === "body") {
-        handleChange(`basebodyVisible`, !basebodyVisible);
+        setValue(`basebodyVisible`, !basebodyVisible);
       }
       if (part === "leftArm") {
-        handleChange(`baseleftArmVisible`, !baseleftArmVisible);
+        setValue(`baseleftArmVisible`, !baseleftArmVisible);
       }
       if (part === "rightArm") {
-        handleChange(`baserightArmVisible`, !baserightArmVisible);
+        setValue(`baserightArmVisible`, !baserightArmVisible);
       }
       if (part === "leftLeg") {
-        handleChange(`baseleftLegVisible`, !baseleftLegVisible);
+        setValue(`baseleftLegVisible`, !baseleftLegVisible);
       }
       if (part === "rightLeg") {
-        handleChange(`baserightLegVisible`, !baserightLegVisible);
+        setValue(`baserightLegVisible`, !baserightLegVisible);
       }
     }
     if (layer === "overlay") {
       if (part === "head") {
-        handleChange(`overlayheadVisible`, !overlayheadVisible);
+        setValue(`overlayheadVisible`, !overlayheadVisible);
       }
       if (part === "body") {
-        handleChange(`overlaybodyVisible`, !overlaybodyVisible);
+        setValue(`overlaybodyVisible`, !overlaybodyVisible);
       }
       if (part === "leftArm") {
-        handleChange(`overlayleftArmVisible`, !overlayleftArmVisible);
+        setValue(`overlayleftArmVisible`, !overlayleftArmVisible);
       }
       if (part === "rightArm") {
-        handleChange(`overlayrightArmVisible`, !overlayrightArmVisible);
+        setValue(`overlayrightArmVisible`, !overlayrightArmVisible);
       }
       if (part === "leftLeg") {
-        handleChange(`overlayleftLegVisible`, !overlayleftLegVisible);
+        setValue(`overlayleftLegVisible`, !overlayleftLegVisible);
       }
       if (part === "rightLeg") {
-        handleChange(`overlayrightLegVisible`, !overlayrightLegVisible);
+        setValue(`overlayrightLegVisible`, !overlayrightLegVisible);
       }
     }
   };

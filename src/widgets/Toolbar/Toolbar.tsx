@@ -1,5 +1,5 @@
 import animations from "@/core/animations";
-import { useRendererStore } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/store";
 import { useDictionary } from "@/i18n";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
@@ -8,24 +8,58 @@ import clsx from "clsx";
 import React, { useCallback, useEffect, useState } from "react";
 import ColorPicker from "../../components/ColorPicker/ColorPicker";
 import Dropdown, { DropdownItem } from "../../components/Dropdown";
-import IconButton from "../../components/IconButton/IconButton";
 import {
   AnimationIcon,
   ColorPickerIcon,
-  EraserIcon,
+  CursorFollowIcon,
   GearIcon,
   GridIcon,
-  PaintCanIcon,
   PartsFilterIcon,
-  PenToolIcon,
-  VariationIcon,
+  RecordIcon,
+  ScreenshotIcon,
+  TouchDrawIcon,
+  TouchViewIcon,
 } from "../../components/Icons/Icons";
+import useIsTouch from "@/hooks/useIsTouch";
 import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
+import ToolButton from "./ToolButton";
+import BrushFlyout, { SymmetryIcon } from "./BrushFlyout";
+import BrushIntroHint from "./BrushIntroHint";
 
 const isMac =
   typeof window !== "undefined" &&
   window.navigator.userAgent.includes("Macintosh");
-const cmdKey = isMac ? "\u2318" : "Ctrl";
+const cmdKey = isMac ? "⌘" : "Ctrl";
+
+const RailDivider = () => (
+  <div className="mx-auto my-1.5 h-px w-7 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+);
+
+// Reusable tooltip wrapper to keep the rail markup tidy. Module-scope on
+// purpose: defined inside Toolbar it would get a new identity every render,
+// making React remount every Hint-wrapped button (closing open tooltips and
+// dropping focus/press state).
+const Hint: React.FC<
+  React.PropsWithChildren<{ text: React.ReactNode; side: "left" | "right" }>
+> = ({ text, side, children }) => (
+  <Tooltip.Provider>
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <div>{children}</div>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          className="z-50 rounded-md bg-neutral-900 px-2 py-1 text-sm text-white shadow-lg dark:bg-neutral-700"
+          side={side}
+          sideOffset={8}
+        >
+          {text}
+          <Tooltip.Arrow className="fill-neutral-900 dark:fill-neutral-700" />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  </Tooltip.Provider>
+);
 
 interface FloatingToolbarProps {
   redo: (() => void) | undefined;
@@ -43,6 +77,11 @@ interface FloatingToolbarProps {
   }[];
   currentAnimation?: string | null;
   onAnimationSelect?: (animation: string | null) => void;
+  lookAtCursor?: boolean;
+  onToggleLookAtCursor?: () => void;
+  onScreenshot?: () => void;
+  onRecord?: () => void;
+  recording?: boolean;
   mode: "Editing" | "Preview";
 }
 
@@ -56,35 +95,40 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   getUniqueColors,
   currentAnimation = null,
   onAnimationSelect,
+  lookAtCursor = false,
+  onToggleLookAtCursor,
+  onScreenshot,
+  onRecord,
+  recording = false,
   mode,
 }) => {
   const { dictionary: dict, locale } = useDictionary();
   const isRtl = locale === "ar";
   const tooltipSide = isRtl ? "left" : "right";
+  const flyoutSide = isRtl ? "left" : "right";
   const colorPickerActive = useRendererStore(
-    (state) => state.values.colorPickerActive,
+    (state) => state.colorPickerActive,
   );
-  const paintMode = useRendererStore((state) => state.values.paintMode);
-  const gridVisible = useRendererStore((state) => state.values.gridVisible);
-  const handleChange = useRendererStore((state) => state.handleChange);
+  const gridVisible = useRendererStore((state) => state.gridVisible);
+  const mirrorPaint = useRendererStore((state) => state.mirrorPaint);
+  const touchDrawMode = useRendererStore((state) => state.touchDrawMode);
+  const setValue = useRendererStore((state) => state.setValue);
+  const isTouch = useIsTouch();
 
   const setColorPickerActive = useCallback(
     (active: boolean) => {
-      handleChange("colorPickerActive", active);
+      setValue("colorPickerActive", active);
     },
-    [handleChange],
-  );
-
-  const setPaintMode = useCallback(
-    (mode: "pixel" | "bulk" | "eraser" | "variation") => {
-      handleChange("paintMode", mode);
-    },
-    [handleChange],
+    [setValue],
   );
 
   const toggleGrid = useCallback(() => {
-    handleChange("gridVisible", !gridVisible);
-  }, [handleChange, gridVisible]);
+    setValue("gridVisible", !gridVisible);
+  }, [setValue, gridVisible]);
+
+  const toggleTouchDrawMode = useCallback(() => {
+    setValue("touchDrawMode", !touchDrawMode);
+  }, [setValue, touchDrawMode]);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -94,253 +138,143 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   }, [dialogOpen, settingsOpen, setSettingsOpen]);
 
   return (
-    <div className="absolute top-0 left-0 mt-2 ml-2 rtl:ml-0 rtl:mr-2 rtl:left-auto rtl:right-0 transform bg-gray-50 dark:bg-gray-800 rounded-lg items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-transparent dark:border-gray-700 dark:shadow-none">
-      <ScrollArea.Root className="max-h-[calc(100dvh-80px)] h-min overflow-y-auto">
-        <ScrollArea.Viewport>
-          <div className="p-2">
+    <div
+      onContextMenu={(e) => e.preventDefault()}
+      className="pointer-events-auto absolute left-0 top-0 ml-3 mt-3 transform select-none rounded-lg border border-neutral-300 bg-neutral-50 shadow-lg rtl:left-auto rtl:right-0 rtl:ml-0 rtl:mr-3 dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-none"
+    >
+      <ScrollArea.Root
+        type="auto"
+        className="overflow-hidden rounded-[inherit]"
+      >
+        <ScrollArea.Viewport className="max-h-[calc(100dvh-90px-env(safe-area-inset-bottom,0px)-max(env(safe-area-inset-top,0px),var(--app-banner-height,0px)))] w-full">
+          <div className="flex flex-col items-center gap-1 p-2">
             {mode === "Editing" && (
               <>
                 <div
-                  className="space-y-2"
+                  className="flex flex-col items-center gap-1.5"
                   data-tutorial-id="color-picker-tools"
                 >
-                  <ColorPicker
-                    label={dict.toolbar.colorPicker}
-                    id="color-picker"
-                    getUniqueColors={getUniqueColors}
-                  />
+                  <div className="flex h-8 w-8 items-center justify-center">
+                    <ColorPicker
+                      label={dict.toolbar.colorPicker}
+                      id="color-picker"
+                      getUniqueColors={getUniqueColors}
+                    />
+                  </div>
 
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div>
-                          <IconButton
-                            label={dict.toolbar.colorPicker}
-                            onClick={() =>
-                              setColorPickerActive(!colorPickerActive)
-                            }
-                            active={colorPickerActive}
-                          >
-                            <ColorPickerIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.colorPicker}{" "}
-                          <span className="text-gray-400">(I)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
+                  <Hint
+                    side={tooltipSide}
+                    text={
+                      <>
+                        {dict.toolbar.colorPicker}{" "}
+                        <span className="text-neutral-400">(I)</span>
+                      </>
+                    }
+                  >
+                    <ToolButton
+                      label={dict.toolbar.colorPicker}
+                      onClick={() => setColorPickerActive(!colorPickerActive)}
+                      active={colorPickerActive}
+                    >
+                      <ColorPickerIcon className="h-full w-full" />
+                    </ToolButton>
+                  </Hint>
                 </div>
-                <hr className="w-full h-px bg-gray-200 dark:bg-gray-700 rounded-full my-2 opacity-10"></hr>
-                <div className="space-y-2">
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div data-tutorial-id="pen-tool">
-                          <IconButton
-                            label={dict.toolbar.penTool}
-                            onClick={() => {
-                              setPaintMode("pixel");
-                              setColorPickerActive(false);
-                            }}
-                            active={paintMode === "pixel" && !colorPickerActive}
-                          >
-                            <PenToolIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.penTool}{" "}
-                          <span className="text-gray-400">(P)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
 
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div>
-                          <IconButton
-                            label={dict.toolbar.bulkPaint}
-                            onClick={() => {
-                              setPaintMode("bulk");
-                              setColorPickerActive(false);
-                            }}
-                            active={paintMode === "bulk" && !colorPickerActive}
-                          >
-                            <PaintCanIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.bulkPaint}{" "}
-                          <span className="text-gray-400">(U)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
+                <RailDivider />
 
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div data-tutorial-id="eraser-tool">
-                          <IconButton
-                            label={dict.toolbar.eraser}
-                            onClick={() => {
-                              setPaintMode("eraser");
-                              setColorPickerActive(false);
-                            }}
-                            active={
-                              paintMode === "eraser" && !colorPickerActive
-                            }
-                          >
-                            <EraserIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.eraser}{" "}
-                          <span className="text-gray-400">(E)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
+                <div
+                  className="flex flex-col items-center gap-1"
+                  data-tutorial-id="pen-tool"
+                >
+                  <BrushIntroHint side={flyoutSide}>
+                    <BrushFlyout
+                      side={flyoutSide}
+                      tooltipSide={tooltipSide}
+                      getUniqueColors={getUniqueColors}
+                    />
+                  </BrushIntroHint>
 
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div>
-                          <IconButton
-                            label={dict.toolbar.variation}
-                            onClick={() => {
-                              setPaintMode("variation");
-                              setColorPickerActive(false);
-                            }}
-                            active={
-                              paintMode === "variation" && !colorPickerActive
-                            }
-                          >
-                            <VariationIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.variation}{" "}
-                          <span className="text-gray-400">(V)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
+                  {/* Quick-disable for symmetry — only surfaces while it's on,
+                      so users can flip it off without opening the brush flyout. */}
+                  {mirrorPaint && (
+                    <Hint
+                      side={tooltipSide}
+                      text={dict.toolbar.disableSymmetry}
+                    >
+                      <ToolButton
+                        label={dict.toolbar.disableSymmetry}
+                        onClick={() => setValue("mirrorPaint", false)}
+                        active
+                      >
+                        <SymmetryIcon className="h-full w-full" />
+                      </ToolButton>
+                    </Hint>
+                  )}
                 </div>
-                <hr className="w-full h-px bg-gray-200 dark:bg-gray-700 rounded-full my-2 opacity-10"></hr>
-                <div className="space-y-2" data-tutorial-id="undo-redo-tools">
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div>
-                          <IconButton
-                            label={dict.toolbar.undo}
-                            onClick={undo || (() => {})}
-                            disabled={undoCount === 0 && !!undo}
-                          >
-                            <ReloadIcon className="-scale-x-100 w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.undo}{" "}
-                          <span className="text-gray-400">({cmdKey}+Z)</span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
 
-                  <Tooltip.Provider>
-                    <Tooltip.Root>
-                      <Tooltip.Trigger asChild>
-                        <div>
-                          <IconButton
-                            label={dict.toolbar.redo}
-                            onClick={redo || (() => {})}
-                            disabled={redoCount === 0 && !!redo}
-                          >
-                            <ReloadIcon className="w-full h-full dark:text-white" />
-                          </IconButton>
-                        </div>
-                      </Tooltip.Trigger>
-                      <Tooltip.Portal>
-                        <Tooltip.Content
-                          className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                          side={tooltipSide}
-                          sideOffset={5}
-                        >
-                          {dict.toolbar.redo}{" "}
-                          <span className="text-gray-400">
-                            ({cmdKey}+Shift+Z)
-                          </span>
-                          <Tooltip.Arrow className="fill-gray-800" />
-                        </Tooltip.Content>
-                      </Tooltip.Portal>
-                    </Tooltip.Root>
-                  </Tooltip.Provider>
+                <RailDivider />
+
+                <div
+                  className="flex flex-col items-center gap-1"
+                  data-tutorial-id="undo-redo-tools"
+                >
+                  <Hint
+                    side={tooltipSide}
+                    text={
+                      <>
+                        {dict.toolbar.undo}{" "}
+                        <span className="text-neutral-400">({cmdKey}+Z)</span>
+                      </>
+                    }
+                  >
+                    <ToolButton
+                      label={dict.toolbar.undo}
+                      onClick={undo || (() => {})}
+                      disabled={undoCount === 0 && !!undo}
+                    >
+                      <ReloadIcon className="h-full w-full -scale-x-100" />
+                    </ToolButton>
+                  </Hint>
+
+                  <Hint
+                    side={tooltipSide}
+                    text={
+                      <>
+                        {dict.toolbar.redo}{" "}
+                        <span className="text-neutral-400">
+                          ({cmdKey}+Shift+Z)
+                        </span>
+                      </>
+                    }
+                  >
+                    <ToolButton
+                      label={dict.toolbar.redo}
+                      onClick={redo || (() => {})}
+                      disabled={redoCount === 0 && !!redo}
+                    >
+                      <ReloadIcon className="h-full w-full" />
+                    </ToolButton>
+                  </Hint>
                 </div>
-                <hr className="w-full h-px bg-gray-200 dark:bg-gray-700 rounded-full my-2 opacity-10"></hr>
+
+                <RailDivider />
               </>
             )}
-            <div className="space-y-2">
+
+            <div className="flex flex-col items-center gap-1">
               {mode === "Preview" && onAnimationSelect && (
                 <Tooltip.Provider>
                   <Tooltip.Root>
                     <Dropdown
                       trigger={
                         <Tooltip.Trigger asChild>
-                          <IconButton
+                          <ToolButton
                             active={currentAnimation !== null}
                             label={dict.toolbar.animations}
                           >
-                            <div className="w-6 h-6">
-                              <AnimationIcon className="w-full h-full dark:text-white" />
-                            </div>
-                          </IconButton>
+                            <AnimationIcon className="h-full w-full" />
+                          </ToolButton>
                         </Tooltip.Trigger>
                       }
                       align="start"
@@ -350,7 +284,7 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                         onClick={() => onAnimationSelect(null)}
                         className={
                           currentAnimation === null
-                            ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                            ? "bg-blue-50 font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
                             : ""
                         }
                       >
@@ -359,15 +293,14 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       {animations.map((animation) => {
                         const labelKey =
                           `${animation.name}Animation` as keyof typeof dict.toolbar;
-                        const label =
-                          dict.toolbar[labelKey] || animation.label;
+                        const label = dict.toolbar[labelKey] || animation.label;
                         return (
                           <DropdownItem
                             key={animation.name}
                             onClick={() => onAnimationSelect(animation.name)}
                             className={clsx(
                               currentAnimation === animation.name
-                                ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium"
+                                ? "bg-blue-50 font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
                                 : "",
                               "capitalize",
                             )}
@@ -379,104 +312,128 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                     </Dropdown>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
+                        className="z-50 rounded-md bg-neutral-900 px-2 py-1 text-sm text-white shadow-lg dark:bg-neutral-700"
                         side={tooltipSide}
-                        sideOffset={5}
+                        sideOffset={8}
                       >
                         {dict.toolbar.animations}
-                        <Tooltip.Arrow className="fill-gray-800" />
+                        <Tooltip.Arrow className="fill-neutral-900 dark:fill-neutral-700" />
                       </Tooltip.Content>
                     </Tooltip.Portal>
                   </Tooltip.Root>
                 </Tooltip.Provider>
               )}
-              <Tooltip.Provider>
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <div data-tutorial-id="mobile-part-filter">
-                      <IconButton
-                        label={dict.toolbar.partsFilter}
-                        onClick={() => setDialogOpen(true)}
-                        active={dialogOpen}
-                      >
-                        <PartsFilterIcon className="w-full h-full dark:text-white" />
-                      </IconButton>
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side={tooltipSide}
-                      sideOffset={5}
-                    >
-                      {dict.toolbar.partsFilter}
-                      <Tooltip.Arrow className="fill-gray-800" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </Tooltip.Provider>
+
+              {mode === "Preview" && !isTouch && onToggleLookAtCursor && (
+                <Hint side={tooltipSide} text={dict.toolbar.lookAtCursor}>
+                  <ToolButton
+                    active={lookAtCursor}
+                    label={dict.toolbar.lookAtCursor}
+                    onClick={onToggleLookAtCursor}
+                  >
+                    <CursorFollowIcon className="h-full w-full" />
+                  </ToolButton>
+                </Hint>
+              )}
+
+              {mode === "Preview" && onRecord && (
+                <Hint side={tooltipSide} text={dict.toolbar.recordClip}>
+                  <ToolButton
+                    label={dict.toolbar.recordClip}
+                    onClick={onRecord}
+                    active={recording}
+                    disabled={recording}
+                  >
+                    <RecordIcon className="h-full w-full" />
+                  </ToolButton>
+                </Hint>
+              )}
+
+              {mode === "Preview" && onScreenshot && (
+                <Hint side={tooltipSide} text={dict.toolbar.screenshot}>
+                  <ToolButton
+                    label={dict.toolbar.screenshot}
+                    onClick={onScreenshot}
+                  >
+                    <ScreenshotIcon className="h-full w-full" />
+                  </ToolButton>
+                </Hint>
+              )}
+
+              <Hint side={tooltipSide} text={dict.toolbar.partsFilter}>
+                <div data-tutorial-id="mobile-part-filter">
+                  <ToolButton
+                    label={dict.toolbar.partsFilter}
+                    onClick={() => setDialogOpen(true)}
+                    active={dialogOpen}
+                  >
+                    <PartsFilterIcon className="h-full w-full" />
+                  </ToolButton>
+                </div>
+              </Hint>
 
               {mode === "Editing" && (
-                <Tooltip.Provider>
-                  <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                      <div>
-                        <IconButton
-                          label={dict.toolbar.grid}
-                          onClick={() => toggleGrid()}
-                          active={gridVisible}
-                        >
-                          <GridIcon className="w-full h-full dark:text-white" />
-                        </IconButton>
-                      </div>
-                    </Tooltip.Trigger>
-                    <Tooltip.Portal>
-                      <Tooltip.Content
-                        className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                        side={tooltipSide}
-                        sideOffset={5}
-                      >
-                        {dict.toolbar.grid}
-                        <Tooltip.Arrow className="fill-gray-800" />
-                      </Tooltip.Content>
-                    </Tooltip.Portal>
-                  </Tooltip.Root>
-                </Tooltip.Provider>
+                <Hint side={tooltipSide} text={dict.toolbar.grid}>
+                  <ToolButton
+                    label={dict.toolbar.grid}
+                    onClick={() => toggleGrid()}
+                    active={gridVisible}
+                  >
+                    <GridIcon className="h-full w-full" />
+                  </ToolButton>
+                </Hint>
               )}
 
-              <Tooltip.Provider>
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <div>
-                      <IconButton
-                        label={dict.common.settings}
-                        onClick={() => setSettingsOpen(!settingsOpen)}
-                        active={settingsOpen}
-                      >
-                        <GearIcon className="w-full h-full dark:text-white" />
-                      </IconButton>
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-md"
-                      side={tooltipSide}
-                      sideOffset={5}
+              <RailDivider />
+
+              {mode === "Editing" && isTouch && (
+                <Hint
+                  side={tooltipSide}
+                  text={
+                    touchDrawMode
+                      ? dict.toolbar.touchDrawMode
+                      : dict.toolbar.touchViewMode
+                  }
+                >
+                  <div data-tutorial-id="touch-draw-mode">
+                    <ToolButton
+                      label={
+                        touchDrawMode
+                          ? dict.toolbar.touchDrawMode
+                          : dict.toolbar.touchViewMode
+                      }
+                      onClick={toggleTouchDrawMode}
+                      active
                     >
-                      {dict.common.settings}
-                      <Tooltip.Arrow className="fill-gray-800" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </Tooltip.Provider>
+                      {touchDrawMode ? (
+                        <TouchDrawIcon className="h-full w-full" />
+                      ) : (
+                        <TouchViewIcon className="h-full w-full" />
+                      )}
+                    </ToolButton>
+                  </div>
+                </Hint>
+              )}
+
+              <Hint side={tooltipSide} text={dict.common.settings}>
+                <div data-tutorial-id="settings">
+                  <ToolButton
+                    label={dict.common.settings}
+                    onClick={() => setSettingsOpen(!settingsOpen)}
+                    active={settingsOpen}
+                  >
+                    <GearIcon className="h-full w-full" />
+                  </ToolButton>
+                </div>
+              </Hint>
             </div>
           </div>
         </ScrollArea.Viewport>
         <ScrollArea.Scrollbar
-          className="flex select-none touch-none p-0.5 bg-gray-100 dark:bg-gray-700 transition-colors duration-150 ease-out hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+          className="flex h-full w-2 touch-none select-none border-l border-l-transparent p-[1px] transition-colors"
           orientation="vertical"
         >
-          <ScrollArea.Thumb className="flex-1 bg-gray-300 dark:bg-gray-500 rounded-full relative" />
+          <ScrollArea.Thumb className="relative flex-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
 

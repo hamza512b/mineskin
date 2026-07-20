@@ -1,23 +1,27 @@
+import CapacitorInit from "@/components/CapacitorInit";
+import { ThemeInitializer } from "@/components/ThemeInitializer";
+import { PopupQueueProvider } from "@/contexts/PopupQueueContext";
+import {
+  baseUrl,
+  DictionaryProvider,
+  generateAlternates,
+  hasLocale,
+  locales,
+  type Locale,
+} from "@/i18n";
+import { getDictionary } from "@/i18n/dictionaries";
 import CookiePopup from "@/widgets/CookiePopup";
 import LanguageDetectionPopup from "@/widgets/LanguageDetectionPopup";
+import OnboardingStepper from "@/widgets/OnboardingStepper";
+import IOSInstallPopup from "@/widgets/IOSInstallPopup";
 import PWAInstallPopup from "@/widgets/PWAInstallPopup";
-import { PopupQueueProvider } from "@/contexts/PopupQueueContext";
+import { DirectionProvider } from "@radix-ui/react-direction";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { notFound } from "next/navigation";
+import LocaleRedirect from "@/components/LocaleRedirect";
 import { Toaster } from "../../components/ui/toaster";
-import "../../styles/global.css";
 import { ConfirmationDialogProvider } from "../../widgets/Confirmation/Confirmation";
-import {
-  hasLocale,
-  locales,
-  generateAlternates,
-  baseUrl,
-  type Locale,
-  DictionaryProvider,
-} from "@/i18n";
-import { getDictionary } from "@/i18n/dictionaries";
 import { HtmlLangSetter } from "./HtmlLangSetter";
 
 export async function generateStaticParams() {
@@ -75,7 +79,7 @@ export async function generateMetadata({
   };
 }
 
-const GoogleAnalyticsScript = () => {
+const GoogleAnalyticsScript = ({ lang }: { lang: string }) => {
   return (
     <>
       <Script
@@ -93,7 +97,10 @@ const GoogleAnalyticsScript = () => {
           wait_for_update: 1000,
         });
         gtag('js', new Date());
-        gtag('config', '${process.env.NEXT_PUBLIC_TAG_MANAGER}');
+        gtag('set', 'user_properties', { app_language: '${lang}' });
+        gtag('config', '${process.env.NEXT_PUBLIC_TAG_MANAGER}', {
+          app_language: '${lang}'
+        });
         `}
       </Script>
     </>
@@ -109,8 +116,12 @@ export default async function LangLayout({
 }) {
   const { lang } = await params;
 
+  // A single non-locale segment like /preview matches [lang] (dynamic beats
+  // catch-all) in dev and server builds alike, so the [...path] redirect never
+  // runs. Redirect to the locale-prefixed path here instead; genuinely unknown
+  // paths still 404 after the redirect (/foo → /en/foo → 404).
   if (!hasLocale(lang)) {
-    notFound();
+    return <LocaleRedirect />;
   }
 
   const dictionary = await getDictionary(lang as Locale);
@@ -139,19 +150,25 @@ export default async function LangLayout({
         }}
       />
       <HtmlLangSetter lang={lang} dir={dir} />
-      <GoogleAnalyticsScript />
+      <ThemeInitializer />
+      <CapacitorInit />
+      <GoogleAnalyticsScript lang={lang} />
       <DictionaryProvider dictionary={dictionary} locale={lang as Locale}>
-        <TooltipProvider>
-          <ConfirmationDialogProvider>
-            {children}
-          </ConfirmationDialogProvider>
-          <Toaster />
-        </TooltipProvider>
-        <PopupQueueProvider>
-          <CookiePopup />
-          <LanguageDetectionPopup />
-          <PWAInstallPopup />
-        </PopupQueueProvider>
+        <DirectionProvider dir={dir}>
+          <TooltipProvider>
+            <PopupQueueProvider>
+              <ConfirmationDialogProvider>
+                {children}
+              </ConfirmationDialogProvider>
+              <CookiePopup />
+              <LanguageDetectionPopup />
+              <PWAInstallPopup />
+              <IOSInstallPopup />
+            </PopupQueueProvider>
+            <Toaster />
+          </TooltipProvider>
+          <OnboardingStepper />
+        </DirectionProvider>
       </DictionaryProvider>
     </>
   );

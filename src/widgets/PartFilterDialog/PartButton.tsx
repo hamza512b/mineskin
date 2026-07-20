@@ -29,12 +29,12 @@ export const PartButton: React.FC<PartButtonProps> = ({
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content
-          className="bg-slate-800 text-white px-2 py-1 rounded text-sm shadow-md"
+          className="bg-neutral-800 text-white px-2 py-1 rounded text-sm shadow-md"
           side="top"
           sideOffset={5}
         >
           {tooltip}
-          <Tooltip.Arrow className="fill-gray-800" />
+          <Tooltip.Arrow className="fill-neutral-800" />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>

@@ -32,13 +32,31 @@ export function TableOfContents({ toc, title = "Table of contents" }: TocProps) 
   );
   const activeHeading = useActiveItem(itemIds);
   const mounted = useMounted();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!activeHeading || !containerRef.current) return;
+    const link = containerRef.current.querySelector<HTMLAnchorElement>(
+      `a[href="#${CSS.escape(activeHeading)}"]`,
+    );
+    if (!link) return;
+    const scroller =
+      link.closest<HTMLElement>("[data-radix-scroll-area-viewport]") ??
+      link.closest<HTMLElement>(".overflow-y-auto") ??
+      containerRef.current;
+    const linkRect = link.getBoundingClientRect();
+    const scrollerRect = scroller.getBoundingClientRect();
+    if (linkRect.top < scrollerRect.top || linkRect.bottom > scrollerRect.bottom) {
+      link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [activeHeading]);
 
   if (!toc?.items) {
     return <></>;
   }
 
   return mounted ? (
-    <div className="space-y-2">
+    <div ref={containerRef} className="space-y-2">
       <p className="font-medium">{title}</p>
       <Tree tree={toc} activeItem={activeHeading} />
     </div>
@@ -109,7 +127,7 @@ function Tree({ tree, level = 1, activeItem }: TreeProps) {
               className={`inline-block no-underline ${
                 item.url === `#${activeItem}`
                   ? "text-state-900 dark:text-white font-medium"
-                  : "text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  : "text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
               }`}
             >
               {item.title}

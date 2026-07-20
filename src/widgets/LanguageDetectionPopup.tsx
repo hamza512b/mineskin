@@ -2,15 +2,20 @@
 
 import Button from "@/components/Button/index";
 import { usePopupQueue } from "@/contexts/PopupQueueContext";
+import { isNativeWebview } from "@/hooks/useNativeWebview";
 import { useDictionary } from "@/i18n";
-import { locales, type Locale, LOCALE_COOKIE_NAME } from "@/i18n/config";
-import { GlobeIcon } from "@radix-ui/react-icons";
+import {
+  locales,
+  type Locale,
+  LOCALE_TO_FLAG,
+  setPreferredLocale,
+} from "@/i18n/config";
 import { AnimatePresence, motion } from "framer-motion";
-import Cookies from "js-cookie";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "language-detection-dismissed";
+const ONBOARDING_STORAGE_KEY = "ios-onboarding-completed";
 
 /**
  * Maps browser language codes to our supported locales
@@ -46,6 +51,10 @@ export default function LanguageDetectionPopup() {
   const isVisible = isActivePopup("languageDetection");
 
   useEffect(() => {
+    // Don't show if onboarding is in progress (it handles language selection)
+    const onboardingCompleted = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (!onboardingCompleted && isNativeWebview()) return;
+
     // Check if user has already dismissed the popup
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
@@ -63,7 +72,7 @@ export default function LanguageDetectionPopup() {
     unregisterPopup("languageDetection");
     localStorage.setItem(STORAGE_KEY, "true");
     // Store current locale in cookie (user chose to stay in this language)
-    Cookies.set(LOCALE_COOKIE_NAME, currentLocale, { expires: 365, sameSite: "lax" });
+    setPreferredLocale(currentLocale);
   }
 
   function handleSwitchLanguage() {
@@ -73,7 +82,7 @@ export default function LanguageDetectionPopup() {
     const newPath = pathname.replace(`/${currentLocale}`, `/${detectedLocale}`);
     localStorage.setItem(STORAGE_KEY, "true");
     // Store locale in cookie for middleware access
-    Cookies.set(LOCALE_COOKIE_NAME, detectedLocale, { expires: 365, sameSite: "lax" });
+    setPreferredLocale(detectedLocale);
     unregisterPopup("languageDetection");
     router.push(newPath);
   }
@@ -85,14 +94,16 @@ export default function LanguageDetectionPopup() {
   };
 
   const languageName = detectedLocale
-    ? dict.languageSwitcher[detectedLocale as keyof typeof dict.languageSwitcher]
+    ? dict.languageSwitcher[
+        detectedLocale as keyof typeof dict.languageSwitcher
+      ]
     : null;
 
   return (
     <AnimatePresence>
       {isVisible && detectedLocale && (
         <motion.div
-          className="z-2000 fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 pointer-events-auto!"
+          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 safe-area-bottom safe-area-leftrtl:safe-area-right pointer-events-auto!"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -101,11 +112,14 @@ export default function LanguageDetectionPopup() {
           aria-labelledby="language-detection-title"
           aria-describedby="language-detection-description"
         >
-          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center px-4 pt-4">
               <div className="flex items-center gap-2">
-                <GlobeIcon className="w-5 h-5" aria-hidden="true" />
+                <span
+                  className={`fi fi-${LOCALE_TO_FLAG[detectedLocale]} rounded-sm shrink-0`}
+                  aria-hidden="true"
+                />
                 <h2
                   id="language-detection-title"
                   className="text-lg font-semibold"
@@ -123,13 +137,13 @@ export default function LanguageDetectionPopup() {
                   languageName || detectedLocale,
                 )}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
                 {dict.languageDetection.instructions}
               </p>
             </div>
 
             {/* Actions */}
-            <div className="dark:bg-slate-800 bg-white mt-4 px-4 pb-4 z-0 relative">
+            <div className="dark:bg-neutral-800 bg-white mt-4 px-4 pb-4 z-0 relative">
               <div className="flex justify-end gap-2">
                 <Button variant="outlined" onClick={handleDismiss}>
                   {dict.languageDetection.stayInCurrent}

@@ -20,7 +20,7 @@ export interface SpinnerProps {
 
   /**
    * Custom CSS class for the track color
-   * @default 'text-gray-200 dark:text-gray-600'
+   * @default 'text-neutral-200 dark:text-neutral-600'
    */
   trackColorClass?: string;
 
@@ -41,7 +41,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
   size = "md",
   className = "",
   fillColorClass = "fill-blue-600",
-  trackColorClass = "text-gray-200 dark:text-gray-600",
+  trackColorClass = "text-neutral-200 dark:text-neutral-600",
   label = "Loading...",
 }) => {
   return (

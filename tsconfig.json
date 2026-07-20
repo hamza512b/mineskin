@@ -10,7 +10,7 @@
       "dom",
       "WebWorker"
     ],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -36,10 +36,12 @@
       }
     ],
     "types": [
-      "@serwist/next/typings"
+      "@serwist/next/typings",
+      "@webgpu/types"
     ]
   },
   "include": [
+    "next-env.d.ts",
     "src",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

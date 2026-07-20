@@ -1,9 +1,9 @@
 "use client";
-import useMediaQuery from "@/hooks/useMediaQuery"
+import { useIsDarkMode } from "@/hooks/useTheme"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const isDark = useMediaQuery("(prefers-color-scheme: dark)")
+  const isDark = useIsDarkMode()
 
   return (
     <Sonner

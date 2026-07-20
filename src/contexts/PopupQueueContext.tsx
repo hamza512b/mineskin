@@ -1,12 +1,24 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 // Define popup priorities (lower number = higher priority)
 export const POPUP_PRIORITIES = {
-  cookie: 1,
-  languageDetection: 2,
-  pwaInstall: 3,
+  languageDetection: 1, // important, first visit, need to know user's language
+  cookie: 2, // important first visit cookie consent popup
+  promoBanner: 3, // Limited-time "100% off" sale — takes precedence over the evergreen app-install banner while it's running.
+  appInstallBanner: 4, // Native advertisement for mobile app, show it to as many people as possible, after one reload so it doesn't interfere with first impression
+  pwaInstall: 5, // Prompt first to install pwa, better user experience for them then having their money.
+  iosInstall: 5, // Prompt iOS users to install the app, since they won't get the PWA install prompt.
+  tutorial: 7, // Guide users through the app's features.
+  modeSwitchHint: 8,
+  brushIntroHint: 8, // Tell returning users the drawing tools collapsed into the brush slot.
 } as const;
 
 export type PopupId = keyof typeof POPUP_PRIORITIES;
@@ -24,8 +36,14 @@ interface PopupQueueContextValue {
 
 const PopupQueueContext = createContext<PopupQueueContextValue | null>(null);
 
-export function PopupQueueProvider({ children }: { children: React.ReactNode }) {
-  const [registeredPopups, setRegisteredPopups] = useState<Set<PopupId>>(new Set());
+export function PopupQueueProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [registeredPopups, setRegisteredPopups] = useState<Set<PopupId>>(
+    new Set(),
+  );
 
   const registerPopup = useCallback((id: PopupId) => {
     setRegisteredPopups((prev) => {
@@ -51,19 +69,19 @@ export function PopupQueueProvider({ children }: { children: React.ReactNode }) 
 
     // Sort registered popups by priority and return the highest priority one
     const sorted = Array.from(registeredPopups).sort(
-      (a, b) => POPUP_PRIORITIES[a] - POPUP_PRIORITIES[b]
+      (a, b) => POPUP_PRIORITIES[a] - POPUP_PRIORITIES[b],
     );
     return sorted[0];
   }, [registeredPopups]);
 
   const isActivePopup = useCallback(
     (id: PopupId) => activePopup === id,
-    [activePopup]
+    [activePopup],
   );
 
   const value = useMemo(
     () => ({ registerPopup, unregisterPopup, isActivePopup, activePopup }),
-    [registerPopup, unregisterPopup, isActivePopup, activePopup]
+    [registerPopup, unregisterPopup, isActivePopup, activePopup],
   );
 
   return (

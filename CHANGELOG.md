@@ -1,3 +1,7 @@
+## 2026-07-20
+
+I reopened source the project again. Too many changes has happened since but though I did not keep track for all the changes.
+
 ## 2025-10-25
 
 - Add animation system.

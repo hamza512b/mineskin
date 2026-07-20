@@ -1,11 +1,10 @@
 import { M44 } from "../maths";
 import { MeshGroup } from "../mesh";
 import { Renderer } from "../Renderer";
-import { State } from "../State";
 
 export interface Backend {
   canvas: HTMLCanvasElement | null;
-  onStart: (meshes: MeshGroup, State: State) => void;
+  onStart: (meshes: MeshGroup) => void;
   onEnd: () => void;
   onRenderFrame: (renderer: Renderer) => void;
   getGlobalTransformation: () => M44;
@@ -13,4 +12,8 @@ export interface Backend {
   getProjectTransformation: () => M44;
   bindMeshGroup: (meshGroup: MeshGroup) => void;
   cleanupMeshGroup: (meshGroup: MeshGroup) => void;
+  setEnvironmentGridSuppressed: (suppressed: boolean) => void;
+  setViewportCenterOffset: (px: number) => void;
+  getViewportCenterOffset: () => number;
+  setViewportCenterOffsetSuppressed: (suppressed: boolean) => void;
 }

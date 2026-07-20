@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { locales, generateAlternates, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface GuidePageProps {
   params: Promise<{
@@ -97,8 +98,8 @@ export default async function GuidePage({ params }: GuidePageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <div className="container relative mx-auto px-6 py-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-10 lg:py-10 xl:gap-20">
+    <div className="h-dvh overflow-y-auto">
+      <div className="container relative mx-auto max-w-5xl px-6 py-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-10 lg:py-10 xl:gap-20">
         <article>
           <div className="mb-6">
             <Link
@@ -123,23 +124,25 @@ export default async function GuidePage({ params }: GuidePageProps) {
             </Link>
           </div>
           <div className={"space-y-4"}>
-            <h1 className="inline-block text-4xl font-black tracking-tight dark:text-white text-slate-900 lg:text-5xl">
+            <h1 className="inline-block text-4xl font-black tracking-tight dark:text-white text-neutral-900 lg:text-5xl">
               {guide.title}
             </h1>
             {guide.description && (
-              <p className="text-xl text-slate-600 dark:text-slate-400">
+              <p className="text-xl text-neutral-600 dark:text-neutral-400">
                 {guide.description}
               </p>
             )}
           </div>
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-neutral-200" />
           <div className="prose prose-blue prose-headings:scroll-m-20 dark:prose-invert">
             <div dangerouslySetInnerHTML={{ __html: guide.html }} />
           </div>{" "}
         </article>
         <div className="hidden text-sm lg:block">
-          <div className="sticky top-8 -mt-10 max-h-[calc(var(--vh)-4rem)] overflow-y-auto pt-10">
-            <TableOfContents toc={guide.toc} title={dict.policies.tableOfContents} />
+          <div className="sticky top-8 -mt-10 pt-10">
+            <ScrollArea className="h-[calc(100dvh-8rem)]">
+              <TableOfContents toc={guide.toc} title={dict.policies.tableOfContents} />
+            </ScrollArea>
           </div>
         </div>
       </div>

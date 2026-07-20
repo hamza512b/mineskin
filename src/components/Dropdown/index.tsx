@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { ReactNode } from "react";
 
 const dropdownContentVariants = cva(
-  "mx-2 min-w-[220px] bg-white dark:bg-gray-800 rounded-md p-1.5 shadow-md border border-gray-200 dark:border-gray-700 animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 z-50",
+  "mx-2 min-w-[220px] bg-white dark:bg-neutral-800 rounded-md p-1.5 shadow-md border border-neutral-200 dark:border-neutral-700 animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 z-50",
   {
     variants: {
       size: {
@@ -20,12 +20,12 @@ const dropdownContentVariants = cva(
 );
 
 const dropdownItemVariants = cva(
-  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 outline-none transition-colors focus:bg-gray-100 dark:focus:bg-gray-700 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 outline-none transition-colors focus:bg-neutral-100 dark:focus:bg-neutral-700 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "text-gray-700 dark:text-gray-200 focus:text-gray-900 dark:focus:text-gray-50",
+          "text-neutral-700 dark:text-neutral-200 focus:text-neutral-900 dark:focus:text-neutral-50",
         destructive: "text-red-500 focus:text-red-700 dark:focus:text-red-400",
       },
     },
@@ -134,7 +134,7 @@ export function DropdownItem({
 
 export function DropdownSeparator() {
   return (
-    <DropdownMenu.Separator className="h-px my-1 bg-gray-200 dark:bg-gray-700" />
+    <DropdownMenu.Separator className="h-px my-1 bg-neutral-200 dark:bg-neutral-700" />
   );
 }
 
@@ -148,7 +148,7 @@ export function DropdownLabel({
   return (
     <DropdownMenu.Label
       className={clsx(
-        "px-2 py-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400",
+        "px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:text-neutral-400",
         className,
       )}
     >

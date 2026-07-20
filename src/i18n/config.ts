@@ -2,8 +2,17 @@ export const locales = ["en", "ar", "zh", "es", "pt-BR"] as const;
 export const defaultLocale = "en" as const;
 export const baseUrl = "https://mineskin.pro";
 export const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
+export const LOCALE_STORAGE_KEY = "NEXT_LOCALE";
 
 export type Locale = (typeof locales)[number];
+
+export const LOCALE_TO_FLAG: Record<Locale, string> = {
+  en: "gb",
+  ar: "sa",
+  zh: "cn",
+  es: "es",
+  "pt-BR": "br",
+};
 
 export const hasLocale = (locale: string): locale is Locale =>
   locales.includes(locale as Locale);
@@ -51,9 +60,31 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 export function getPreferredLocale(): Locale {
+  if (typeof localStorage !== "undefined") {
+    const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as
+      | Locale
+      | undefined
+      | null;
+    if (stored && locales.includes(stored)) {
+      return stored;
+    }
+  }
   const cookieLocale = getCookie(LOCALE_COOKIE_NAME) as Locale | undefined;
   if (cookieLocale && locales.includes(cookieLocale)) {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(LOCALE_STORAGE_KEY, cookieLocale);
+    }
     return cookieLocale;
   }
   return getLocaleFromNavigator();
+}
+
+export function setPreferredLocale(locale: Locale) {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }
+  if (typeof document !== "undefined") {
+    const maxAge = 60 * 60 * 24 * 365;
+    document.cookie = `${LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${maxAge}; samesite=lax`;
+  }
 }

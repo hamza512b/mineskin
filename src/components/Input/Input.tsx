@@ -50,7 +50,7 @@ export default function Input({
     <div className={`mb-2 ${fullWidth ? "w-full" : ""}`}>
       <label
         htmlFor={inputId}
-        className="text-sm dark:text-slate-300 mb-1 block font-semibold"
+        className="text-sm dark:text-neutral-300 mb-1 block font-semibold"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
@@ -70,12 +70,12 @@ export default function Input({
           className={`
             block w-full px-3 py-2 rounded-md shadow-sm 
             transition-colors appearance-none
-            dark:bg-slate-800 dark:text-white
+            dark:bg-neutral-800 dark:text-white
             focus:outline-none focus:ring-2
             border ${
               errorMessage
                 ? "dark:border-red-500/50 border-red-500"
-                : "dark:border-slate-700/50 border-gray-300 focus:border-blue-600 focus:ring-blue-600 dark:hover:border-slate-600/50"
+                : "dark:border-neutral-700/50 border-neutral-300 focus:border-blue-600 focus:ring-blue-600 dark:hover:border-neutral-600/50"
             }
             ${className}
           `}

@@ -1,0 +1,57 @@
+{
+  "name": "crouch",
+  "label": "Crouch animation",
+  "duration": 3.0,
+  "loop": true,
+  "parts": [
+    {
+      "name": "body",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.25, 0, 0], "position": [0, -1.5, 0] },
+        { "time": 1.5, "rotation": [0.27, 0, 0], "position": [0, -1.6, 0] },
+        { "time": 3.0, "rotation": [0.25, 0, 0], "position": [0, -1.5, 0] }
+      ]
+    },
+    {
+      "name": "head",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.15, 0, 0] },
+        { "time": 1.0, "rotation": [-0.15, 0.08, 0] },
+        { "time": 2.0, "rotation": [-0.15, -0.08, 0] },
+        { "time": 3.0, "rotation": [-0.15, 0, 0] }
+      ]
+    },
+    {
+      "name": "leftArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.2, 0, 0] },
+        { "time": 1.5, "rotation": [-0.25, 0, 0.03] },
+        { "time": 3.0, "rotation": [-0.2, 0, 0] }
+      ]
+    },
+    {
+      "name": "rightArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.2, 0, 0] },
+        { "time": 1.5, "rotation": [-0.25, 0, -0.03] },
+        { "time": 3.0, "rotation": [-0.2, 0, 0] }
+      ]
+    },
+    {
+      "name": "leftLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.6, 0, 0] },
+        { "time": 1.5, "rotation": [-0.55, 0, 0] },
+        { "time": 3.0, "rotation": [-0.6, 0, 0] }
+      ]
+    },
+    {
+      "name": "rightLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.3, 0, 0], "position": [0, 0, -1] },
+        { "time": 1.5, "rotation": [-0.25, 0, 0], "position": [0, 0, -1] },
+        { "time": 3.0, "rotation": [-0.3, 0, 0], "position": [0, 0, -1] }
+      ]
+    }
+  ]
+}

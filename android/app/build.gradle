@@ -1,0 +1,100 @@
+apply plugin: 'com.android.application'
+
+// Release signing is configured via android/keystore.properties (gitignored).
+// Copy android/keystore.properties.example to android/keystore.properties and
+// fill it in. When the file is absent (fresh checkout / CI without secrets),
+// release builds fall back to unsigned output so debug builds still work.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
+android {
+    namespace = "pro.mineskin.app"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "pro.mineskin.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 16
+        versionName "1.1.26"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// Build the web app and sync it into the Android project before every native
+// build, so an Android Studio "Run"/"Build" always packages the latest web
+// bundle. Set MINESKIN_SKIP_WEB_BUILD=1 to skip (e.g. CI building the web
+// bundle separately).
+tasks.register('mineskinWebBuildAndSync', Exec) {
+    description = 'Build the web app and sync it into the Android project'
+    // app -> android -> repo root; the sync script lives at scripts/.
+    def script = file("${rootProject.projectDir}/../scripts/build-and-sync.sh")
+    workingDir rootProject.projectDir
+    // Tell the script when this is a release build so it drops CAP_SERVER_URL
+    // (dev-server URL) instead of baking it into the shipped config.
+    def isRelease = gradle.startParameter.taskNames.any {
+        it.toLowerCase(Locale.ROOT).contains('release')
+    }
+    environment 'MINESKIN_RELEASE_BUILD', isRelease ? '1' : '0'
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'bash', script.absolutePath, 'android'
+    } else {
+        commandLine 'bash', script.absolutePath, 'android'
+    }
+}
+preBuild.dependsOn 'mineskinWebBuildAndSync'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

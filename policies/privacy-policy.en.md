@@ -2,7 +2,7 @@
 title: "Privacy Policy"
 ---
 
-_Last updated: October 30, 2025_
+_Last updated: February 7, 2026_
 
 This Privacy Policy outlines the policies and procedures regarding the collection, use, and disclosure of your personal information when you use our services. In this policy, \"We,\" \"Us,\" \"Our\" refers to mineskin.pro.
 
@@ -50,6 +50,7 @@ We use the following third-party services to collect and analyze usage data:
 - **Google Analytics:** Collects information about how you use our Service to help us understand user behavior and improve functionality.
 - **Vercel Analytics:** Collects anonymous page view data and basic visitor metrics to understand traffic patterns.
 - **Vercel Speed Insights:** Monitors website performance metrics such as page load times and Core Web Vitals to ensure optimal user experience.
+- **Sentry:** Collects error reports, performance data, and session replay recordings to help us identify and fix issues. Session replays capture anonymized recordings of user interactions (such as clicks and page navigation) for a sample of sessions. Sentry may also collect device information, browser type, and IP addresses.
 
 These services may use cookies and similar tracking technologies. You can manage your cookie preferences through our cookie consent banner or your browser settings.
 
@@ -67,7 +68,7 @@ Your Information is used to:
 We may share your Information with:
 
 - **Cloud Service Providers:** e.g., Vercel, PlanetScale, AWS, Google Cloud Platform, for hosting and data storage.
-- **Analytics Providers:** e.g., Google Analytics, Vercel Analytics, and Vercel Speed Insights, for improving and understanding Service usage and performance monitoring.
+- **Analytics Providers:** e.g., Google Analytics, Vercel Analytics, Vercel Speed Insights, and Sentry, for improving and understanding Service usage, performance monitoring, and error tracking.
 - **Communications Providers:** e.g., SendGrid, MailChimp, for sending communications and newsletters.
 - **Legal Requirements:** when legally compelled by authorities, law enforcement, or court orders.
 - **With Your Consent:** for other purposes explicitly approved by you.

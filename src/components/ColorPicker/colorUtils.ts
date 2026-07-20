@@ -34,28 +34,40 @@ export function hsvToRgb(h: number, s: number, v: number) {
   };
 }
 
-// Convert RGB to Hex string
-export function rgbToHex(r: number, g: number, b: number): string {
+// Convert RGB to Hex string (includes alpha if < 255)
+export function rgbToHex(r: number, g: number, b: number, a?: number): string {
   const toHex = (x: number) => x.toString(16).padStart(2, "0");
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+  const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  if (a !== undefined && a < 255) {
+    return `${hex}${toHex(a)}`.toUpperCase();
+  }
+  return hex.toUpperCase();
 }
 
-// Convert HSV to Hex string
-export function hsvToHex({ h, s, v }: { h: number; s: number; v: number }) {
+// Convert HSV to Hex string (includes alpha if < 255)
+export function hsvToHex({ h, s, v }: { h: number; s: number; v: number }, a?: number) {
   const { r, g, b } = hsvToRgb(h, s, v);
-  return rgbToHex(r, g, b);
+  return rgbToHex(r, g, b, a);
 }
 
-// Convert Hex string to RGB (returns null if invalid)
+// Convert Hex string to RGB (returns null if invalid, supports #RRGGBB and #RRGGBBAA)
 export function hexToRgb(hex?: string) {
   if (!hex) return null;
   const cleaned = hex.replace("#", "");
-  if (cleaned.length !== 6) return null;
+  if (cleaned.length !== 6 && cleaned.length !== 8) return null;
   return {
     r: parseInt(cleaned.slice(0, 2), 16),
     g: parseInt(cleaned.slice(2, 4), 16),
     b: parseInt(cleaned.slice(4, 6), 16),
+    a: cleaned.length === 8 ? parseInt(cleaned.slice(6, 8), 16) : 255,
   };
+}
+
+// Extract alpha from hex string (returns 255 if no alpha present)
+export function hexToAlpha(hex: string): number {
+  const cleaned = hex.replace("#", "");
+  if (cleaned.length === 8) return parseInt(cleaned.slice(6, 8), 16);
+  return 255;
 }
 
 // Convert RGB to HSV

@@ -1,0 +1,66 @@
+{
+  "name": "running",
+  "label": "Running animation",
+  "duration": 1.0,
+  "loop": true,
+  "parts": [
+    {
+      "name": "leftArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.8, 0, 0.1] },
+        { "time": 0.25, "rotation": [0, 0, 0.05] },
+        { "time": 0.5, "rotation": [-0.8, 0, 0.1] },
+        { "time": 0.75, "rotation": [0, 0, 0.05] },
+        { "time": 1.0, "rotation": [0.8, 0, 0.1] }
+      ]
+    },
+    {
+      "name": "rightArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.8, 0, -0.1] },
+        { "time": 0.25, "rotation": [0, 0, -0.05] },
+        { "time": 0.5, "rotation": [0.8, 0, -0.1] },
+        { "time": 0.75, "rotation": [0, 0, -0.05] },
+        { "time": 1.0, "rotation": [-0.8, 0, -0.1] }
+      ]
+    },
+    {
+      "name": "leftLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.5, 0, 0] },
+        { "time": 0.25, "rotation": [0, 0, 0] },
+        { "time": 0.5, "rotation": [0.5, 0, 0] },
+        { "time": 0.75, "rotation": [0, 0, 0] },
+        { "time": 1.0, "rotation": [-0.5, 0, 0] }
+      ]
+    },
+    {
+      "name": "rightLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.5, 0, 0] },
+        { "time": 0.25, "rotation": [0, 0, 0] },
+        { "time": 0.5, "rotation": [-0.5, 0, 0] },
+        { "time": 0.75, "rotation": [0, 0, 0] },
+        { "time": 1.0, "rotation": [0.5, 0, 0] }
+      ]
+    },
+    {
+      "name": "head",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.08, 0, 0] },
+        { "time": 0.25, "rotation": [-0.08, 0, 0] },
+        { "time": 0.5, "rotation": [0.08, 0, 0] },
+        { "time": 0.75, "rotation": [-0.08, 0, 0] },
+        { "time": 1.0, "rotation": [0.08, 0, 0] }
+      ]
+    },
+    {
+      "name": "body",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.15, 0, 0.03] },
+        { "time": 0.5, "rotation": [0.15, 0, -0.03] },
+        { "time": 1.0, "rotation": [0.15, 0, 0.03] }
+      ]
+    }
+  ]
+}

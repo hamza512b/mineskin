@@ -38,12 +38,46 @@ uniform float u_floorSpecular;
 uniform float u_directionalLightIntensity;
 out vec4 outColor;
 uniform bool u_gridLines;
+uniform vec3 u_gridColor;
+uniform float u_gridAlpha;
+uniform bool u_gridFloor;
+uniform float u_gridCell;
+uniform vec3 u_gridColorAxis;
+uniform vec3 u_gridColorAxis2;
+uniform float u_gridFadeStart;
+uniform float u_gridFadeEnd;
+
+float gridMask(vec2 p, float cell) {
+  vec2 c = p / cell;
+  vec2 d = max(fwidth(c), vec2(1e-5));
+  vec2 g = abs(fract(c - 0.5) - 0.5) / d;
+  return 1.0 - clamp(min(g.x, g.y) - 0.5, 0.0, 1.0);
+}
 
 void main() {
-  if (u_gridLines) {
-    outColor = vec4(vec3(0.8, 0.8, 0.8), 1.0);
+  if (u_gridFloor) {
+    vec2 P = v_position.xz;
+    float line = gridMask(P, u_gridCell);
+    float axd = max(fwidth(P.y), 1e-5);
+    float axisX = 1.0 - clamp(abs(P.y) / axd - 0.5, 0.0, 1.0);
+    float axd2 = max(fwidth(P.x), 1e-5);
+    float axisY = 1.0 - clamp(abs(P.x) / axd2 - 0.5, 0.0, 1.0);
+
+    float a = line * 0.5;
+    vec3 col = u_gridColor;
+    if (axisX > a) { a = axisX; col = u_gridColorAxis; }
+    if (axisY > a) { a = axisY; col = u_gridColorAxis2; }
+
+    float dist = length(v_position.xz);
+    a *= (1.0 - smoothstep(u_gridFadeStart, u_gridFadeEnd, dist)) * u_gridAlpha;
+    if (a < 0.001) discard;
+    outColor = vec4(col * a, a);
     return;
-  }  
+  }
+  if (u_gridLines) {
+    outColor = vec4(u_gridColor * u_gridAlpha, u_gridAlpha);
+    return;
+  }
   vec3 normal = normalize(v_normal);
   vec3 lightDir = normalize(u_diffuseLightPosition - v_position.xyz);
   
@@ -53,7 +87,7 @@ void main() {
   float specular = pow(max(dot(viewDir, reflectDir), 0.0), 50.0);
   
   vec4 texelColor = texture(u_skinTexture, v_texcoord);
-  if (texelColor.a < 1.0) {
+  if (texelColor.a < 0.01) {
     discard;
   }
   float objectDiffuse = u_diffuseStrength;
@@ -61,8 +95,9 @@ void main() {
 
   float totalDiffuse = diffuse * u_directionalLightIntensity * objectDiffuse;
   float totalSpecular = specular * objectSpecular;
-  
-  outColor = vec4(texelColor.rgb * (u_ambientLight + totalDiffuse + totalSpecular), texelColor.a);
+
+  vec3 litColor = texelColor.rgb * (u_ambientLight + totalDiffuse + totalSpecular);
+  outColor = vec4(litColor * texelColor.a, texelColor.a);
 }
 `;
 
@@ -207,5 +242,29 @@ export class MainProgram extends RendererProgram {
       "u_floorColor",
       gl.getUniformLocation(this.getProgram(), "u_floorColor")!,
     );
+
+    this.setLocation(
+      "u_gridColor",
+      gl.getUniformLocation(this.getProgram(), "u_gridColor")!,
+    );
+
+    this.setLocation(
+      "u_gridAlpha",
+      gl.getUniformLocation(this.getProgram(), "u_gridAlpha")!,
+    );
+
+    for (const name of [
+      "u_gridFloor",
+      "u_gridCell",
+      "u_gridColorAxis",
+      "u_gridColorAxis2",
+      "u_gridFadeStart",
+      "u_gridFadeEnd",
+    ]) {
+      this.setLocation(
+        name,
+        gl.getUniformLocation(this.getProgram(), name)!,
+      );
+    }
   }
 }

@@ -27,7 +27,7 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="z-50 w-96 max-h-[500px] overflow-y-auto rounded-lg bg-white dark:bg-gray-900 p-6 shadow-lg outline-none animate-in fade-in-0 zoom-in-95"
+            className="z-50 w-96 max-h-[500px] overflow-y-auto rounded-lg bg-white dark:bg-neutral-900 p-6 shadow-lg outline-none animate-in fade-in-0 zoom-in-95"
             sideOffset={5}
             side="top"
             align="end"
@@ -63,7 +63,7 @@ export const ChangelogPopover: React.FC<ChangelogPopoverProps> = ({
               />
             </div>
 
-            <Popover.Arrow className="fill-white dark:fill-gray-900" />
+            <Popover.Arrow className="fill-white dark:fill-neutral-900" />
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

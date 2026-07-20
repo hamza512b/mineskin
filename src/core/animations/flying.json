@@ -1,0 +1,56 @@
+{
+  "name": "flying",
+  "label": "Flying animation",
+  "duration": 3.0,
+  "loop": true,
+  "parts": [
+    {
+      "name": "body",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.7, 0, 0], "position": [0, 0.5, 0] },
+        { "time": 1.5, "rotation": [0.75, 0, 0], "position": [0, 0.3, 0] },
+        { "time": 3.0, "rotation": [0.7, 0, 0], "position": [0, 0.5, 0] }
+      ]
+    },
+    {
+      "name": "head",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.4, 0, 0] },
+        { "time": 1.5, "rotation": [-0.35, 0.05, 0] },
+        { "time": 3.0, "rotation": [-0.4, 0, 0] }
+      ]
+    },
+    {
+      "name": "leftArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.4, 0, 0.02] },
+        { "time": 1.5, "rotation": [-0.3, 0, 0.03] },
+        { "time": 3.0, "rotation": [-0.4, 0, 0.03] }
+      ]
+    },
+    {
+      "name": "rightArm",
+      "keyframes": [
+        { "time": 0.0, "rotation": [-0.4, 0, -0.02] },
+        { "time": 1.5, "rotation": [-0.3, 0, -0.03] },
+        { "time": 3.0, "rotation": [-0.4, 0, -0.03] }
+      ]
+    },
+    {
+      "name": "leftLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.1, 0, 0.05] },
+        { "time": 1.5, "rotation": [0.15, 0, 0.03] },
+        { "time": 3.0, "rotation": [0.1, 0, 0.05] }
+      ]
+    },
+    {
+      "name": "rightLeg",
+      "keyframes": [
+        { "time": 0.0, "rotation": [0.1, 0, -0.05] },
+        { "time": 1.5, "rotation": [0.15, 0, -0.03] },
+        { "time": 3.0, "rotation": [0.1, 0, -0.05] }
+      ]
+    }
+  ]
+}

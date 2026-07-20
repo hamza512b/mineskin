@@ -13,6 +13,15 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const VISIT_COUNT_KEY = "mineskin-visit-count";
+const VISIT_THRESHOLD = 7;
+
+function isAppleDevice() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /iphone|ipod|ipad|macintosh|mac os x/.test(ua);
+}
+
 export default function PWAInstallPopup() {
   const path = usePathname();
   const [deferredPrompt, setDeferredPrompt] =
@@ -22,26 +31,37 @@ export default function PWAInstallPopup() {
   const isVisible = isActivePopup("pwaInstall");
 
   useEffect(() => {
-    // Check if user has already dismissed or installed
-    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    // Already installed — nothing to prompt.
     const isStandalone = window.matchMedia(
       "(display-mode: standalone)",
     ).matches;
+    if (isStandalone) return;
 
-    if (dismissed || isStandalone) {
-      return;
-    }
+    // Apple devices get the iOS app prompt instead
+    if (isAppleDevice()) return;
 
-    const cookieConsented = localStorage.getItem("consent-popup");
+    // Chrome re-dispatches `beforeinstallprompt` on every navigation (including
+    // client-side route changes like editor <-> preview) until the stashed event
+    // is consumed via prompt(). Only surface our popup once per mount, and always
+    // re-read the dismissed/consent flags fresh so a dismissal actually sticks.
+    let handled = false;
 
     const beforeIsntallHandler = (e: Event) => {
-      if (cookieConsented) {
-        e.preventDefault();
-        registerPopup("pwaInstall");
-        setDeferredPrompt(e as BeforeInstallPromptEvent);
-      }
+      if (handled) return;
+      if (localStorage.getItem("pwa-install-dismissed")) return;
+      if (!localStorage.getItem("consent-popup")) return;
+      const visits = parseInt(
+        localStorage.getItem(VISIT_COUNT_KEY) || "0",
+        10,
+      );
+      if (visits < VISIT_THRESHOLD) return;
+      handled = true;
+      e.preventDefault();
+      registerPopup("pwaInstall");
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      window.gtag?.("event", "pwa_prompt_shown");
     };
-    const installHandler = (_e: Event) => {
+    const installHandler = () => {
       window.gtag("event", "pwa_installed");
     };
 
@@ -50,6 +70,7 @@ export default function PWAInstallPopup() {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", beforeIsntallHandler);
+      window.removeEventListener("appinstalled", installHandler);
     };
   }, [registerPopup]);
 
@@ -58,19 +79,19 @@ export default function PWAInstallPopup() {
       return;
     }
 
-    // Show the install prompt
+    window.gtag?.("event", "pwa_install_clicked");
     await deferredPrompt.prompt();
 
-    // Wait for the user to respond to the prompt
-    await deferredPrompt.userChoice;
+    const choice = await deferredPrompt.userChoice;
+    window.gtag?.("event", "pwa_native_choice", { outcome: choice.outcome });
 
-    // Clear the deferredPrompt
     setDeferredPrompt(null);
     unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
   const handleDismiss = () => {
+    window.gtag?.("event", "pwa_dismissed");
     unregisterPopup("pwaInstall");
     localStorage.setItem("pwa-install-dismissed", "true");
   };
@@ -90,7 +111,7 @@ export default function PWAInstallPopup() {
     <AnimatePresence>
       {isVisible && deferredPrompt && (
         <motion.div
-          className="z-2000 fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 pointer-events-auto! standalone:bottom-8"
+          className="z-[2000] fixed bottom-2 start-2 end-2 md:start-2 md:end-auto md:bottom-2 standalone:bottom-8 safe-area-bottom safe-area-leftrtl:safe-area-right pointer-events-auto!"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -99,7 +120,7 @@ export default function PWAInstallPopup() {
           aria-labelledby="pwa-install-title"
           aria-describedby="pwa-install-description"
         >
-          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="max-w-md w-full bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center px-4 pt-4">
               <div className="flex items-center gap-2">
@@ -126,7 +147,7 @@ export default function PWAInstallPopup() {
               <IconButton
                 onClick={handleDismiss}
                 label={dict.pwa.closePrompt}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
               >
                 <Icons.Close />
               </IconButton>

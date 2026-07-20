@@ -1,9 +1,11 @@
+import { getRendererState } from "../store";
+import type { HistorySnapshot } from "../store/types";
+import { MinecraftSkin } from "./MinecraftSkin";
 import { MiSkiRenderer } from "./MiSkiRenderer";
-import { HistorySnapshot as Snapshot } from "./State";
+
+let firstEditTracked = false;
 
 export class UndoRedoManager {
-  private batching: boolean = false;
-  private batchBaseline: Snapshot | null = null;
   private boundOnKeyDown = (e: KeyboardEvent) => {
     const isMod = e.ctrlKey || e.metaKey; // support Ctrl (Windows/Linux) and Cmd (macOS)
     if (isMod && e.key.toLowerCase() === "z") {
@@ -22,93 +24,84 @@ export class UndoRedoManager {
   constructor(public renderer: MiSkiRenderer) {}
 
   public beginBatch() {
-    if (!this.batching) {
-      this.batching = true;
-      const skin = this.renderer.getMainSkin();
-      this.batchBaseline = {
-        material: skin.material.clone(),
-        skinIsPocket: this.renderer.state.getSkinIsPocket(),
-      };
-    }
+    const skin = this.renderer.getMainSkin();
+    const state = getRendererState();
+    state.beginBatch(skin.material, state.skinIsPocket, state.skinIsDoubleRes);
   }
 
   public endBatch() {
-    if (!this.batching) return;
     const skin = this.renderer.getMainSkin();
-    const snapshot: Snapshot = {
-      material: skin.material.clone(),
-      skinIsPocket: this.renderer.state.getSkinIsPocket(),
-    };
-    if (
-      this.batchBaseline &&
-      (!this.areEqual(
-        this.batchBaseline.material.imageData,
-        skin.material.imageData,
-      ) ||
-        this.batchBaseline.skinIsPocket !== snapshot.skinIsPocket)
-    ) {
-      this.renderer.state.undoStack.push(snapshot);
-      this.renderer.state.redoStack.clear();
+    const state = getRendererState();
+    state.endBatch(skin.material, state.skinIsPocket, state.skinIsDoubleRes);
+    if (!firstEditTracked) {
+      firstEditTracked = true;
+      window.gtag?.("event", "first_edit", { tool: state.paintMode });
+    }
+  }
 
-      this.renderer.state.storeSkinImageData(
-        snapshot.material.imageData,
-        "main_skin",
+  private async applySnapshot(snapshot: HistorySnapshot) {
+    const state = getRendererState();
+    const skin = this.renderer.getMainSkin();
+    // Determine current resolution from the actual skin material, not the store.
+    // The store's undo/redo already updated skinIsDoubleRes before this runs,
+    // so checking the store would always match and skip the mesh rebuild.
+    const currentIsDoubleRes = skin.material.width === 128;
+
+    if (snapshot.skinIsDoubleRes !== currentIsDoubleRes) {
+      // Resolution changed — full mesh rebuild needed
+      this.renderer.backend.cleanupMeshGroup(skin);
+      this.renderer.removeMesh(skin);
+
+      const newSkin = await MinecraftSkin.create(
+        "MainSkin",
+        this.renderer.world,
+        snapshot.material.clone().imageData,
+        undefined,
+        snapshot.skinIsDoubleRes,
       );
+
+      this.renderer.addMesh(newSkin);
+      this.renderer.backend.bindMeshGroup(newSkin);
+      this.renderer.updateMeshVisibility(state);
+    } else {
+      // Same resolution — just swap material
+      skin.material = snapshot.material.clone();
     }
-    this.batching = false;
-    this.batchBaseline = null;
   }
 
-  private areEqual(a: ImageData, b: ImageData): boolean {
-    if (a.width !== b.width || a.height !== b.height) return false;
-    for (let i = 0; i < a.data.length; i++) {
-      if (a.data[i] !== b.data[i]) return false;
-    }
-    return true;
-  }
-
-  public undo() {
+  public async undo() {
     if (this.renderer.getMode() === "Preview") {
       return;
     }
-    if (this.renderer.state.undoStack.count > 1) {
-      const current = this.renderer.state.undoStack.pop();
-      if (current) this.renderer.state.redoStack.push(current);
-      const prev = this.renderer.state.undoStack.peek();
-      if (prev) {
-        const material = prev.material.clone();
-        this.renderer.getMainSkin().material = material;
-        // Update the skinIsPocket flag to match the snapshot.
-        this.renderer.state.setSkinIsPocket(prev.skinIsPocket, true, "App");
-        this.renderer.state.storeSkinImageData(material.imageData, "main_skin");
-      }
+    const state = getRendererState();
+    const prev = state.undo();
+    if (prev) {
+      await this.applySnapshot(prev);
     }
   }
 
-  public redo() {
+  public async redo() {
     if (this.renderer.getMode() === "Preview") {
       return;
     }
-    if (this.renderer.state.redoStack.count > 0) {
-      const next = this.renderer.state.redoStack.pop();
-      if (next) {
-        this.renderer.state.undoStack.push(next);
-        const material = next.material.clone();
-        this.renderer.getMainSkin().material = material;
-
-        this.renderer.state.setSkinIsPocket(next.skinIsPocket, true, "App");
-        this.renderer.state.storeSkinImageData(material.imageData, "main_skin");
-      }
+    const state = getRendererState();
+    const next = state.redo();
+    if (next) {
+      await this.applySnapshot(next);
     }
   }
 
   public mountListeners() {
     document.addEventListener("keydown", this.boundOnKeyDown);
-    this.renderer.state.undoStack.push({
-      material: this.renderer.getMainSkin().material.clone(),
-      skinIsPocket: this.renderer.state.getSkinIsPocket(),
+
+    // Push initial state to undo stack
+    const skin = this.renderer.getMainSkin();
+    const state = getRendererState();
+    state.pushToUndoStack({
+      material: skin.material.clone(),
+      skinIsPocket: state.skinIsPocket,
+      skinIsDoubleRes: state.skinIsDoubleRes,
     });
-    this.renderer.state.redoStack.clear();
   }
 
   public unmountListeners() {
@@ -116,7 +109,6 @@ export class UndoRedoManager {
   }
 
   public reset() {
-    this.renderer.state.undoStack.clear();
-    this.renderer.state.redoStack.clear();
+    getRendererState().clearHistory();
   }
 }

@@ -1,17 +1,17 @@
 import { MiSkiRenderer } from "@/core/MiSkiRenderer";
-import { State } from "@/core/State";
+import { BackendNotSupportedError } from "@/core/errors";
 import { RefObject, useEffect, useRef, useState } from "react";
 
 interface KlassRenderer {
-  setup: (canvas: HTMLCanvasElement, state: State) => Promise<MiSkiRenderer>;
+  setup: (canvas: HTMLCanvasElement) => Promise<MiSkiRenderer>;
 }
 
 export default function useRenderer(
   KlassRenderer: KlassRenderer,
   canvasRef: RefObject<HTMLCanvasElement | null>,
-  state: State,
-): MiSkiRenderer | null {
+): { renderer: MiSkiRenderer | null; backendNotSupported: boolean } {
   const rendererRef = useRef<MiSkiRenderer>(null);
+  const [backendNotSupported, setBackendNotSupported] = useState(false);
 
   // UseEffect is guaranteed to run after the DOM is painted, but after it runs, we need to render.
   const [, setGeneration] = useState(0);
@@ -24,19 +24,28 @@ export default function useRenderer(
 
     let isMounted = true;
 
-    KlassRenderer.setup(canvasRef.current, state).then((renderer) => {
-      if (!isMounted) {
-        // Component was unmounted before setup completed, cleanup immediately
-        renderer.stop();
-        renderer.unmount();
-        return;
-      }
+    KlassRenderer.setup(canvasRef.current)
+      .then((renderer) => {
+        if (!isMounted) {
+          // Component was unmounted before setup completed, cleanup immediately
+          renderer.stop();
+          renderer.unmount();
+          return;
+        }
 
-      rendererRef.current = renderer;
-      rendererRef.current.mount();
-      rendererRef.current.start();
-      setGeneration((generation) => generation + 1);
-    });
+        rendererRef.current = renderer;
+        rendererRef.current.mount();
+        rendererRef.current.start();
+        setGeneration((generation) => generation + 1);
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        if (error instanceof BackendNotSupportedError) {
+          setBackendNotSupported(true);
+        } else {
+          throw error;
+        }
+      });
 
     setGeneration((generation) => generation + 1);
 
@@ -50,7 +59,7 @@ export default function useRenderer(
         rendererRef.current = null;
       }
     };
-  }, [KlassRenderer, state]);
+  }, [KlassRenderer]);
 
-  return rendererRef.current;
+  return { renderer: rendererRef.current, backendNotSupported };
 }

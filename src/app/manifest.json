@@ -26,7 +26,50 @@
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["games", "graphics", "utilities"]
+  "categories": ["games", "graphics", "utilities"],
+  "screenshots": [
+    {
+      "src": "/screenshots/phone_1.png",
+      "sizes": "1290x2796",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "3D skin preview with orbit controls"
+    },
+    {
+      "src": "/screenshots/phone_2.png",
+      "sizes": "1290x2796",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Skin editor with drawing tools"
+    },
+    {
+      "src": "/screenshots/phone_3.png",
+      "sizes": "1290x2796",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Color picker with hue and saturation controls"
+    },
+    {
+      "src": "/screenshots/ipad_1.png",
+      "sizes": "2048x2732",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "3D skin preview with orbit controls"
+    },
+    {
+      "src": "/screenshots/ipad_2.png",
+      "sizes": "2048x2732",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Skin editor with drawing tools"
+    }
+  ]
 }

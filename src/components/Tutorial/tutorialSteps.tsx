@@ -1,4 +1,6 @@
 import { t, tJsx, useDictionary } from "@/i18n";
+import { isNativeWebview } from "@/hooks/useNativeWebview";
+import { openExternalUrl } from "@/core/openExternalUrl";
 import { useMemo } from "react";
 
 export interface TutorialStep {
@@ -42,12 +44,15 @@ export function useTutorialSteps(): TutorialStep[] {
           <p>
             {dict.tutorial.eraserContent}
           </p>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-neutral-400">
             {dict.tutorial.eraserNote}
           </p>
         </>
       ),
-      target: '[data-tutorial-id="eraser-tool"]',
+      // The eraser lives inside the brush flyout now, so point at its rail
+      // slot (a missing target would leave the spotlight on the previous
+      // step's element).
+      target: '[data-tutorial-id="pen-tool"]',
       placement: "right",
     },
     {
@@ -63,7 +68,7 @@ export function useTutorialSteps(): TutorialStep[] {
                   shortcuts: isMac ? "⌘ + Shift + Z or ⌘ + Z" : "Ctrl + Y or Ctrl + Z",
                 })}
           </p>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-neutral-400">
             {dict.tutorial.undoRedoNote}
           </p>
         </>
@@ -93,6 +98,20 @@ export function useTutorialSteps(): TutorialStep[] {
       placement: "right",
     },
     {
+      id: "touch-draw-mode",
+      title: dict.tutorial.touchDrawModeTitle,
+      content: dict.tutorial.touchDrawModeContent,
+      target: '[data-tutorial-id="touch-draw-mode"]',
+      placement: "right",
+    },
+    {
+      id: "settings-tip",
+      title: dict.tutorial.settingsTipTitle,
+      content: dict.tutorial.settingsTipContent,
+      target: '[data-tutorial-id="settings"]',
+      placement: "right",
+    },
+    {
       id: "finish",
       title: dict.tutorial.finishTitle,
       content: (
@@ -102,7 +121,15 @@ export function useTutorialSteps(): TutorialStep[] {
               <a
                 key="usage-guide-link"
                 href={`/${locale}/guides/usage_guide`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
+                onClick={(e) => {
+                  if (isNativeWebview()) {
+                    e.preventDefault();
+                    openExternalUrl(`/${locale}/guides/usage_guide`);
+                  }
+                }}
               >
                 {dict.detailPanel.usageGuide}
               </a>

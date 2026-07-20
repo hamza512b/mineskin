@@ -26,6 +26,7 @@ dist-ssr
 prompt.
 
 .next
+.vercel
 
 .husky
 .eslintcache
@@ -34,7 +35,74 @@ prompt.
 public/sw*
 public/swe-worker*
 certificates
+certs
 
 out
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# Android
+android/.gradle
+android/app/build
+android/local.properties
+android/app/src/main/assets/public
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/assets/adi-registration.properties
+android/app/release/
+android/app/google-services.json
+
+# iOS
+ios/App/App/GoogleService-Info.plist
+ios/App/App/Pods/
+ios/App/Podfile.lock
+*.mobileprovision
+*.xcuserstate
+
+# Secrets / credentials
+.env
+.env.*
+!.env.example
+*.pem
+# Public dev-CA cert (no key) — referenced by @raw/ in network_security_config,
+# so Android builds fail without it.
+!android/app/src/main/res/raw/mineskin_dev_ca.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.jks
+*.keystore
+*.p8
+android/keystore.properties
+secrets/
+credentials.json
+service-account*.json
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+# Store-native release notes are generated from fastlane/release_notes.txt.
+fastlane/metadata/
+build/ios/
+fastlane/README.md
+
+# Sentry Config File
+.env.sentry-build-plugin
+
+# Claude local settings
+.claude/settings.local.json
+
+# design-sync (claude.ai/design) — staged scripts, build output, machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.agents
+.claude
+.windsurf
+skills-lock.json
+.design-sync

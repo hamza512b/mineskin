@@ -9,13 +9,13 @@ import {
 import clsx from "clsx";
 
 const selectTriggerVariants = cva(
-  "inline-flex items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900 focus:ring-blue-500 data-[placeholder]:text-gray-500 dark:data-[placeholder]:text-gray-400 max-w-[200px] gap-2",
+  "inline-flex items-center justify-between rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 px-3 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-neutral-900 focus:ring-blue-500 data-[placeholder]:text-neutral-500 dark:data-[placeholder]:text-neutral-400 gap-2",
   {
     variants: {
       variant: {
-        default: "text-gray-700 dark:text-gray-200",
+        default: "text-neutral-700 dark:text-neutral-200",
         error:
-          "border-red-500 focus:ring-red-500 text-gray-700 dark:text-gray-200",
+          "border-red-500 focus:ring-red-500 text-neutral-700 dark:text-neutral-200",
       },
       size: {
         sm: "h-8 text-sm",
@@ -24,7 +24,7 @@ const selectTriggerVariants = cva(
       },
       fullWidth: {
         true: "w-full",
-        false: "w-min",
+        false: "w-min max-w-[200px]",
       },
       isDisabled: {
         true: "opacity-50 cursor-not-allowed",
@@ -93,9 +93,9 @@ const SelectTrigger = forwardRef<
       {children}
       <SelectPrimitive.Icon asChild>
         {isUp ? (
-          <ChevronUpIcon className="h-4 w-4 opacity-50" />
+          <ChevronUpIcon className="h-4 w-4 shrink-0 opacity-50" />
         ) : (
-          <ChevronDownIcon className="h-4 w-4 opacity-50" />
+          <ChevronDownIcon className="h-4 w-4 shrink-0 opacity-50" />
         )}
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
@@ -111,7 +111,7 @@ const SelectContent = forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={clsx(
-        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-md animate-in fade-in-80",
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 shadow-md animate-in fade-in-80",
         position === "popper" &&
           "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
         className,
@@ -119,13 +119,13 @@ const SelectContent = forwardRef<
       position={position}
       {...props}
     >
-      <SelectPrimitive.ScrollUpButton className="flex items-center justify-center h-6 bg-white dark:bg-gray-800 cursor-default">
+      <SelectPrimitive.ScrollUpButton className="flex items-center justify-center h-6 bg-white dark:bg-neutral-800 cursor-default">
         <ChevronUpIcon />
       </SelectPrimitive.ScrollUpButton>
       <SelectPrimitive.Viewport className="p-1">
         {children}
       </SelectPrimitive.Viewport>
-      <SelectPrimitive.ScrollDownButton className="flex items-center justify-center h-6 bg-white dark:bg-gray-800 cursor-default">
+      <SelectPrimitive.ScrollDownButton className="flex items-center justify-center h-6 bg-white dark:bg-neutral-800 cursor-default">
         <ChevronDownIcon />
       </SelectPrimitive.ScrollDownButton>
     </SelectPrimitive.Content>
@@ -140,7 +140,7 @@ const SelectLabel = forwardRef<
   <SelectPrimitive.Label
     ref={ref}
     className={clsx(
-      "px-2 py-1.5 text-sm font-semibold text-gray-500 dark:text-gray-400",
+      "px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:text-neutral-400",
       className,
     )}
     {...props}
@@ -173,14 +173,14 @@ const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={clsx(
-      "relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-gray-100 dark:focus:bg-gray-700 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-pointer select-none items-center rounded-sm py-1.5 ps-2 pe-8 text-sm outline-none focus:bg-neutral-100 dark:focus:bg-neutral-700 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
     {...props}
   >
-    {icon && <span className="mr-2 flex items-center">{icon}</span>}
+    {icon && <span className="me-2 flex items-center">{icon}</span>}
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="absolute end-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
         <CheckIcon className="h-4 w-4" />
       </SelectPrimitive.ItemIndicator>
@@ -195,7 +195,7 @@ const SelectSeparator = forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={clsx("h-px my-1 bg-gray-200 dark:bg-gray-700", className)}
+    className={clsx("h-px my-1 bg-neutral-200 dark:bg-neutral-700", className)}
     {...props}
   />
 ));
@@ -279,9 +279,11 @@ export function SelectBox({
         className={className}
         isUp={selectIconUp}
       >
-        <div className="flex items-center gap-1">
-          {leftIcon && <span className="flex items-center">{leftIcon}</span>}
-          <SelectValue placeholder={placeholder} />
+        <div className="flex min-w-0 items-center gap-1">
+          {leftIcon && (
+            <span className="flex shrink-0 items-center">{leftIcon}</span>
+          )}
+          <SelectValue placeholder={placeholder} className="truncate" />
         </div>
       </SelectTrigger>
       <SelectContent>

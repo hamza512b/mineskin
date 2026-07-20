@@ -6,6 +6,7 @@ import animations, {
   PartTransform,
 } from "./animations";
 import { lerpVector3, smoothStepLerpVector3 } from "./interpolationUtils";
+import { MeshGroup } from "./mesh";
 import { MinecraftSkin } from "./MinecraftSkin";
 
 export class AnimationSystem {
@@ -15,6 +16,7 @@ export class AnimationSystem {
   private isPlaying: boolean = false;
   private bodyParts: AnimationBodyPart[] = [];
   private originalTransforms: Map<string, PartTransform> = new Map();
+  private parentGroups: Set<MeshGroup> = new Set();
   private onAnimationUpdate?: () => void;
 
   constructor(onAnimationUpdate?: () => void) {
@@ -42,6 +44,17 @@ export class AnimationSystem {
         overlay: skin.overlayRightLeg,
       },
     ];
+
+    // Collect parent groups (opaqueGroup, transparentGroup) so body transform
+    // can be applied to them, making all parts inherit body rotation/position
+    this.parentGroups.clear();
+    for (const part of this.bodyParts) {
+      const baseParent = part.base?.getParent();
+      const overlayParent = part.overlay?.getParent();
+      if (baseParent instanceof MeshGroup) this.parentGroups.add(baseParent);
+      if (overlayParent instanceof MeshGroup)
+        this.parentGroups.add(overlayParent);
+    }
   }
 
   public playAnimation(animationName: string): void {
@@ -85,6 +98,17 @@ export class AnimationSystem {
     this.animationSpeed = Math.max(0.1, speed);
   }
 
+  public setAnimationTime(time: number): void {
+    if (!this.currentAnimation) return;
+
+    const duration = this.currentAnimation.duration;
+    this.animationTime = this.currentAnimation.loop
+      ? ((time % duration) + duration) % duration
+      : Math.min(Math.max(0, time), duration);
+    this.updateAnimation();
+    this.onAnimationUpdate?.();
+  }
+
   public isAnimationPlaying(): boolean {
     return this.isPlaying;
   }
@@ -96,10 +120,41 @@ export class AnimationSystem {
   private updateAnimation(): void {
     if (!this.currentAnimation) return;
 
-    // Normal animation update
+    // Process body first: apply body transform to parent groups so all parts
+    // inherit the body's rotation/position (e.g. tilting forward when flying)
+    const bodyPartData = this.currentAnimation.parts.find(
+      (p) => p.name === "body",
+    );
+    if (bodyPartData) {
+      const bodyTransform = this.calculatePartTransformAtTime(
+        bodyPartData,
+        this.animationTime,
+      );
+      for (const group of this.parentGroups) {
+        group.rotation = bodyTransform.rotation;
+        group.position = bodyTransform.position;
+      }
+    }
+
+    // Apply animation to each part
     this.currentAnimation.parts.forEach((partData) => {
       const bodyPart = this.bodyParts.find((bp) => bp.name === partData.name);
       if (!bodyPart) return;
+
+      // Body transform is already applied to parent groups above;
+      // reset the body part itself so it doesn't double-rotate
+      if (partData.name === "body") {
+        if (bodyPart.base) {
+          bodyPart.base.rotation = [0, 0, 0];
+          bodyPart.base.position = [0, 0, 0];
+          bodyPart.base.scale = [1, 1, 1];
+        }
+        if (bodyPart.overlay) {
+          bodyPart.overlay.rotation = [0, 0, 0];
+          bodyPart.overlay.position = [0, 0, 0];
+        }
+        return;
+      }
 
       const transform = this.calculatePartTransformAtTime(
         partData,
@@ -217,6 +272,12 @@ export class AnimationSystem {
   }
 
   private resetToOriginalTransforms(): void {
+    // Reset parent groups (body transform applied during animation)
+    for (const group of this.parentGroups) {
+      group.rotation = [0, 0, 0];
+      group.position = [0, 0, 0];
+    }
+
     this.bodyParts.forEach((part) => {
       if (part.base) {
         part.base.rotation = [0, 0, 0];

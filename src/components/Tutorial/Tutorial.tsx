@@ -1,5 +1,6 @@
+import { usePopupQueue } from "@/contexts/PopupQueueContext";
 import useMediaQuery from "@/hooks/useMediaQuery";
-import { useRendererStore } from "@/hooks/useRendererState";
+import { useRendererStore } from "@/store";
 import { useDictionary } from "@/i18n";
 import { useConfirmation } from "@/widgets/Confirmation/Confirmation";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -25,13 +26,20 @@ const Tutorial: React.FC = () => {
   const { dictionary: dict, locale } = useDictionary();
   const isRTL = locale === "ar";
   const tutorialSteps = useTutorialSteps();
+  const { registerPopup, unregisterPopup, isActivePopup } = usePopupQueue();
+  const isVisible = isActivePopup("tutorial");
+
+  useEffect(() => {
+    registerPopup("tutorial");
+    return () => unregisterPopup("tutorial");
+  }, [registerPopup, unregisterPopup]);
 
   const filteredSteps = useMemo(() => {
     return tutorialSteps.filter((step) => {
       if (isMobile) {
         return step.id !== "part-filter-desktop";
       } else {
-        return step.id !== "part-filter-mobile";
+        return step.id !== "part-filter-mobile" && step.id !== "touch-draw-mode";
       }
     });
   }, [isMobile, tutorialSteps]);
@@ -43,6 +51,7 @@ const Tutorial: React.FC = () => {
 
   const padding = 10;
   useLayoutEffect(() => {
+    if (!isVisible) return;
     function calculatePosition() {
       let top;
       let left;
@@ -119,9 +128,10 @@ const Tutorial: React.FC = () => {
     return () => {
       window.removeEventListener("resize", calculatePosition);
     };
-  }, [step, targetRect, isRTL]);
+  }, [step, targetRect, isRTL, isVisible]);
 
   useEffect(() => {
+    if (!isVisible) return;
     if (!step) return;
 
     const updateTargetRect = () => {
@@ -145,7 +155,7 @@ const Tutorial: React.FC = () => {
       window.removeEventListener("resize", updateTargetRect);
       window.removeEventListener("scroll", updateTargetRect, true);
     };
-  }, [currentStep, step]);
+  }, [currentStep, step, isVisible]);
 
   const handleNext = () => {
     if (currentStep < filteredSteps.length - 1) {
@@ -173,6 +183,8 @@ const Tutorial: React.FC = () => {
 
   const isFirstStep = currentStep == 0;
   const isLastStep = currentStep == filteredSteps.length - 1;
+
+  if (!isVisible) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -219,7 +231,7 @@ const Tutorial: React.FC = () => {
           <Dialog.Content asChild>
             <motion.div
               ref={tooltipRef}
-              className="absolute max-w-md w-full min-w-0 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-transparent dark:border-gray-700 p-5 shadow-lg rounded-lg "
+              className="absolute max-w-md w-full min-w-0 bg-neutral-50 dark:bg-neutral-800 border-neutral-300 dark:border-gray-transparent dark:border-neutral-700 p-5 shadow-lg rounded-lg "
               style={position}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={

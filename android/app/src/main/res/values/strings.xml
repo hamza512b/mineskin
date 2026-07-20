@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mineskin</string>
+    <string name="title_activity_main">Mineskin</string>
+    <string name="package_name">pro.mineskin.app</string>
+    <string name="custom_url_scheme">pro.mineskin.app</string>
+</resources>

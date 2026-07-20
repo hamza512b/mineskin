@@ -13,8 +13,8 @@ function PickerSliderComponent({
   setDragging: (dragging: boolean) => void;
   update: (e: React.PointerEvent<HTMLDivElement>) => void;
   setRecentlyDragged: (recentlyDragged: boolean) => void;
-  visualPosition: { hue: number; s: number; v: number };
-  type: "h" | "s" | "v";
+  visualPosition: { hue: number; s: number; v: number; a: number };
+  type: "h" | "s" | "v" | "a";
   className?: string;
 }) {
   const { dictionary: dict } = useDictionary();
@@ -32,6 +32,12 @@ function PickerSliderComponent({
     setDragging(false);
     setRecentlyDragged(true);
     setTimeout(() => setRecentlyDragged(false), 100);
+  };
+  const handleHuePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    setDragging(false);
   };
 
   const { pos, background, label, ariaLabel } = useMemo(() => {
@@ -58,36 +64,60 @@ function PickerSliderComponent({
       label = dict.colorPicker.lightness;
       ariaLabel = dict.colorPicker.lightnessSelector;
     }
+    if (type === "a") {
+      pos = visualPosition.a / 100;
+      background = `linear-gradient(to right, transparent, hsl(${visualPosition.hue} calc(${visualPosition.s} * 1%) calc(${visualPosition.v} * 0.5%)))`;
+      label = dict.colorPicker.opacity;
+      ariaLabel = dict.colorPicker.opacitySelector;
+    }
     return { pos, background, label, ariaLabel };
   }, [visualPosition, type, dict]);
 
+  const sliderTrack = (
+    <div
+      className="relative h-4 w-full rounded-lg cursor-pointer focus:outline-none"
+      style={{
+        backgroundImage: background,
+        touchAction: "pan-y",
+      }}
+      onPointerDown={handleHuePointerDown}
+      onPointerMove={handleHuePointerMove}
+      onPointerUp={handleHuePointerUp}
+      onPointerCancel={handleHuePointerCancel}
+      role="slider"
+      tabIndex={0}
+      aria-label={ariaLabel}
+    >
+      <div
+        className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-neutral-700 outline-none ring-1 ring-black"
+        style={{
+          left: `${pos * (100 - 4) + 2}%`,
+          transform: "translateX(-50%)",
+        }}
+        aria-hidden="true"
+      />
+    </div>
+  );
+
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <label className="block text-sm dark:text-slate-300 text-slate-900font-semibold">
+      <label className="block text-sm dark:text-neutral-300 text-neutral-900font-semibold">
         {label}
       </label>
-      <div
-        className="relative h-4 w-full rounded-lg cursor-pointer focus:outline-none"
-        style={{
-          backgroundImage: background,
-          touchAction: "none",
-        }}
-        onPointerDown={handleHuePointerDown}
-        onPointerMove={handleHuePointerMove}
-        onPointerUp={handleHuePointerUp}
-        role="slider"
-        tabIndex={0}
-        aria-label={ariaLabel}
-      >
+      {type === "a" ? (
         <div
-          className="absolute w-4 h-4 rounded-lg border-2 dark:border-white border-slate-700 outline-none ring-1 ring-black"
+          className="rounded-lg"
           style={{
-            left: `${pos * (100 - 4) + 2}%`,
-            transform: "translateX(-50%)",
+            backgroundImage:
+              "repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%)",
+            backgroundSize: "8px 8px",
           }}
-          aria-hidden="true"
-        />
-      </div>
+        >
+          {sliderTrack}
+        </div>
+      ) : (
+        sliderTrack
+      )}
     </div>
   );
 }

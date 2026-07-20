@@ -20,10 +20,10 @@ export default function Accordion({
     >
       <AccordionPrimitive.Item
         value="item"
-        className="mb-4 border border-slate-700 rounded-lg"
+        className="mb-4 border border-neutral-700 rounded-lg"
       >
         <AccordionPrimitive.Header>
-          <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between text-lg p-4  dark:text-slate-300 font-semibold cursor-pointer">
+          <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between text-lg p-4  dark:text-neutral-300 font-semibold cursor-pointer">
             {label}
             <ChevronDownIcon
               className="ease-[cubic-bezier(0.87,0,0.13,1)] transition-transform duration-300 group-data-[state=open]:rotate-180"

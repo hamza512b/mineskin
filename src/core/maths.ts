@@ -255,7 +255,11 @@ export function multiplyM44(...matrices: [M44, M44, ...M44[]]): M44 {
       a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15],
     ];
   };
-  return matrices.reduce((acc, m) => multiply(acc, m), identityM44());
+  let acc = matrices[0];
+  for (let i = 1; i < matrices.length; i++) {
+    acc = multiply(acc, matrices[i]);
+  }
+  return acc;
 }
 
 /**

@@ -1,8 +1,10 @@
 import clsx from "clsx";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { getEnvironmentCameraFloorY } from "../../core/environment";
 import { multiplyM3V3, rotateM33 } from "../../core/maths";
-import useMediaQuery from "../../hooks/useMediaQuery";
-import { useRendererStore } from "../../hooks/useRendererState";
+import useIsTouch from "../../hooks/useIsTouch";
+import { useIsDarkMode } from "../../hooks/useTheme";
+import { useRendererStore } from "../../store";
 
 interface GlobalRotationGizmoProps {
   className?: string;
@@ -113,22 +115,41 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
   className,
 }) => {
   // Use Zustand store with selective subscriptions for optimal performance
-  const cameraPhi = useRendererStore((state) => state.values.cameraPhi);
-  const cameraTheta = useRendererStore((state) => state.values.cameraTheta);
-  const handleChange = useRendererStore((state) => state.handleChange);
-  
+  const cameraPhi = useRendererStore((state) => state.cameraPhi);
+  const cameraTheta = useRendererStore((state) => state.cameraTheta);
+  const cameraRadius = useRendererStore((state) => state.cameraRadius);
+  const environmentPreset = useRendererStore(
+    (state) => state.environmentPreset,
+  );
+  const setValue = useRendererStore((state) => state.setValue);
+
   const rotation: [number, number, number] = [cameraPhi, cameraTheta, 0];
   const onRotationChange = useCallback(
     (rotation: [number, number, number]) => {
-      handleChange("cameraPhi", rotation[0]);
-      handleChange("cameraTheta", rotation[1]);
+      let phi = rotation[0];
+
+      // Clamp phi so the camera stays above the environment ground plane.
+      const floorY = getEnvironmentCameraFloorY(environmentPreset);
+      if (floorY !== null) {
+        const ratio = Math.min(1, -floorY / cameraRadius);
+        const maxPhi = Math.asin(ratio);
+        phi = Math.max(-Math.PI / 2, Math.min(phi, maxPhi));
+      }
+
+      setValue("cameraPhi", phi);
+      setValue("cameraTheta", rotation[1]);
     },
-    [handleChange],
+    [setValue, environmentPreset, cameraRadius],
   );
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const startTimeRef = useRef<number>(0);
+  const startEndpointRef = useRef<{
+    axisName: string;
+    subtype: "positive" | "negative";
+  } | null>(null);
   const elementsRef = useRef<Element[]>([]);
   const hoveredEndpointRef = useRef<{
     axisName: string;
@@ -168,8 +189,8 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     [],
   );
 
-  const isDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const isFineGrained = useMediaQuery("(pointer: fine)");
+  const isDarkMode = useIsDarkMode();
+  const isFineGrained = !useIsTouch();
 
   const rotMat = useMemo(
     () => rotateM33(rotation[0], rotation[1], rotation[2]),
@@ -348,14 +369,17 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     });
   }, [rotation, axes, isDarkMode, rotMat]);
 
+  const updateCanvasRef = useRef(updateCanvas);
+  updateCanvasRef.current = updateCanvas;
+
   const frameRef = useRef<number | null>(null);
   const scheduleUpdate = useCallback(() => {
     if (frameRef.current !== null) return;
     frameRef.current = requestAnimationFrame(() => {
-      updateCanvas();
+      updateCanvasRef.current();
       frameRef.current = null;
     });
-  }, [updateCanvas]);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -395,7 +419,11 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     return res;
   };
 
-  const handleClick = (pos: { x: number; y: number }) => {
+  // Mobile taps use a larger hit radius so blobs are easier to hit accurately.
+  const findEndpointAt = (
+    pos: { x: number; y: number },
+    hitRadius: number = CIRCLE_RADIUS,
+  ): { axisName: string; subtype: "positive" | "negative" } | null => {
     const endpoints = elementsRef.current.filter(
       (el: Element) => el.type === "circle",
     ) as CircleElement[];
@@ -403,21 +431,30 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     for (const el of endpoints) {
       const dx = pos.x - el.center[0],
         dy = pos.y - el.center[1];
-      if (Math.hypot(dx, dy) <= CIRCLE_RADIUS) {
-        if (targetRotations[el.axisName as AxisName]) {
-          const clickedRot =
-            targetRotations[el.axisName as AxisName][el.subtype];
-          const newRot = !equalRotation([rotation[0], rotation[1]], clickedRot)
-            ? targetRotations[el.axisName as AxisName][
-                el.subtype === "positive" ? "negative" : "positive"
-              ]
-            : clickedRot;
-          onRotationChange([newRot[0], newRot[1], 0]);
-          return;
-        }
+      if (Math.hypot(dx, dy) <= hitRadius) {
+        return { axisName: el.axisName, subtype: el.subtype };
       }
     }
+    return null;
+  };
 
+  const snapToEndpoint = (axisName: string, subtype: "positive" | "negative") => {
+    if (!targetRotations[axisName as AxisName]) return;
+    const clickedRot = targetRotations[axisName as AxisName][subtype];
+    const newRot = !equalRotation([rotation[0], rotation[1]], clickedRot)
+      ? targetRotations[axisName as AxisName][
+          subtype === "positive" ? "negative" : "positive"
+        ]
+      : clickedRot;
+    onRotationChange([newRot[0], newRot[1], 0]);
+  };
+
+  const handleClick = (pos: { x: number; y: number }) => {
+    const hit = findEndpointAt(pos);
+    if (hit) {
+      snapToEndpoint(hit.axisName, hit.subtype);
+      return;
+    }
     onRotationChange([rotation[0], rotation[1], 0]);
   };
 
@@ -440,6 +477,18 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     hasMoved.current = false; // Reset movement tracking on start
     lastPos.current = pos;
     startPosRef.current = pos;
+    startTimeRef.current =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    // Track which blob the press started on (for tap-to-snap on touch).
+    // Slightly larger radius makes touch targets easier to hit.
+    startEndpointRef.current = isFineGrained
+      ? null
+      : findEndpointAt(pos, CIRCLE_RADIUS + 4);
+    // On touch, light up the blob being pressed so the user knows it's interactive.
+    if (!isFineGrained && startEndpointRef.current) {
+      hoveredEndpointRef.current = startEndpointRef.current;
+      scheduleUpdate();
+    }
     canvas.style.cursor = "grabbing";
   };
 
@@ -472,6 +521,14 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
       // Track if significant movement has occurred
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
         hasMoved.current = true;
+      }
+
+      // On touch, once the user clearly starts rotating, drop the tap-to-snap
+      // intent and remove the press highlight so they know it's a drag now.
+      if (!isFineGrained && hasMoved.current && startEndpointRef.current) {
+        startEndpointRef.current = null;
+        hoveredEndpointRef.current = null;
+        scheduleUpdate();
       }
 
       lastPos.current = posNow;
@@ -523,30 +580,55 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
       const canvas = canvasRef.current;
       if (!canvas) return;
 
+      const pos = getPos(e);
+      const wasDragging = dragging.current;
+      const startEndpoint = startEndpointRef.current;
+      const elapsed =
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+        startTimeRef.current;
+      const moved = Math.hypot(
+        pos.x - startPosRef.current.x,
+        pos.y - startPosRef.current.y,
+      );
+
+      // Reset touch highlight regardless of outcome.
       if (!isFineGrained) {
+        hoveredEndpointRef.current = null;
+        scheduleUpdate();
+      }
+
+      if (!isFineGrained) {
+        // Mobile: only snap if the tap started AND ended on the same blob,
+        // with minimal movement and short duration. This guards against
+        // accidental snaps while rotating.
+        if (wasDragging && startEndpoint && !hasMoved.current && moved < 8 && elapsed < 300) {
+          const endEndpoint = findEndpointAt(pos, CIRCLE_RADIUS + 4);
+          if (
+            endEndpoint &&
+            endEndpoint.axisName === startEndpoint.axisName &&
+            endEndpoint.subtype === startEndpoint.subtype
+          ) {
+            snapToEndpoint(startEndpoint.axisName, startEndpoint.subtype);
+          }
+        }
+        dragging.current = false;
+        startEndpointRef.current = null;
         return;
       }
 
       canvas.style.cursor = "grab";
-      const pos = getPos(e);
 
-      // Only treat as a click if no significant movement occurred during drag
-      if (
-        !hasMoved.current &&
-        Math.hypot(
-          pos.x - startPosRef.current.x,
-          pos.y - startPosRef.current.y,
-        ) < 5 &&
-        dragging.current
-      ) {
+      // Desktop: treat as a click only if no significant movement occurred.
+      if (!hasMoved.current && moved < 5 && wasDragging) {
         handleClick(pos);
       }
       if (document.pointerLockElement === canvas && document.exitPointerLock) {
         document.exitPointerLock();
       }
       dragging.current = false;
+      startEndpointRef.current = null;
     },
-    [handleClick, isFineGrained],
+    [handleClick, isFineGrained, scheduleUpdate],
   );
 
   // Attach additional canvas events for mouseleave
@@ -568,6 +650,7 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const onContextMenu = (e: Event) => e.preventDefault();
     canvas.addEventListener("mousedown", onStart);
     canvas.addEventListener("touchstart", onStart, { passive: false });
     canvas.addEventListener("mousemove", onMove);
@@ -575,6 +658,7 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     canvas.addEventListener("mouseup", onEnd);
     canvas.addEventListener("touchend", onEnd);
     canvas.addEventListener("touchcancel", onEnd);
+    canvas.addEventListener("contextmenu", onContextMenu);
     return () => {
       canvas.removeEventListener("mousedown", onStart);
       canvas.removeEventListener("touchstart", onStart);
@@ -583,6 +667,7 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
       canvas.removeEventListener("mouseup", onEnd);
       canvas.removeEventListener("touchend", onEnd);
       canvas.removeEventListener("touchcancel", onEnd);
+      canvas.removeEventListener("contextmenu", onContextMenu);
     };
   }, [rotation, onRotationChange]);
 
@@ -609,10 +694,15 @@ const GlobalRotationGizmo: React.FC<GlobalRotationGizmoProps> = ({
     >
       <div
         className={
-          "w-24 h-24 rounded-full dark:bg-slate-700/50 dark:hover:bg-slate-700/60 bg-slate-200/50 hover:bg-slate-200/60 pointer-events-auto"
+          "w-24 h-24 rounded-full dark:bg-neutral-700/50 dark:hover:bg-neutral-700/60 bg-neutral-200/50 hover:bg-neutral-200/60 pointer-events-auto select-none"
         }
+        style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
       >
-        <canvas ref={canvasRef} className="w-full h-full select-none" />
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full select-none touch-none"
+          style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
+        />
       </div>
     </div>
   );

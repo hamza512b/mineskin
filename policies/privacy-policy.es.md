@@ -2,7 +2,7 @@
 title: "Política de Privacidad"
 ---
 
-_Última actualización: 30 de octubre de 2025_
+_Última actualización: 7 de febrero de 2026_
 
 Esta Política de Privacidad describe las políticas y procedimientos relacionados con la recopilación, uso y divulgación de su información personal cuando utiliza nuestros servicios. En esta política, "Nosotros", "Nos", "Nuestro" se refiere a mineskin.pro.
 
@@ -50,6 +50,7 @@ Utilizamos los siguientes servicios de terceros para recopilar y analizar datos 
 - **Google Analytics:** Recopila información sobre cómo usa nuestro Servicio para ayudarnos a entender el comportamiento del usuario y mejorar la funcionalidad.
 - **Vercel Analytics:** Recopila datos anónimos de vistas de página y métricas básicas de visitantes para entender los patrones de tráfico.
 - **Vercel Speed Insights:** Monitorea métricas de rendimiento del sitio web como tiempos de carga de página y Core Web Vitals para garantizar una experiencia de usuario óptima.
+- **Sentry:** Recopila informes de errores, datos de rendimiento y grabaciones de repetición de sesiones para ayudarnos a identificar y solucionar problemas. Las repeticiones de sesión capturan grabaciones anonimizadas de las interacciones del usuario (como clics y navegación de páginas) para una muestra de sesiones. Sentry también puede recopilar información del dispositivo, tipo de navegador y direcciones IP.
 
 Estos servicios pueden usar cookies y tecnologías de seguimiento similares. Puede gestionar sus preferencias de cookies a través de nuestro banner de consentimiento de cookies o la configuración de su navegador.
 
@@ -67,7 +68,7 @@ Su Información se utiliza para:
 Podemos compartir su Información con:
 
 - **Proveedores de Servicios en la Nube:** por ejemplo, Vercel, PlanetScale, AWS, Google Cloud Platform, para alojamiento y almacenamiento de datos.
-- **Proveedores de Análisis:** por ejemplo, Google Analytics, Vercel Analytics y Vercel Speed Insights, para mejorar y entender el uso del Servicio y el monitoreo de rendimiento.
+- **Proveedores de Análisis:** por ejemplo, Google Analytics, Vercel Analytics, Vercel Speed Insights y Sentry, para mejorar y entender el uso del Servicio, el monitoreo de rendimiento y el seguimiento de errores.
 - **Proveedores de Comunicaciones:** por ejemplo, SendGrid, MailChimp, para enviar comunicaciones y boletines.
 - **Requisitos Legales:** cuando sea legalmente requerido por autoridades, fuerzas del orden u órdenes judiciales.
 - **Con su Consentimiento:** para otros propósitos explícitamente aprobados por usted.
