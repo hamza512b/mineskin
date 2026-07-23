@@ -2,12 +2,16 @@ apply plugin: 'com.android.application'
 
 // Release signing is configured via android/keystore.properties (gitignored).
 // Copy android/keystore.properties.example to android/keystore.properties and
-// fill it in. When the file is absent (fresh checkout / CI without secrets),
-// release builds fall back to unsigned output so debug builds still work.
+// fill it in. Debug builds remain usable without secrets, but release builds
+// must fail locally instead of producing an AAB that Google Play will reject.
 def keystorePropsFile = rootProject.file("keystore.properties")
 def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) {
     keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
+def isReleaseBuild = gradle.startParameter.taskNames.any {
+    it.toLowerCase(Locale.ROOT).contains('release')
 }
 
 android {
@@ -17,8 +21,8 @@ android {
         applicationId "pro.mineskin.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "1.1.26"
+        versionCode 19
+        versionName "1.1.27"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -44,6 +48,35 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+}
+
+if (isReleaseBuild) {
+    if (!keystorePropsFile.exists()) {
+        throw new GradleException(
+            "Release signing is not configured. Copy " +
+            "android/keystore.properties.example to android/keystore.properties " +
+            "and provide the Google Play upload-keystore details."
+        )
+    }
+
+    def requiredSigningProperties = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+    def missingSigningProperties = requiredSigningProperties.findAll {
+        !keystoreProps[it]?.trim() || keystoreProps[it] == 'CHANGE_ME'
+    }
+    if (!missingSigningProperties.isEmpty()) {
+        throw new GradleException(
+            "Release signing properties are missing or unchanged: " +
+            missingSigningProperties.join(', ')
+        )
+    }
+
+    def releaseKeystoreFile = rootProject.file(keystoreProps['storeFile'])
+    if (!releaseKeystoreFile.isFile()) {
+        throw new GradleException(
+            "Release keystore not found at ${releaseKeystoreFile}. " +
+            "Check storeFile in android/keystore.properties."
+        )
     }
 }
 
@@ -78,10 +111,7 @@ tasks.register('mineskinWebBuildAndSync', Exec) {
     workingDir rootProject.projectDir
     // Tell the script when this is a release build so it drops CAP_SERVER_URL
     // (dev-server URL) instead of baking it into the shipped config.
-    def isRelease = gradle.startParameter.taskNames.any {
-        it.toLowerCase(Locale.ROOT).contains('release')
-    }
-    environment 'MINESKIN_RELEASE_BUILD', isRelease ? '1' : '0'
+    environment 'MINESKIN_RELEASE_BUILD', isReleaseBuild ? '1' : '0'
     if (System.getProperty('os.name').toLowerCase().contains('windows')) {
         commandLine 'cmd', '/c', 'bash', script.absolutePath, 'android'
     } else {

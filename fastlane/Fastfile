@@ -11,7 +11,9 @@
 # the web app uses. See .env.example for the required keys. fastlane doesn't
 # auto-load .env.local, so load it explicitly here (existing ENV wins).
 require "dotenv"
+require "base64"
 require "fileutils"
+require "openssl"
 Dotenv.load(File.expand_path("../.env.local", __dir__))
 
 default_platform(:ios)
@@ -148,14 +150,39 @@ end
 
 # App Store Connect API key — non-interactive auth (no Apple ID password / 2FA).
 def asc_api_key
-  key_content = ENV.fetch("ASC_KEY")
-  key_is_base64 = !key_content.lstrip.start_with?("-----BEGIN")
+  key_content = ENV.fetch("ASC_KEY").strip.gsub('\\n', "\n")
 
+  # Fastlane ultimately calls OpenSSL::PKey::EC.new with this value. Normalize
+  # both documented base64 input and raw PEM to canonical PEM first so binary
+  # DER is never mistaken for a curve name (which surfaces as the misleading
+  # "string contains null byte" error on some Ruby/OpenSSL combinations).
+  unless key_content.start_with?("-----BEGIN")
+    begin
+      key_content = Base64.strict_decode64(key_content.delete(" \t\r\n"))
+    rescue ArgumentError
+      UI.user_error!("ASC_KEY must be a PEM .p8 key or its base64-encoded content.")
+    end
+  end
+
+  begin
+    parsed_key = OpenSSL::PKey.read(key_content)
+  rescue OpenSSL::PKey::PKeyError, ArgumentError
+    UI.user_error!("ASC_KEY is not a valid App Store Connect private key.")
+  end
+
+  unless parsed_key.is_a?(OpenSSL::PKey::EC) && parsed_key.private?
+    UI.user_error!("ASC_KEY must contain an EC private key.")
+  end
+
+  # altool (the binary uploader) writes key_content to a temp .p8 and only accepts
+  # PKCS#8 ("BEGIN PRIVATE KEY"). EC#to_pem emits SEC1 ("BEGIN EC PRIVATE KEY"),
+  # which altool rejects as "does not contain a valid authentication key" — even
+  # though Spaceship's in-Ruby JWT signing accepts it. private_to_pem is PKCS#8.
   app_store_connect_api_key(
     key_id: ENV.fetch("ASC_KEY_ID"),
     issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-    key_content: key_content,
-    is_key_content_base64: key_is_base64,
+    key_content: parsed_key.private_to_pem,
+    is_key_content_base64: false,
     in_house: false,
   )
 end

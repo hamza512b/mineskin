@@ -1,10 +1,28 @@
 # fastlane Appfile — shared app identifiers.
 # Secrets come from fastlane/.env (gitignored); see fastlane/.env.example.
 
+require "json"
+
 app_identifier("pro.mineskin.app") # iOS bundle id
 team_id("98V5CH5383")              # Apple Developer team
 
+# supply requires the service-account key as valid JSON. If PLAY_JSON_KEY is
+# stored double-quoted in .env, dotenv expands the \n inside private_key into
+# real newlines, corrupting the JSON ("invalid control character in string").
+# Compact service-account JSON has no structural newlines, so any raw newline/
+# CR/tab must live inside a string value — re-escape it to recover. Only kicks
+# in when the raw value fails to parse, so a correct (single-quoted) key is
+# passed through untouched.
+def play_json_key_data(raw)
+  key = raw.strip
+  JSON.parse(key)
+  key
+rescue JSON::ParserError
+  key.gsub("\r", '\\r').gsub("\n", '\\n').gsub("\t", '\\t')
+end
+
 for_platform :android do
   package_name("pro.mineskin.app")
-  json_key_data_raw(ENV["PLAY_JSON_KEY"]) if ENV["PLAY_JSON_KEY"]
+  raw = ENV["PLAY_JSON_KEY"]
+  json_key_data_raw(play_json_key_data(raw)) if raw && !raw.strip.empty?
 end
