@@ -131,7 +131,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
           return (
             <div
               key={layer}
-              className="flex flex-col items-center gap-1.5 group"
+              className="group pointer-events-auto flex flex-col items-center gap-1.5"
             >
               <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300">
                 {label}
@@ -153,7 +153,9 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
                     className={clsx(
                       "pointer-events-auto box-border cursor-pointer rounded-[3px] border hover:ring-2 hover:ring-blue-500",
                       visibility[layer][part]
-                        ? "border-[#3776bf] bg-[#4A90E2]"
+                        ? layer === "base"
+                          ? "border-slate-800 bg-slate-700 dark:border-slate-400 dark:bg-slate-300"
+                          : "border-[#3776bf] bg-[#4A90E2]"
                         : "border-neutral-400 bg-neutral-300 dark:border-neutral-600 dark:bg-neutral-700",
                     )}
                   >
@@ -164,7 +166,7 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
               <PartButton
                 tooltip={dict.partFilter.toggleWholeLayer}
                 onClick={() => toggleWholeLayer(layer)}
-                className="opacity-0 group-hover:opacity-100 pointer-events-auto flex h-5 w-6 cursor-pointer items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="pointer-events-auto flex h-5 w-6 cursor-pointer items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
               >
                 {anyVisible ? <Eye size={12} /> : <EyeOff size={12} />}
                 <span className="sr-only">

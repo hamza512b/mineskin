@@ -169,7 +169,9 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
                   className={clsx(
                     "box-border cursor-pointer rounded-[3px] border",
                     visibility[layer][part]
-                      ? "border-[#3776bf] bg-[#4A90E2]"
+                      ? layer === "base"
+                        ? "border-slate-800 bg-slate-700 dark:border-slate-400 dark:bg-slate-300"
+                        : "border-[#3776bf] bg-[#4A90E2]"
                       : "border-neutral-400 bg-neutral-300 dark:border-neutral-600 dark:bg-neutral-700",
                     !isCoarse && "hover:ring-2 hover:ring-blue-500",
                   )}

@@ -43,15 +43,15 @@ Address the user directly in the second person masculine singular (the neutral M
 | English | ar | Notes |
 |---|---|---|
 | **Skin** <br><sub>The Minecraft character texture</sub> | سكن <br>*(مظهر)* | INCONSISTENT in file: metadata/home/onboarding/importDialog use سكن/سكنات (the term the Arabic Minecraft community actually uses), but detailPanel/partFilter/library/tutorial use المظهر. Standardize on سكن (plural سكنات) to match community usage; مظهر is acceptable formal MSA but should not be mixed. |
-| **Base** <br><sub>Base/inner texture layer (keys: baseLayer, baseLayerShort)</sub> | الطبقة الأساسية <br>*(الأساسية — short display form)* | Replaces the removed "First Layer" = الطبقة الأولى. partFilter.baseLayer = "الطبقة الأساسية" (canonical, screen-reader/full contexts). Conveys "base" rather than mere ordering. Compact visible column label baseLayerShort = "الأساسية" (elliptical adjective, الطبقة implied). |
-| **Overlay** <br><sub>Outer/second layer — helmet, jacket, sleeves, pants (keys: overlayLayer, overlayLayerShort)</sub> | الطبقة الخارجية <br>*(الخارجية — short display form)* | Replaces the removed "Second Layer" = الطبقة الثانية. partFilter.overlayLayer = "الطبقة الخارجية" (canonical). "Outer layer" is the natural Arabic term for the clothing layer and pairs with الطبقة الأساسية. Compact visible column label overlayLayerShort = "الخارجية". |
+| **Base Body** <br><sub>Base character body (keys: baseLayer, baseLayerShort)</sub> | الجسم الأساسي | partFilter.baseLayer and partFilter.baseLayerShort = "الجسم الأساسي". This is the clear Arabic label for the character's base body. |
+| **Armor** <br><sub>Character armor — helmet, jacket, sleeves, pants (keys: overlayLayer, overlayLayerShort)</sub> | الدرع | partFilter.overlayLayer and partFilter.overlayLayerShort = "الدرع". Use the singular collective noun for the complete armor set. |
 | **Toggle whole layer** <br><sub>Eye-button label that shows/hides every part of a layer (keys: toggleWholeLayer, toggleWholeLayerShort)</sub> | تبديل الطبقة كاملة <br>*(تبديل الكل — short display form)* | partFilter.toggleWholeLayer = "تبديل الطبقة كاملة" (canonical, screen-reader/full contexts). Follows the established "تبديل + noun" pattern of the other partFilter.toggle* strings. Compact visible button label toggleWholeLayerShort = "تبديل الكل" ("all" = every part; الطبقة implied since the button sits under a specific layer's grid). |
 | **Slim mode** <br><sub>Slim (3px) arm model, aka Alex</sub> | الوضع النحيف <br>*(وضع سليم (Alex))* | Current detailPanel.slimMode = "الوضع النحيف". Matches. النحيف is clear; some community members say "سليم" (Slim) or reference Alex. |
 | **Resolution** <br><sub>Texture resolution 64x64 / 128x128</sub> | الدقة <br>*(دقة السكن)* | Current changeResolution = "تغيير الدقة". Matches. |
 | **Java Edition** <br><sub>Minecraft: Java Edition (product name)</sub> | إصدار Java <br>*(Minecraft: Java Edition)* | Current doubleResWarning uses "إصدار Minecraft (Java)". Keep Java in Latin; recommend إصدار Java (or the full product name Minecraft: Java Edition verbatim when space allows). |
 | **Template** <br><sub>Starter skin template</sub> | قالب | Current library.templates = "القوالب". Matches (singular قالب). |
 
-### Body (base)
+### Base Body
 
 | English | ar | Notes |
 |---|---|---|
@@ -63,16 +63,16 @@ Address the user directly in the second person masculine singular (the neutral M
 | **Left Leg** | الساق اليسرى | Current partFilter.leftLeg = "الساق اليسرى". Matches (ساق is feminine). |
 | **Right Leg** | الساق اليمنى | Current partFilter.rightLeg = "الساق اليمنى". Matches. |
 
-### Body (overlay)
+### Armor
 
 | English | ar | Notes |
 |---|---|---|
-| **Helmet** <br><sub>Head overlay</sub> | الخوذة | Current partFilter.helmet = "الخوذة". Matches (Head overlay). |
-| **Jacket** <br><sub>Body overlay</sub> | السترة | Current partFilter.jacket = "السترة". Matches (Body overlay). |
-| **Left Sleeve** <br><sub>Left arm overlay</sub> | الكم الأيسر | Current partFilter.leftSleeve = "الكم الأيسر". Matches. |
-| **Right Sleeve** <br><sub>Right arm overlay</sub> | الكم الأيمن | Current partFilter.rightSleeve = "الكم الأيمن". Matches. |
-| **Left Pants** <br><sub>Left leg overlay</sub> | البنطال الأيسر <br>*(ساق البنطال اليسرى)* | Current partFilter.leftPants = "ساق البنطال اليسرى" (verbose). Recommend the shorter البنطال الأيسر for the overlay label; keep the longer form only if the UI needs the leg distinction. |
-| **Right Pants** <br><sub>Right leg overlay</sub> | البنطال الأيمن <br>*(ساق البنطال اليمنى)* | Current partFilter.rightPants = "ساق البنطال اليمنى". Recommend shorter البنطال الأيمن; matches pattern of Left Pants. |
+| **Helmet** <br><sub>Head armor</sub> | الخوذة | Current partFilter.helmet = "الخوذة". Matches. |
+| **Jacket** <br><sub>Body armor</sub> | السترة | Current partFilter.jacket = "السترة". Matches. |
+| **Left Sleeve** <br><sub>Left arm armor</sub> | الكم الأيسر | Current partFilter.leftSleeve = "الكم الأيسر". Matches. |
+| **Right Sleeve** <br><sub>Right arm armor</sub> | الكم الأيمن | Current partFilter.rightSleeve = "الكم الأيمن". Matches. |
+| **Left Pants** <br><sub>Left leg armor</sub> | البنطال الأيسر <br>*(ساق البنطال اليسرى)* | Current partFilter.leftPants = "ساق البنطال اليسرى" (verbose). Recommend the shorter البنطال الأيسر for the armor label; keep the longer form only if the UI needs the leg distinction. |
+| **Right Pants** <br><sub>Right leg armor</sub> | البنطال الأيمن <br>*(ساق البنطال اليمنى)* | Current partFilter.rightPants = "ساق البنطال اليمنى". Recommend shorter البنطال الأيمن; matches pattern of Left Pants. |
 
 ### Tools
 
