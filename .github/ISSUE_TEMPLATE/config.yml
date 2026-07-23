@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/hamza512b/mineskin/security/advisories/new
+    about: Report security vulnerabilities privately.
+  - name: Questions and support
+    url: https://discord.gg/2egvhmqdza
+    about: Ask for help and chat with the MineSkin PRO community on Discord.

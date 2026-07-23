@@ -1,6 +1,6 @@
 # Agent Guide
 
-Mineskin is a Minecraft skin editor with a 3D preview. It is a Next.js 16 web
+MineSkin PRO is a Minecraft skin editor with a 3D preview. It is a Next.js 16 web
 application exported fully statically, wrapped by Capacitor for the iOS and
 Android apps. Rendering is a custom WebGL engine.
 
@@ -61,7 +61,7 @@ verbatim-brand/placeholder rules.
   same change.
 - **Invariants for every locale (validate after editing):** all locales keep
   identical key sets to `en.json` (no missing/extra), every `{{placeholder}}`
-  is preserved verbatim, brand names stay verbatim in Latin (MineSkin,
+  is preserved verbatim, brand names stay verbatim in Latin (MineSkin PRO,
   Minecraft, iOS, Android, App Store, Google Play, GitHub, Discord, PNG),
   `languageSwitcher.*` endonyms are never changed, and each file remains valid
   2-space-indented JSON.

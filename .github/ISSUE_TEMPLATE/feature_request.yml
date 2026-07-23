@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an improvement or new capability
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea. Focus on the problem and outcome so different solutions can be considered.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: Describe the situation, limitation, or user need.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+      placeholder: Describe the desired outcome or behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and additional context
+      description: Include workarounds, mockups, references, or tradeoffs you considered.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I searched the existing issues for similar requests.
+          required: true
+        - label: This is not a security vulnerability; security reports must follow [SECURITY.md](https://github.com/hamza512b/mineskin/blob/main/SECURITY.md).
+          required: true
+        - label: I have read the [contributing guidelines](https://github.com/hamza512b/mineskin/blob/main/CONTRIBUTING.md).
+          required: true

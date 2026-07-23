@@ -5,7 +5,7 @@
 
 ## Universal rules (all locales)
 
-**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Mineskin.pro` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG`. Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
+**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG`. Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
 
 **Interpolation placeholders — never translate, reorder, or respell** (replaced at runtime in `src/i18n/DictionaryContext.tsx`):
 
@@ -20,7 +20,7 @@ Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.js
 
 ## Voice & register
 
-Use informal second person ("você", never "tu" or "vós"); this is the Brazilian gaming standard and matches the current file throughout (e.g. "Você pode escolher", "sua skin"). Tone is friendly, concise and encouraging — short imperative verbs on buttons ("Salvar", "Baixar", "Compartilhar"). Capitalization: use sentence case for descriptions and most controls; the current file mixes sentence case (toolbar: "Pintura em massa", "Seletor de cores") with Title Case for panel/section headings (detailPanel: "Campo de Visão", "Velocidade de Movimento", "Luz Principal"). Recommend keeping sentence case for toolbar/button labels and reserving initial-cap-per-word only for proper section titles to stay consistent. Keep brand/platform names verbatim (MineSkin, MineSkin PRO, PRO, Mineskin.pro, Minecraft, iOS, Android, App Store, Google Play, GitHub, Discord, PNG, Java Edition). Never alter placeholders {{link}}, {{shortcuts}}, {{language}}, {{date}}. Use Portuguese typographic conventions: comma as decimal separator and period/space as thousands separator; curly quotes "" are already used (saveImage.instruction) and should be kept. Avoid European Portuguese forms (use "tela" not "ecrã", "tela" for screen, "captura de tela", "usuário" not "utilizador", "gerenciar" not "gerir").
+Use informal second person ("você", never "tu" or "vós"); this is the Brazilian gaming standard and matches the current file throughout (e.g. "Você pode escolher", "sua skin"). Tone is friendly, concise and encouraging — short imperative verbs on buttons ("Salvar", "Baixar", "Compartilhar"). Capitalization: use sentence case for descriptions and most controls; the current file mixes sentence case (toolbar: "Pintura em massa", "Seletor de cores") with Title Case for panel/section headings (detailPanel: "Campo de Visão", "Velocidade de Movimento", "Luz Principal"). Recommend keeping sentence case for toolbar/button labels and reserving initial-cap-per-word only for proper section titles to stay consistent. Keep brand/platform names verbatim (MineSkin, MineSkin PRO, PRO, Minecraft, iOS, Android, App Store, Google Play, GitHub, Discord, PNG, Java Edition). Never alter placeholders {{link}}, {{shortcuts}}, {{language}}, {{date}}. Use Portuguese typographic conventions: comma as decimal separator and period/space as thousands separator; curly quotes "" are already used (saveImage.instruction) and should be kept. Avoid European Portuguese forms (use "tela" not "ecrã", "tela" for screen, "captura de tela", "usuário" not "utilizador", "gerenciar" not "gerir").
 
 ## Canonical terms
 

@@ -1,11 +1,11 @@
 ---
 title: "使用指南"
-description: "了解如何使用Mineskin.pro - 强大的Minecraft皮肤编辑器和预览器"
+description: "了解如何使用MineSkin PRO - 强大的Minecraft皮肤编辑器和预览器"
 ---
 
 ## 概述
 
-Mineskin.pro是一款功能强大的Minecraft皮肤编辑器和预览器，完全在浏览器中运行。通过实时3D预览、高级光照控制和专业编辑工具，逐像素编辑您的皮肤。
+MineSkin PRO是一款功能强大的Minecraft皮肤编辑器和预览器，完全在浏览器中运行。通过实时3D预览、高级光照控制和专业编辑工具，逐像素编辑您的皮肤。
 
 ---
 
@@ -295,7 +295,7 @@ Mineskin.pro是一款功能强大的Minecraft皮肤编辑器和预览器，完�
 
 ### 报告问题
 
-发现了错误？请在[GitHub仓库](https://github.com/hamza512b/minskin/issues)上报告
+发现了错误？请在[GitHub仓库](https://github.com/hamza512b/mineskin/issues)上报告
 
 ### 加入社区
 

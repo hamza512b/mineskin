@@ -1,11 +1,11 @@
 ---
 title: "Guía de Uso"
-description: "Aprende a usar Mineskin.pro - el potente editor y visor de skins de Minecraft"
+description: "Aprende a usar MineSkin PRO - el potente editor y visor de skins de Minecraft"
 ---
 
 ## Descripción General
 
-Mineskin.pro es un potente editor y visor de skins de Minecraft que funciona completamente en tu navegador. Edita tus skins píxel a píxel con vista previa 3D en tiempo real, controles de iluminación avanzados y herramientas de edición profesionales.
+MineSkin PRO es un potente editor y visor de skins de Minecraft que funciona completamente en tu navegador. Edita tus skins píxel a píxel con vista previa 3D en tiempo real, controles de iluminación avanzados y herramientas de edición profesionales.
 
 ---
 
@@ -295,7 +295,7 @@ Accede al **panel de Configuración** haciendo clic en el icono de engranaje en 
 
 ### Reportar Problemas
 
-¿Encontraste un error? Repórtalo en el [Repositorio de GitHub](https://github.com/hamza512b/minskin/issues)
+¿Encontraste un error? Repórtalo en el [Repositorio de GitHub](https://github.com/hamza512b/mineskin/issues)
 
 ### Únete a la Comunidad
 

@@ -1,0 +1,68 @@
+name: Bug report
+description: Report something that is not working correctly
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve MineSkin PRO. Please do not include private data or skin files you do not have permission to share.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Explain what you expected and what happened instead.
+      placeholder: I expected ... but instead ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Web
+        - iOS
+        - Android
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Browser, app version, and device
+      description: Include the browser and OS for web issues, or the app version and device for native issues.
+      placeholder: e.g. Safari 20 on macOS, or MineSkin PRO 1.2 on iPhone 17
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, recordings, or logs
+      description: Drag and drop supporting files or paste relevant console output. Remove sensitive information first.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I searched the existing issues for duplicates.
+          required: true
+        - label: This is not a security vulnerability; security reports must follow [SECURITY.md](https://github.com/hamza512b/mineskin/blob/main/SECURITY.md).
+          required: true
+        - label: I have read the [contributing guidelines](https://github.com/hamza512b/mineskin/blob/main/CONTRIBUTING.md).
+          required: true

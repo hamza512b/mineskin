@@ -1,11 +1,11 @@
 ---
 title: "Usage Guide"
-description: "Learn how to use Mineskin.pro - the powerful Minecraft skin editor and previewer"
+description: "Learn how to use MineSkin PRO - the powerful Minecraft skin editor and previewer"
 ---
 
 ## Overview
 
-Mineskin.pro is a powerful Minecraft skin editor and previewer that runs entirely in your browser. Edit your skins pixel-by-pixel with real-time 3D preview, advanced lighting controls, and professional editing tools.
+MineSkin PRO is a powerful Minecraft skin editor and previewer that runs entirely in your browser. Edit your skins pixel-by-pixel with real-time 3D preview, advanced lighting controls, and professional editing tools.
 
 ---
 
@@ -295,7 +295,7 @@ Access the **Settings panel** by clicking the gear icon in the toolbar.
 
 ### Report Issues
 
-Found a bug? Report it on the [GitHub Repository](https://github.com/hamza512b/minskin/issues)
+Found a bug? Report it on the [GitHub Repository](https://github.com/hamza512b/mineskin/issues)
 
 ### Join the Community
 

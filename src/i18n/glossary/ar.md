@@ -7,7 +7,7 @@
 
 ## Universal rules (all locales)
 
-**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Mineskin.pro` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG`. Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
+**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG`. Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
 
 **Interpolation placeholders — never translate, reorder, or respell** (replaced at runtime in `src/i18n/DictionaryContext.tsx`):
 
@@ -32,7 +32,7 @@ Address the user directly in the second person masculine singular (the neutral M
 
 | English | ar | Notes |
 |---|---|---|
-| **Editor** <br><sub>Pixel-drawing mode</sub> | المحرر <br>*(محرر)* | Current common.editor = "المحرر". Matches. Use المحرر for the mode/panel heading, محرر when indefinite (e.g. محرر Mineskin.pro). |
+| **Editor** <br><sub>Pixel-drawing mode</sub> | المحرر <br>*(محرر)* | Current common.editor = "المحرر". Matches. Use المحرر for the mode/panel heading, محرر when indefinite (e.g. محرر MineSkin PRO). |
 | **Preview** <br><sub>View-only 3D mode; also "Previewer"</sub> | معاينة <br>*(المعاينة)* | Current common.preview = "معاينة"; previewer rendered as "المعاين"/"عارض". Matches. Use معاينة for the mode; العارض/المعاين for "Previewer". |
 | **Editing** <br><sub>State label while editing</sub> | تحرير <br>*(جارٍ التحرير)* | Current common.editing = "تحرير". Matches. |
 | **Draw Mode** <br><sub>Touch mode where gestures paint</sub> | وضع الرسم | Current toolbar.touchDrawMode = "وضع الرسم". Matches. |
