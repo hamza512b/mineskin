@@ -7,7 +7,7 @@ import pluginNext from "@next/eslint-plugin-next";
 
 export default defineConfig([
   {
-    ignores: [".next", "node_modules"],
+    ignores: [".next", "node_modules", "out", "android", "ios", "public"],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
