@@ -1,8 +1,8 @@
-import { useRendererStore } from "@/store";
 import { useDictionary } from "@/i18n";
-import { cn } from "@/lib/utils";
+import { useRendererStore } from "@/store";
 import clsx from "clsx";
-import React, { useMemo } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import React from "react";
 import { PartButton } from "./PartButton";
 
 type PartsComponentProps = {
@@ -10,39 +10,18 @@ type PartsComponentProps = {
   scale?: number;
 };
 
-// Base dimensions at scale 1
-const CONTAINER = { width: 32, height: 64 } as const;
+type Part = "head" | "body" | "leftArm" | "rightArm" | "leftLeg" | "rightLeg";
+type Layer = "base" | "overlay";
 
-const PARTS = {
-  head: { left: 8, top: 0, width: 16, height: 16 },
-  body: { left: 8, top: 16, width: 16, height: 24 },
-  rightArm: { left: 24, top: 16, width: 8, height: 24 },
-  rightLeg: { left: 16, top: 40, width: 8, height: 24 },
-  leftArm: { left: 0, top: 16, width: 8, height: 24 },
-  leftLeg: { left: 8, top: 40, width: 8, height: 24 },
-} as const;
-
-// Background positions for each part (base layer)
-const BASE_BG_POS = {
-  head: "0 0",
-  body: "-16px 0",
-  rightArm: "-32px 0",
-  rightLeg: "-40px 0",
-  leftArm: "-48px 0",
-  leftLeg: "-56px 0",
-} as const;
-
-// Background positions for overlay layer
-const OVERLAY_BG_POS = {
-  head: "0 -16px",
-  body: "-16px -24px",
-  rightArm: "-32px -24px",
-  rightLeg: "-40px -24px",
-  leftArm: "-48px -24px",
-  leftLeg: "-56px -24px",
-} as const;
-
-type PartName = keyof typeof BASE_BG_POS;
+// Humanoid silhouette on a 4-column grid (viewer perspective, always LTR)
+const GRID_PARTS: { part: Part; col: string; row: string }[] = [
+  { part: "head", col: "2 / 4", row: "1" },
+  { part: "leftArm", col: "1", row: "2" },
+  { part: "body", col: "2 / 4", row: "2" },
+  { part: "rightArm", col: "4", row: "2" },
+  { part: "leftLeg", col: "2", row: "3" },
+  { part: "rightLeg", col: "3", row: "3" },
+];
 
 const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   className,
@@ -52,301 +31,149 @@ const DesktopPartFilter: React.FC<PartsComponentProps> = ({
   // Use Zustand store with selective subscriptions
   const baseheadVisible = useRendererStore((state) => state.baseheadVisible);
   const basebodyVisible = useRendererStore((state) => state.basebodyVisible);
-  const baseleftArmVisible = useRendererStore((state) => state.baseleftArmVisible);
-  const baserightArmVisible = useRendererStore((state) => state.baserightArmVisible);
-  const baseleftLegVisible = useRendererStore((state) => state.baseleftLegVisible);
-  const baserightLegVisible = useRendererStore((state) => state.baserightLegVisible);
-  const overlayheadVisible = useRendererStore((state) => state.overlayheadVisible);
-  const overlaybodyVisible = useRendererStore((state) => state.overlaybodyVisible);
-  const overlayleftArmVisible = useRendererStore((state) => state.overlayleftArmVisible);
-  const overlayrightArmVisible = useRendererStore((state) => state.overlayrightArmVisible);
-  const overlayleftLegVisible = useRendererStore((state) => state.overlayleftLegVisible);
-  const overlayrightLegVisible = useRendererStore((state) => state.overlayrightLegVisible);
+  const baseleftArmVisible = useRendererStore(
+    (state) => state.baseleftArmVisible,
+  );
+  const baserightArmVisible = useRendererStore(
+    (state) => state.baserightArmVisible,
+  );
+  const baseleftLegVisible = useRendererStore(
+    (state) => state.baseleftLegVisible,
+  );
+  const baserightLegVisible = useRendererStore(
+    (state) => state.baserightLegVisible,
+  );
+  const overlayheadVisible = useRendererStore(
+    (state) => state.overlayheadVisible,
+  );
+  const overlaybodyVisible = useRendererStore(
+    (state) => state.overlaybodyVisible,
+  );
+  const overlayleftArmVisible = useRendererStore(
+    (state) => state.overlayleftArmVisible,
+  );
+  const overlayrightArmVisible = useRendererStore(
+    (state) => state.overlayrightArmVisible,
+  );
+  const overlayleftLegVisible = useRendererStore(
+    (state) => state.overlayleftLegVisible,
+  );
+  const overlayrightLegVisible = useRendererStore(
+    (state) => state.overlayrightLegVisible,
+  );
   const setValue = useRendererStore((state) => state.setValue);
 
-  // Compute scaled dimensions (floor to avoid subpixel clipping)
-  const scaled = useMemo(() => {
-    const s = (v: number) => Math.floor(v * scale);
-    return {
-      container: {
-        width: s(CONTAINER.width),
-        height: s(CONTAINER.height),
-      },
-      parts: Object.fromEntries(
-        Object.entries(PARTS).map(([key, dims]) => [
-          key,
-          {
-            left: s(dims.left),
-            top: s(dims.top),
-            width: s(dims.width),
-            height: s(dims.height),
-          },
-        ]),
-      ) as Record<PartName, { left: number; top: number; width: number; height: number }>,
-      bgSize: `${s(64)}px ${s(48)}px`,
-      bgPos: (pos: string) =>
-        pos
-          .split(" ")
-          .map((v) => {
-            const num = parseInt(v);
-            return isNaN(num) ? v : `${Math.floor(num * scale)}px`;
-          })
-          .join(" "),
-    };
-  }, [scale]);
+  // Grid cell unit; head is 2x2 cells, body 2x3, arms/legs 1x3
+  const cell = Math.floor(9 * scale);
 
-  const partBgStyle = {
-    backgroundColor: "hsla(0, 10%, 45%, 1)",
-    backgroundImage: 'url("/parts.png")',
-    imageRendering: "pixelated",
-    backgroundSize: scaled.bgSize,
-    pointerEvents: "auto",
-    cursor: "pointer",
-  } as React.CSSProperties;
-
-  const toggleVisibility = (
-    layer: "base" | "overlay",
-    part: "head" | "body" | "leftArm" | "rightArm" | "leftLeg" | "rightLeg",
-  ) => {
-    if (layer === "base") {
-      if (part === "head") {
-        setValue(`baseheadVisible`, !baseheadVisible);
-      }
-      if (part === "body") {
-        setValue(`basebodyVisible`, !basebodyVisible);
-      }
-      if (part === "leftArm") {
-        setValue(`baseleftArmVisible`, !baseleftArmVisible);
-      }
-      if (part === "rightArm") {
-        setValue(`baserightArmVisible`, !baserightArmVisible);
-      }
-      if (part === "leftLeg") {
-        setValue(`baseleftLegVisible`, !baseleftLegVisible);
-      }
-      if (part === "rightLeg") {
-        setValue(`baserightLegVisible`, !baserightLegVisible);
-      }
-    }
-    if (layer === "overlay") {
-      if (part === "head") {
-        setValue(`overlayheadVisible`, !overlayheadVisible);
-      }
-      if (part === "body") {
-        setValue(`overlaybodyVisible`, !overlaybodyVisible);
-      }
-      if (part === "leftArm") {
-        setValue(`overlayleftArmVisible`, !overlayleftArmVisible);
-      }
-      if (part === "rightArm") {
-        setValue(`overlayrightArmVisible`, !overlayrightArmVisible);
-      }
-      if (part === "leftLeg") {
-        setValue(`overlayleftLegVisible`, !overlayleftLegVisible);
-      }
-      if (part === "rightLeg") {
-        setValue(`overlayrightLegVisible`, !overlayrightLegVisible);
-      }
-    }
+  const visibility: Record<Layer, Record<Part, boolean>> = {
+    base: {
+      head: baseheadVisible,
+      body: basebodyVisible,
+      leftArm: baseleftArmVisible,
+      rightArm: baserightArmVisible,
+      leftLeg: baseleftLegVisible,
+      rightLeg: baserightLegVisible,
+    },
+    overlay: {
+      head: overlayheadVisible,
+      body: overlaybodyVisible,
+      leftArm: overlayleftArmVisible,
+      rightArm: overlayrightArmVisible,
+      leftLeg: overlayleftLegVisible,
+      rightLeg: overlayrightLegVisible,
+    },
   };
 
-  const getPartStyle = (
-    part: PartName,
-    layer: "base" | "overlay",
-  ): React.CSSProperties => ({
-    ...partBgStyle,
-    position: "absolute",
-    left: scaled.parts[part].left,
-    top: scaled.parts[part].top,
-    width: scaled.parts[part].width,
-    height: scaled.parts[part].height,
-    backgroundPosition:
-      layer === "base"
-        ? scaled.bgPos(BASE_BG_POS[part])
-        : scaled.bgPos(OVERLAY_BG_POS[part]),
-  });
-
-  const baseVisibility = {
-    head: baseheadVisible,
-    body: basebodyVisible,
-    leftArm: baseleftArmVisible,
-    rightArm: baserightArmVisible,
-    leftLeg: baseleftLegVisible,
-    rightLeg: baserightLegVisible,
+  const toggleVisibility = (layer: Layer, part: Part) => {
+    setValue(`${layer}${part}Visible`, !visibility[layer][part]);
   };
 
-  const overlayVisibility = {
-    head: overlayheadVisible,
-    body: overlaybodyVisible,
-    leftArm: overlayleftArmVisible,
-    rightArm: overlayrightArmVisible,
-    leftLeg: overlayleftLegVisible,
-    rightLeg: overlayrightLegVisible,
+  const toggleWholeLayer = (layer: Layer) => {
+    const next = !Object.values(visibility[layer]).some(Boolean);
+    (Object.keys(visibility[layer]) as Part[]).forEach((part) =>
+      setValue(`${layer}${part}Visible`, next),
+    );
   };
+
+  const tooltips: Record<Layer, Record<Part, string>> = {
+    base: {
+      head: dict.partFilter.toggleHead,
+      body: dict.partFilter.toggleBody,
+      leftArm: dict.partFilter.toggleLeftArm,
+      rightArm: dict.partFilter.toggleRightArm,
+      leftLeg: dict.partFilter.toggleLeftLeg,
+      rightLeg: dict.partFilter.toggleRightLeg,
+    },
+    overlay: {
+      head: dict.partFilter.toggleHelmet,
+      body: dict.partFilter.toggleJacket,
+      leftArm: dict.partFilter.toggleLeftSleeve,
+      rightArm: dict.partFilter.toggleRightSleeve,
+      leftLeg: dict.partFilter.toggleLeftPants,
+      rightLeg: dict.partFilter.toggleRightPants,
+    },
+  };
+
+  const layers: { layer: Layer; label: string }[] = [
+    { layer: "base", label: dict.partFilter.baseLayer },
+    { layer: "overlay", label: dict.partFilter.overlayLayer },
+  ];
 
   return (
     <div className={clsx("relative", className)}>
       <div
         data-tutorial-id="desktop-part-filter"
-        className="flex justify-around gap-2"
+        className="flex justify-around gap-3"
       >
-        {/* Base Layer */}
-        <div
-          className="relative"
-          style={{
-            width: scaled.container.width,
-            height: scaled.container.height,
-          }}
-        >
-          {/* Head */}
-          <PartButton
-            className={cn("opacity-100", !baseVisibility.head && "opacity-40")}
-            onClick={() => toggleVisibility("base", "head")}
-            style={getPartStyle("head", "base")}
-            tooltip={dict.partFilter.toggleHead}
-          >
-            <span className="sr-only">{dict.partFilter.toggleHead}</span>
-          </PartButton>
-          {/* Body */}
-          <PartButton
-            className={cn("opacity-100", !baseVisibility.body && "opacity-40")}
-            style={getPartStyle("body", "base")}
-            tooltip={dict.partFilter.toggleBody}
-            onClick={() => toggleVisibility("base", "body")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleBody}</span>
-          </PartButton>
-          {/* Right Arm */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !baseVisibility.rightArm && "opacity-40",
-            )}
-            style={getPartStyle("rightArm", "base")}
-            tooltip={dict.partFilter.toggleRightArm}
-            onClick={() => toggleVisibility("base", "rightArm")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleRightArm}</span>
-          </PartButton>
-          {/* Right Leg */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !baseVisibility.rightLeg && "opacity-40",
-            )}
-            style={getPartStyle("rightLeg", "base")}
-            tooltip={dict.partFilter.toggleRightLeg}
-            onClick={() => toggleVisibility("base", "rightLeg")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleRightLeg}</span>
-          </PartButton>
-          {/* Left Arm */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !baseVisibility.leftArm && "opacity-40",
-            )}
-            style={getPartStyle("leftArm", "base")}
-            tooltip={dict.partFilter.toggleLeftArm}
-            onClick={() => toggleVisibility("base", "leftArm")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleLeftArm}</span>
-          </PartButton>
-          {/* Left Leg */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !baseVisibility.leftLeg && "opacity-40",
-            )}
-            style={getPartStyle("leftLeg", "base")}
-            tooltip={dict.partFilter.toggleLeftLeg}
-            onClick={() => toggleVisibility("base", "leftLeg")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleLeftLeg}</span>
-          </PartButton>
-        </div>
-
-        {/* Overlay Layer */}
-        <div
-          className="relative"
-          style={{
-            width: scaled.container.width,
-            height: scaled.container.height,
-          }}
-        >
-          {/* Helmet */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.head && "opacity-40",
-            )}
-            style={getPartStyle("head", "overlay")}
-            tooltip={dict.partFilter.toggleHelmet}
-            onClick={() => toggleVisibility("overlay", "head")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleHelmet}</span>
-          </PartButton>
-          {/* Jacket */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.body && "opacity-40",
-            )}
-            style={getPartStyle("body", "overlay")}
-            tooltip={dict.partFilter.toggleJacket}
-            onClick={() => toggleVisibility("overlay", "body")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleJacket}</span>
-          </PartButton>
-          {/* Right Sleeve */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.rightArm && "opacity-40",
-            )}
-            style={getPartStyle("rightArm", "overlay")}
-            tooltip={dict.partFilter.toggleRightSleeve}
-            onClick={() => toggleVisibility("overlay", "rightArm")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleRightSleeve}</span>
-          </PartButton>
-          {/* Right Pants */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.rightLeg && "opacity-40",
-            )}
-            style={getPartStyle("rightLeg", "overlay")}
-            tooltip={dict.partFilter.toggleRightPants}
-            onClick={() => toggleVisibility("overlay", "rightLeg")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleRightPants}</span>
-          </PartButton>
-          {/* Left Sleeve */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.leftArm && "opacity-40",
-            )}
-            style={getPartStyle("leftArm", "overlay")}
-            tooltip={dict.partFilter.toggleLeftSleeve}
-            onClick={() => toggleVisibility("overlay", "leftArm")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleLeftSleeve}</span>
-          </PartButton>
-          {/* Left Pants */}
-          <PartButton
-            className={cn(
-              "opacity-100",
-              !overlayVisibility.leftLeg && "opacity-40",
-            )}
-            style={getPartStyle("leftLeg", "overlay")}
-            tooltip={dict.partFilter.toggleLeftPants}
-            onClick={() => toggleVisibility("overlay", "leftLeg")}
-          >
-            <span className="sr-only">{dict.partFilter.toggleLeftPants}</span>
-          </PartButton>
-        </div>
+        {layers.map(({ layer, label }) => {
+          const anyVisible = Object.values(visibility[layer]).some(Boolean);
+          return (
+            <div
+              key={layer}
+              className="flex flex-col items-center gap-1.5 group"
+            >
+              <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300">
+                {label}
+              </span>
+              <div
+                dir="ltr"
+                className="grid gap-[2px]"
+                style={{
+                  gridTemplateColumns: `repeat(4, ${cell}px)`,
+                  gridTemplateRows: `${2 * cell}px ${3 * cell}px ${3 * cell}px`,
+                }}
+              >
+                {GRID_PARTS.map(({ part, col, row }) => (
+                  <PartButton
+                    key={part}
+                    tooltip={tooltips[layer][part]}
+                    onClick={() => toggleVisibility(layer, part)}
+                    style={{ gridColumn: col, gridRow: row }}
+                    className={clsx(
+                      "pointer-events-auto box-border cursor-pointer rounded-[3px] border hover:ring-2 hover:ring-blue-500",
+                      visibility[layer][part]
+                        ? "border-[#3776bf] bg-[#4A90E2]"
+                        : "border-neutral-400 bg-neutral-300 dark:border-neutral-600 dark:bg-neutral-700",
+                    )}
+                  >
+                    <span className="sr-only">{tooltips[layer][part]}</span>
+                  </PartButton>
+                ))}
+              </div>
+              <PartButton
+                tooltip={dict.partFilter.toggleWholeLayer}
+                onClick={() => toggleWholeLayer(layer)}
+                className="opacity-0 group-hover:opacity-100 pointer-events-auto flex h-5 w-6 cursor-pointer items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+              >
+                {anyVisible ? <Eye size={12} /> : <EyeOff size={12} />}
+                <span className="sr-only">
+                  {dict.partFilter.toggleWholeLayer}
+                </span>
+              </PartButton>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

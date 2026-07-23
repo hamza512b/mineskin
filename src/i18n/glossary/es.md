@@ -16,7 +16,7 @@
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (353 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
 
 ## Voice & register
 
@@ -41,8 +41,10 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | English | es | Notes |
 |---|---|---|
 | **Skin** <br><sub>The Minecraft character texture</sub> | skin | Loanword the ES Minecraft community uses; feminine (la skin). Current file mixes "Skin"/"skin" appropriately (proper-noun-y labels capitalized, mid-sentence lowercase). Never translate to "piel". |
-| **First Layer** <br><sub>Base texture layer</sub> | Primera capa | Current partFilter.firstLayer = "Primera Capa". Content matches; drop the capital C for sentence case. |
-| **Second Layer** <br><sub>Overlay layer (clothing/accessories)</sub> | Segunda capa <br>*(Capa superior)* | Current partFilter.secondLayer = "Segunda Capa". Matches (sentence-case it). Note tutorial.eraserNote calls it "capa superior" descriptively — acceptable in prose. |
+| **Base** <br><sub>Base texture layer (partFilter.baseLayer; screen-reader label of the base-layer grid in Visibility Settings)</sub> | Capa base | Replaces the removed "First Layer" → "Primera capa". "Capa base" states what the layer is (base vs. overlay) instead of an ordinal. Canonical full term everywhere (SR text, compact desktop widget, prose). |
+| **Base (short)** <br><sub>Compact display-only column label (partFilter.baseLayerShort, above the ~74px base grid in Visibility Settings)</sub> | Base | Canonical short form. Bare "Base" is safe here because the visible dialog title and the paired "Exterior" column establish the layer context; the full "Capa base" stays as the screen-reader label. |
+| **Overlay** <br><sub>Overlay layer, clothing/accessories (partFilter.overlayLayer; screen-reader label of the overlay grid in Visibility Settings)</sub> | Capa superior <br>*(Capa exterior)* | Replaces the removed "Second Layer" → "Segunda capa". "Capa superior" was already used descriptively in tutorial.eraserNote — now the canonical term. Do NOT shorten to bare "Superior": next to a body silhouette it could be misread as "upper body". |
+| **Overlay (short)** <br><sub>Compact display-only column label (partFilter.overlayLayerShort, above the ~74px overlay grid in Visibility Settings)</sub> | Exterior | Canonical short form. Deliberately NOT "Superior": the label sits directly above a body silhouette, exactly where "Superior" reads as "upper body". "Exterior" unambiguously means the outer layer and matches the accepted alt "Capa exterior". The full "Capa superior" stays as the screen-reader label. |
 | **Slim mode** <br><sub>Slim (3px) arm model, aka Alex</sub> | Modo delgado <br>*(Modo Slim)* | Current detailPanel.slimMode = "Modo delgado". Matches; "delgado" is the term the official Minecraft launcher uses for the Alex/slim arm model. Keep it. |
 | **Resolution** <br><sub>Texture resolution 64x64 / 128x128</sub> | Resolución | Current uses "resolución" (changeResolution, doubleResolution). Matches. |
 | **Java Edition** <br><sub>Minecraft: Java Edition (product name)</sub> | Java Edition | Product name — keep verbatim. Current doubleResWarning correctly keeps "Minecraft (Java Edition)". |
@@ -126,6 +128,8 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Record clip** <br><sub>Record a shareable video</sub> | Grabar clip | Current toolbar.recordClip = "Grabar clip". Matches. |
 | **Share** | Compartir | Current recorder.share = "Compartir vídeo", shareImage = "Compartir imagen". Base verb "Compartir" matches. |
 | **Discard** | Descartar | Current recorder.discard = "Descartar". Matches. Keep distinct from "Eliminar" (Delete) and "Cancelar" (Cancel). |
+| **Toggle** <br><sub>Show/hide toggles: partFilter.toggle*, toggleWholeLayer</sub> | Alternar | Established pattern: "Alternar cabeza", "Alternar casco", etc. New partFilter.toggleWholeLayer ("Toggle whole layer") follows it: "Alternar toda la capa". |
+| **Toggle all (short)** <br><sub>Compact visible button label under each layer's part grid (partFilter.toggleWholeLayerShort); the full "Alternar toda la capa" stays as the screen-reader text</sub> | Alternar todo | Neuter "todo" (= everything in this layer's grid), not "toda": the button sits under a specific layer, so "capa" stays implicit and eliding it is natural. Keeps the canonical "Alternar" verb. |
 
 ### Animation
 

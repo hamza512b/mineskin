@@ -18,7 +18,7 @@
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (353 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
 
 ## Voice & register
 
@@ -43,8 +43,9 @@ Address the user directly in the second person masculine singular (the neutral M
 | English | ar | Notes |
 |---|---|---|
 | **Skin** <br><sub>The Minecraft character texture</sub> | سكن <br>*(مظهر)* | INCONSISTENT in file: metadata/home/onboarding/importDialog use سكن/سكنات (the term the Arabic Minecraft community actually uses), but detailPanel/partFilter/library/tutorial use المظهر. Standardize on سكن (plural سكنات) to match community usage; مظهر is acceptable formal MSA but should not be mixed. |
-| **First Layer** <br><sub>Base texture layer</sub> | الطبقة الأولى | Current partFilter.firstLayer = "الطبقة الأولى". Matches. |
-| **Second Layer** <br><sub>Overlay layer (clothing/accessories)</sub> | الطبقة الثانية | Current partFilter.secondLayer = "الطبقة الثانية". Matches. |
+| **Base** <br><sub>Base/inner texture layer (keys: baseLayer, baseLayerShort)</sub> | الطبقة الأساسية <br>*(الأساسية — short display form)* | Replaces the removed "First Layer" = الطبقة الأولى. partFilter.baseLayer = "الطبقة الأساسية" (canonical, screen-reader/full contexts). Conveys "base" rather than mere ordering. Compact visible column label baseLayerShort = "الأساسية" (elliptical adjective, الطبقة implied). |
+| **Overlay** <br><sub>Outer/second layer — helmet, jacket, sleeves, pants (keys: overlayLayer, overlayLayerShort)</sub> | الطبقة الخارجية <br>*(الخارجية — short display form)* | Replaces the removed "Second Layer" = الطبقة الثانية. partFilter.overlayLayer = "الطبقة الخارجية" (canonical). "Outer layer" is the natural Arabic term for the clothing layer and pairs with الطبقة الأساسية. Compact visible column label overlayLayerShort = "الخارجية". |
+| **Toggle whole layer** <br><sub>Eye-button label that shows/hides every part of a layer (keys: toggleWholeLayer, toggleWholeLayerShort)</sub> | تبديل الطبقة كاملة <br>*(تبديل الكل — short display form)* | partFilter.toggleWholeLayer = "تبديل الطبقة كاملة" (canonical, screen-reader/full contexts). Follows the established "تبديل + noun" pattern of the other partFilter.toggle* strings. Compact visible button label toggleWholeLayerShort = "تبديل الكل" ("all" = every part; الطبقة implied since the button sits under a specific layer's grid). |
 | **Slim mode** <br><sub>Slim (3px) arm model, aka Alex</sub> | الوضع النحيف <br>*(وضع سليم (Alex))* | Current detailPanel.slimMode = "الوضع النحيف". Matches. النحيف is clear; some community members say "سليم" (Slim) or reference Alex. |
 | **Resolution** <br><sub>Texture resolution 64x64 / 128x128</sub> | الدقة <br>*(دقة السكن)* | Current changeResolution = "تغيير الدقة". Matches. |
 | **Java Edition** <br><sub>Minecraft: Java Edition (product name)</sub> | إصدار Java <br>*(Minecraft: Java Edition)* | Current doubleResWarning uses "إصدار Minecraft (Java)". Keep Java in Latin; recommend إصدار Java (or the full product name Minecraft: Java Edition verbatim when space allows). |

@@ -16,7 +16,7 @@
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (353 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
 
 ## Voice & register
 
@@ -41,8 +41,9 @@ Use informal second person ("você", never "tu" or "vós"); this is the Brazilia
 | English | pt-BR | Notes |
 |---|---|---|
 | **Skin** <br><sub>The Minecraft character texture</sub> | skin | Community keeps 'skin' untranslated. Current file uses 'skin'/'Skin' throughout (detailPanel.skin 'Skin', library items). Matches. Capitalize only at sentence start or as a standalone label. |
-| **First Layer** <br><sub>Base texture layer</sub> | Primeira Camada | Current: 'Primeira Camada' (partFilter.firstLayer). Matches. |
-| **Second Layer** <br><sub>Overlay layer (clothing/accessories)</sub> | Segunda Camada | Current: 'Segunda Camada' (partFilter.secondLayer). Matches. Note tutorial.eraserNote says 'camada superior' for 'top layer' — that's a different concept (overlay), acceptable. |
+| **Base** <br><sub>Base/inner texture layer (formerly "First Layer")</sub> | Base <br>*(Camada base)* | Current: 'Base' (partFilter.baseLayer); the compact display variant (partFilter.baseLayerShort, visible column label in Visibility Settings) reuses 'Base' verbatim. Use 'camada base' when the word 'layer' is spelled out in prose. Replaces the removed 'Primeira Camada' (partFilter.firstLayer). |
+| **Overlay** <br><sub>Outer/second layer: helmet, jacket, sleeves, pants (formerly "Second Layer")</sub> | Sobreposição <br>*(Camada externa)* | Current: 'Sobreposição' (partFilter.overlayLayer) — canonical full term (screen readers, compact desktop widget). The compact display variant (partFilter.overlayLayerShort, ~74px visible column label) is 'Externa' — feminine adjective agreeing with implied 'camada', pairing naturally with 'Base'. Replaces the removed 'Segunda Camada' (partFilter.secondLayer). Note tutorial.eraserNote says 'camada superior' for 'top layer' — same concept in prose, acceptable there. |
+| **Toggle whole layer** <br><sub>Eye-button that shows/hides every part of a layer</sub> | Alternar camada inteira | Current: 'Alternar camada inteira' (partFilter.toggleWholeLayer) — full label, kept as screen-reader text. Follows the established 'Alternar …' sentence-case pattern of the other partFilter toggle tooltips. The compact visible variant (partFilter.toggleWholeLayerShort, English 'Toggle all') is 'Alternar tudo' — 'camada' stays implicit because the button sits under that layer's own part grid. |
 | **Slim mode** <br><sub>Slim (3px) arm model, aka Alex</sub> | Modo Slim <br>*(Modo slim)* | Current: 'Modo slim' (detailPanel.slimMode). Community keeps 'Slim' (aka Alex) untranslated; recommend capitalizing to 'Modo Slim' for consistency with other mode labels — minor casing inconsistency in current file. |
 | **Resolution** <br><sub>Texture resolution 64x64 / 128x128</sub> | Resolução | Current: 'Resolução' (detailPanel.changeResolution, doubleResolution). Matches. |
 | **Java Edition** <br><sub>Minecraft: Java Edition (product name)</sub> | Java Edition | Product name — keep verbatim. Current: 'Java Edition' (detailPanel.doubleResWarning). Matches. |
