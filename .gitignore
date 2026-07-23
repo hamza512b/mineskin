@@ -64,9 +64,6 @@ ios/App/Podfile.lock
 .env.*
 !.env.example
 *.pem
-# Public dev-CA cert (no key) — referenced by @raw/ in network_security_config,
-# so Android builds fail without it.
-!android/app/src/main/res/raw/mineskin_dev_ca.pem
 *.key
 *.p12
 *.pfx

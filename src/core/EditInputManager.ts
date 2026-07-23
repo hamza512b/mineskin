@@ -1,10 +1,27 @@
 import { getRendererState } from "../store";
+import type { MinecraftSkinMaterial } from "./MeshMaterial";
 import { MiSkiEditingRenderer } from "./MiSkiRenderer";
+
+const MULTI_FINGER_TAP_MAX_DURATION_MS = 300;
+const MULTI_FINGER_TAP_MAX_MOVEMENT_PX = 12;
+
+type TouchPointer = {
+  startX: number;
+  startY: number;
+};
 
 export class EditInputManager {
   private isDrawing = false;
   private touchHitActive = false;
   private touchStart: { x: number; y: number } | null = null;
+  private touchPointers = new Map<number, TouchPointer>();
+  private touchGestureStartedAt = 0;
+  private touchGestureMaxPointers = 0;
+  private touchGestureEligible = false;
+  private touchGestureBaseline: MinecraftSkinMaterial | null = null;
+  private suppressTouchPainting = false;
+  private touchSuppressionResetTimer: ReturnType<typeof setTimeout> | null =
+    null;
 
   private boundOnVisibilityChange = this.onVisibilityChange.bind(this);
   private onVisibilityChange() {
@@ -66,6 +83,10 @@ export class EditInputManager {
     if (!this.renderer.backend.canvas) return;
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
+      if (this.onTouchPointerDown(e)) {
+        e.preventDefault();
+        return;
+      }
       const state = getRendererState();
       // For touch color picker, pick immediately on touch down
       if (state.colorPickerActive) {
@@ -148,6 +169,11 @@ export class EditInputManager {
   };
 
   private onPointerMove = (e: PointerEvent) => {
+    if (e.pointerType === "touch" && this.onTouchPointerMove(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       // Draw on touch move if touch draw mode is enabled
@@ -179,6 +205,11 @@ export class EditInputManager {
 
   private onPointerUp = (e: PointerEvent) => {
     if (!this.renderer.backend.canvas) return;
+    if (e.pointerType === "touch" && this.onTouchPointerUp(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       const state = getRendererState();
@@ -237,6 +268,7 @@ export class EditInputManager {
 
   private onWindowBlur = () => {
     if (!this.renderer.backend.canvas) return;
+    this.resetTouchGesture();
     if (this.isDrawing) {
       this.isDrawing = false;
       this.setFrontIndicatorVisible(true);
@@ -263,8 +295,150 @@ export class EditInputManager {
     };
   }
 
+  /**
+   * Tracks touch pointers before painting starts so a second or third finger
+   * can turn the interaction into an undo/redo tap without leaving behind the
+   * pixel painted by the first finger.
+   */
+  private onTouchPointerDown(e: PointerEvent): boolean {
+    if (this.touchPointers.size === 0) {
+      if (this.touchSuppressionResetTimer !== null) {
+        clearTimeout(this.touchSuppressionResetTimer);
+        this.touchSuppressionResetTimer = null;
+      }
+      this.touchGestureStartedAt = performance.now();
+      this.touchGestureMaxPointers = 0;
+      this.touchGestureEligible = true;
+      this.touchGestureBaseline = this.renderer.getMainSkin().material.clone();
+      this.suppressTouchPainting = false;
+    }
+
+    this.touchPointers.set(e.pointerId, {
+      startX: e.clientX,
+      startY: e.clientY,
+    });
+    this.touchGestureMaxPointers = Math.max(
+      this.touchGestureMaxPointers,
+      this.touchPointers.size,
+    );
+
+    if (
+      performance.now() - this.touchGestureStartedAt >
+        MULTI_FINGER_TAP_MAX_DURATION_MS ||
+      this.touchGestureMaxPointers > 3
+    ) {
+      this.touchGestureEligible = false;
+    }
+
+    if (this.touchPointers.size >= 2 && this.touchGestureEligible) {
+      this.suppressTouchPainting = true;
+      this.cancelTouchStrokeForGesture();
+    }
+
+    return this.suppressTouchPainting;
+  }
+
+  private onTouchPointerMove(e: PointerEvent): boolean {
+    const pointer = this.touchPointers.get(e.pointerId);
+    if (!pointer) return this.suppressTouchPainting;
+
+    const dx = e.clientX - pointer.startX;
+    const dy = e.clientY - pointer.startY;
+    if (
+      dx * dx + dy * dy >
+      MULTI_FINGER_TAP_MAX_MOVEMENT_PX * MULTI_FINGER_TAP_MAX_MOVEMENT_PX
+    ) {
+      this.touchGestureEligible = false;
+    }
+
+    return this.suppressTouchPainting;
+  }
+
+  private onTouchPointerUp(e: PointerEvent): boolean {
+    if (!this.touchPointers.has(e.pointerId)) {
+      return this.suppressTouchPainting;
+    }
+
+    if (e.type === "pointercancel") {
+      this.touchGestureEligible = false;
+    } else {
+      this.onTouchPointerMove(e);
+    }
+
+    this.touchPointers.delete(e.pointerId);
+    const wasSuppressed = this.suppressTouchPainting;
+
+    if (this.touchPointers.size === 0) {
+      const elapsed = performance.now() - this.touchGestureStartedAt;
+      const fingerCount = this.touchGestureMaxPointers;
+      const shouldTrigger =
+        wasSuppressed &&
+        this.touchGestureEligible &&
+        elapsed <= MULTI_FINGER_TAP_MAX_DURATION_MS &&
+        (fingerCount === 2 || fingerCount === 3);
+
+      if (shouldTrigger) {
+        if (fingerCount === 2) {
+          void this.renderer.undoRedoManager.undo();
+        } else {
+          void this.renderer.undoRedoManager.redo();
+        }
+      }
+
+      this.resetTouchGesture(wasSuppressed);
+    }
+
+    return wasSuppressed;
+  }
+
+  private cancelTouchStrokeForGesture() {
+    const baseline = this.touchGestureBaseline;
+    if (!baseline) return;
+
+    const skin = this.renderer.getMainSkin();
+    skin.material = baseline.clone();
+
+    if (this.isDrawing) {
+      this.isDrawing = false;
+      this.setFrontIndicatorVisible(true);
+      getRendererState().setTouchDrawActive(false);
+      this.renderer.undoRedoManager.endBatch();
+      if (this.renderer.backend.canvas) {
+        this.renderer.backend.canvas.style.cursor = "grab";
+      }
+    }
+
+    this.touchHitActive = false;
+    this.touchStart = null;
+  }
+
+  private resetTouchGesture(deferSuppressionReset = false) {
+    this.touchPointers.clear();
+    this.touchGestureStartedAt = 0;
+    this.touchGestureMaxPointers = 0;
+    this.touchGestureEligible = false;
+    this.touchGestureBaseline = null;
+
+    if (this.touchSuppressionResetTimer !== null) {
+      clearTimeout(this.touchSuppressionResetTimer);
+      this.touchSuppressionResetTimer = null;
+    }
+
+    if (deferSuppressionReset) {
+      // The same pointerup is observed by both the window and canvas listeners.
+      // Keep suppression through the rest of this event dispatch.
+      this.touchSuppressionResetTimer = setTimeout(() => {
+        this.suppressTouchPainting = false;
+        this.touchSuppressionResetTimer = null;
+      }, 0);
+    } else {
+      this.suppressTouchPainting = false;
+    }
+  }
+
   public unmountListeners() {
     if (!this.renderer.backend.canvas) return;
+    this.resetTouchGesture();
     this.renderer.backend.canvas.removeEventListener(
       "pointerdown",
       this.onPointerDown,
