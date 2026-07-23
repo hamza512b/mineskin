@@ -10,12 +10,27 @@ import { useDictionary } from "@/i18n";
 import { useRendererStore } from "@/store";
 import * as Dialog from "@radix-ui/react-dialog";
 import clsx from "clsx";
+import { Eye, EyeOff } from "lucide-react";
 import { PartButton } from "./PartButton";
+import Button from "@/components/Button";
 
 type PartFilterDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+type Part = "head" | "body" | "leftArm" | "rightArm" | "leftLeg" | "rightLeg";
+type Layer = "base" | "overlay";
+
+// Humanoid silhouette on a 4-column grid (viewer perspective, always LTR)
+const GRID_PARTS: { part: Part; col: string; row: string }[] = [
+  { part: "head", col: "2 / 4", row: "1" },
+  { part: "leftArm", col: "1", row: "2" },
+  { part: "body", col: "2 / 4", row: "2" },
+  { part: "rightArm", col: "4", row: "2" },
+  { part: "leftLeg", col: "2", row: "3" },
+  { part: "rightLeg", col: "3", row: "3" },
+];
 
 export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
   open,
@@ -59,337 +74,130 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
 
   const isCoarse = useIsTouch();
 
-  const scale = isCoarse ? 10 : 6;
-  const headWidth = 8 * scale;
-  const headHeight = 8 * scale;
-  const bodyWidth = 8 * scale;
-  const bodyHeight = 12 * scale;
-  const armWidth = 4 * scale;
-  const armHeight = 12 * scale;
-  const legWidth = 4 * scale;
-  const legHeight = 12 * scale;
-  const containerWidth = armWidth + bodyWidth + armWidth; // e.g. 4+8+4 = 16*scale
-  const containerHeight = headHeight + bodyHeight + legHeight; // (8+12+12)*scale
+  // Grid cell unit; head is 2x2 cells, body 2x3, arms/legs 1x3
+  const cell = isCoarse ? 28 : 18;
 
-  const toggleVisibility = (
-    layer: "base" | "overlay",
-    part: "head" | "body" | "leftArm" | "rightArm" | "leftLeg" | "rightLeg",
-  ) => {
-    if (layer === "base") {
-      if (part === "head") {
-        setValue(`baseheadVisible`, !baseheadVisible);
-      }
-      if (part === "body") {
-        setValue(`basebodyVisible`, !basebodyVisible);
-      }
-      if (part === "leftArm") {
-        setValue(`baseleftArmVisible`, !baseleftArmVisible);
-      }
-      if (part === "rightArm") {
-        setValue(`baserightArmVisible`, !baserightArmVisible);
-      }
-      if (part === "leftLeg") {
-        setValue(`baseleftLegVisible`, !baseleftLegVisible);
-      }
-      if (part === "rightLeg") {
-        setValue(`baserightLegVisible`, !baserightLegVisible);
-      }
-    }
-    if (layer === "overlay") {
-      if (part === "head") {
-        setValue(`overlayheadVisible`, !overlayheadVisible);
-      }
-      if (part === "body") {
-        setValue(`overlaybodyVisible`, !overlaybodyVisible);
-      }
-      if (part === "leftArm") {
-        setValue(`overlayleftArmVisible`, !overlayleftArmVisible);
-      }
-      if (part === "rightArm") {
-        setValue(`overlayrightArmVisible`, !overlayrightArmVisible);
-      }
-      if (part === "leftLeg") {
-        setValue(`overlayleftLegVisible`, !overlayleftLegVisible);
-      }
-      if (part === "rightLeg") {
-        setValue(`overlayrightLegVisible`, !overlayrightLegVisible);
-      }
-    }
+  const visibility: Record<Layer, Record<Part, boolean>> = {
+    base: {
+      head: baseheadVisible,
+      body: basebodyVisible,
+      leftArm: baseleftArmVisible,
+      rightArm: baserightArmVisible,
+      leftLeg: baseleftLegVisible,
+      rightLeg: baserightLegVisible,
+    },
+    overlay: {
+      head: overlayheadVisible,
+      body: overlaybodyVisible,
+      leftArm: overlayleftArmVisible,
+      rightArm: overlayrightArmVisible,
+      leftLeg: overlayleftLegVisible,
+      rightLeg: overlayrightLegVisible,
+    },
   };
 
-  // Conventional tooltip texts for each part.
-  const tooltips = {
-    head: dict.partFilter.head,
-    body: dict.partFilter.torso,
-    leftArm: dict.partFilter.leftArm,
-    rightArm: dict.partFilter.rightArm,
-    leftLeg: dict.partFilter.leftLeg,
-    rightLeg: dict.partFilter.rightLeg,
+  const toggleVisibility = (layer: Layer, part: Part) => {
+    setValue(`${layer}${part}Visible`, !visibility[layer][part]);
   };
 
-  const partButtonStyle = (): React.CSSProperties => ({
-    border: "1px solid #333",
-    position: "absolute",
-    cursor: "pointer",
-    // backgroundColor: visible ? "#4A90E2" : "#555",
-  });
+  const toggleWholeLayer = (layer: Layer) => {
+    const next = !Object.values(visibility[layer]).some(Boolean);
+    (Object.keys(visibility[layer]) as Part[]).forEach((part) =>
+      setValue(`${layer}${part}Visible`, next),
+    );
+  };
+
+  const tooltips: Record<Layer, Record<Part, string>> = {
+    base: {
+      head: dict.partFilter.toggleHead,
+      body: dict.partFilter.toggleBody,
+      leftArm: dict.partFilter.toggleLeftArm,
+      rightArm: dict.partFilter.toggleRightArm,
+      leftLeg: dict.partFilter.toggleLeftLeg,
+      rightLeg: dict.partFilter.toggleRightLeg,
+    },
+    overlay: {
+      head: dict.partFilter.toggleHelmet,
+      body: dict.partFilter.toggleJacket,
+      leftArm: dict.partFilter.toggleLeftSleeve,
+      rightArm: dict.partFilter.toggleRightSleeve,
+      leftLeg: dict.partFilter.toggleLeftPants,
+      rightLeg: dict.partFilter.toggleRightPants,
+    },
+  };
+
+  const layers: { layer: Layer; label: string; shortLabel: string }[] = [
+    {
+      layer: "base",
+      label: dict.partFilter.baseLayer,
+      shortLabel: dict.partFilter.baseLayerShort,
+    },
+    {
+      layer: "overlay",
+      label: dict.partFilter.overlayLayer,
+      shortLabel: dict.partFilter.overlayLayerShort,
+    },
+  ];
 
   const bodyContent = (
-    <div className="flex flex-row justify-around gap-2 sm:gap-8 max-w-lg mx-auto">
-      {/* Base Layer Panel */}
-      <div>
-        <h3 className="text-base sm:text-xl font-medium mb-2 sm:mb-4 text-center dark:text-neutral-100 text-neutral-900">
-          {dict.partFilter.firstLayer}
-        </h3>
-        <div
-          className="relative mx-auto"
-          style={{ width: containerWidth, height: containerHeight }}
-        >
-          {/* Head – top center */}
-          <PartButton
-            tooltip={tooltips.head}
-            onClick={() => toggleVisibility("base", "head")}
-            style={{
-              top: 0,
-              left: (containerWidth - headWidth) / 2,
-              width: headWidth,
-              height: headHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (baseheadVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (baseheadVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Body – below head */}
-          <PartButton
-            tooltip={tooltips.body}
-            onClick={() => toggleVisibility("base", "body")}
-            style={{
-              top: headHeight,
-              left: (containerWidth - bodyWidth) / 2,
-              width: bodyWidth,
-              height: bodyHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (basebodyVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (basebodyVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Left Arm – left side (maps to rightArm) */}
-          <PartButton
-            tooltip={tooltips.rightArm}
-            onClick={() => toggleVisibility("base", "leftArm")}
-            style={{
-              top: headHeight,
-              left: 0,
-              width: armWidth,
-              height: armHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (baseleftArmVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (baseleftArmVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Right Arm – right side (maps to leftArm) */}
-          <PartButton
-            tooltip={tooltips.leftArm}
-            onClick={() => toggleVisibility("base", "rightArm")}
-            style={{
-              top: headHeight,
-              left: containerWidth - armWidth,
-              width: armWidth,
-              height: armHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (baserightArmVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (baserightArmVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Left Leg – below body, aligned right */}
-          <PartButton
-            tooltip={tooltips.rightLeg}
-            onClick={() => toggleVisibility("base", "leftLeg")}
-            style={{
-              top: headHeight + bodyHeight,
-              left: (containerWidth - bodyWidth) / 2,
-              width: legWidth,
-              height: legHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (baseleftLegVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (baseleftLegVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Right Leg – below body, aligned left */}
-          <PartButton
-            tooltip={tooltips.leftLeg}
-            onClick={() => toggleVisibility("base", "rightLeg")}
-            style={{
-              top: headHeight + bodyHeight,
-              left: (containerWidth - bodyWidth) / 2 + bodyWidth - legWidth,
-              width: legWidth,
-              height: legHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (baserightLegVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (baserightLegVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-        </div>
-      </div>
-      {/* Overlay Layer Panel */}
-      <div>
-        <h3 className="text-base sm:text-xl font-medium mb-2 sm:mb-4 text-center dark:text-neutral-100 text-neutral-900">
-          {dict.partFilter.secondLayer}
-        </h3>
-        <div
-          className="relative mx-auto"
-          style={{ width: containerWidth, height: containerHeight }}
-        >
-          {/* Head */}
-          <PartButton
-            tooltip={tooltips.head}
-            onClick={() => toggleVisibility("overlay", "head")}
-            style={{
-              top: 0,
-              left: (containerWidth - headWidth) / 2,
-              width: headWidth,
-              height: headHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlayheadVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (overlayheadVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Body */}
-          <PartButton
-            tooltip={tooltips.body}
-            onClick={() => toggleVisibility("overlay", "body")}
-            style={{
-              top: headHeight,
-              left: (containerWidth - bodyWidth) / 2,
-              width: bodyWidth,
-              height: bodyHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlaybodyVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse && (overlaybodyVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Left Arm */}
-          <PartButton
-            tooltip={tooltips.leftArm}
-            onClick={() => toggleVisibility("overlay", "leftArm")}
-            style={{
-              top: headHeight,
-              left: 0,
-              width: armWidth,
-              height: armHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlayleftArmVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse &&
-                (overlayleftArmVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Right Arm */}
-          <PartButton
-            tooltip={tooltips.rightArm}
-            onClick={() => toggleVisibility("overlay", "rightArm")}
-            style={{
-              top: headHeight,
-              left: containerWidth - armWidth,
-              width: armWidth,
-              height: armHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlayrightArmVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse &&
-                (overlayrightArmVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Left Leg */}
-          <PartButton
-            tooltip={tooltips.leftLeg}
-            onClick={() => toggleVisibility("overlay", "leftLeg")}
-            style={{
-              top: headHeight + bodyHeight,
-              left: (containerWidth - bodyWidth) / 2,
-              width: legWidth,
-              height: legHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlayleftLegVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse &&
-                (overlayleftLegVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-          {/* Right Leg */}
-          <PartButton
-            tooltip={tooltips.rightLeg}
-            onClick={() => toggleVisibility("overlay", "rightLeg")}
-            style={{
-              top: headHeight + bodyHeight,
-              left: (containerWidth - bodyWidth) / 2 + bodyWidth - legWidth,
-              width: legWidth,
-              height: legHeight,
-              ...partButtonStyle(),
-            }}
-            className={clsx(
-              !isCoarse &&
-                (overlayrightLegVisible
-                  ? "hover:bg-[#3776bf] bg-[#4A90E2]"
-                  : "hover:bg-[#666] bg-[#555]"),
-              isCoarse &&
-                (overlayrightLegVisible ? "bg-[#4A90E2]" : "bg-[#555]"),
-            )}
-          />
-        </div>
-      </div>
+    <div className="flex flex-row justify-center gap-10 sm:gap-14 mx-auto">
+      {layers.map(({ layer, label, shortLabel }) => {
+        const visibleCount = Object.values(visibility[layer]).filter(
+          Boolean,
+        ).length;
+        const anyVisible = visibleCount > 0;
+        return (
+          <div key={layer} className="flex flex-col items-center gap-2">
+            <p className="text-[11px] font-semibold text-neutral-600 dark:text-neutral-300">
+              <span aria-hidden="true">{shortLabel}</span>
+              <span className="sr-only">{label}</span>
+            </p>
+            <div
+              dir="ltr"
+              className="grid gap-[2px]"
+              style={{
+                gridTemplateColumns: `repeat(4, ${cell}px)`,
+                gridTemplateRows: `${2 * cell}px ${3 * cell}px ${3 * cell}px`,
+              }}
+            >
+              {GRID_PARTS.map(({ part, col, row }) => (
+                <PartButton
+                  key={part}
+                  tooltip={tooltips[layer][part]}
+                  onClick={() => toggleVisibility(layer, part)}
+                  style={{ gridColumn: col, gridRow: row }}
+                  className={clsx(
+                    "box-border cursor-pointer rounded-[3px] border",
+                    visibility[layer][part]
+                      ? "border-[#3776bf] bg-[#4A90E2]"
+                      : "border-neutral-400 bg-neutral-300 dark:border-neutral-600 dark:bg-neutral-700",
+                    !isCoarse && "hover:ring-2 hover:ring-blue-500",
+                  )}
+                >
+                  <span className="sr-only">{tooltips[layer][part]}</span>
+                </PartButton>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => toggleWholeLayer(layer)}
+              className="flex h-6 cursor-pointer items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 gap-1 px-2"
+            >
+              {anyVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+              <span
+                aria-hidden="true"
+                className="text-[11px] font-semibold text-neutral-600 dark:text-neutral-300"
+              >
+                {dict.partFilter.toggleWholeLayerShort}
+              </span>
+              <span className="sr-only">
+                {dict.partFilter.toggleWholeLayer}
+              </span>
+            </Button>
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -411,7 +219,7 @@ export const PartFilterDialog: React.FC<PartFilterDialogProps> = ({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 dark:bg-black/50 bg-white/50" />
         <Dialog.Content
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[700px] dark:bg-neutral-900 bg-neutral-100 rounded-lg p-8 border dark:border-neutral-700 border-neutral-200 shadow-lg overflow-y-auto max-h-dvh"
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] dark:bg-neutral-900 bg-neutral-100 rounded-lg p-8 border dark:border-neutral-700 border-neutral-200 shadow-lg overflow-y-auto max-h-dvh"
           aria-describedby="dialog-description"
         >
           <Dialog.Title className="text-2xl font-semibold mb-6 dark:text-neutral-100 text-neutral-900">

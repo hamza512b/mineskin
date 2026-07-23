@@ -16,7 +16,7 @@
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (353 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
 
 ## Voice & register
 
@@ -41,8 +41,9 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 | English | zh | Notes |
 |---|---|---|
 | **Skin** <br><sub>The Minecraft character texture</sub> | 皮肤 | Current uses 皮肤 throughout. Matches; standard community term. |
-| **First Layer** <br><sub>Base texture layer</sub> | 第一图层 <br>*(底层)* | Current partFilter.firstLayer=第一图层. Matches. Tutorial prose says 顶层/底层 for top/bottom — keep 图层 as the noun. |
-| **Second Layer** <br><sub>Overlay layer (clothing/accessories)</sub> | 第二图层 <br>*(外层)* | Current partFilter.secondLayer=第二图层. Matches. |
+| **Base** <br><sub>Base/inner skin layer (partFilter.baseLayer); replaced "First Layer"=第一图层</sub> | 底层 | partFilter.baseLayer=底层. Community-standard term for the base skin layer; compact label next to the body-silhouette grid. Keep 图层 as the generic noun for "layer" (e.g. 切换整个图层). partFilter.baseLayerShort reuses 底层 verbatim — already maximally compact, do not abbreviate further. |
+| **Overlay** <br><sub>Outer/second layer: helmet/jacket/sleeves/pants (partFilter.overlayLayer); replaced "Second Layer"=第二图层</sub> | 外层 | partFilter.overlayLayer=外层. Community-standard term for the skin overlay layer. partFilter.overlayLayerShort reuses 外层 verbatim — already maximally compact. |
+| **Toggle whole layer** <br><sub>Eye-icon tooltip: show/hide every part of one layer (partFilter.toggleWholeLayer)</sub> | 切换整个图层 | Follows the existing partFilter toggle pattern 切换＋对象 (切换头部, 切换夹克…); 图层 is the generic noun for a texture layer. Short visible label (partFilter.toggleWholeLayerShort, EN "Toggle all") = 切换全部 — the button sits under a specific layer's part grid, so the layer stays implicit; keeps the 切换＋对象 pattern at 4 characters. |
 | **Slim mode** <br><sub>Slim (3px) arm model, aka Alex</sub> | 纤细模式 <br>*(纤细 (Alex 模型))* | Current detailPanel.slimMode=纤细模式. Matches; 纤细 is the community term for the Alex 3px arm model. |
 | **Resolution** <br><sub>Texture resolution 64x64 / 128x128</sub> | 分辨率 | Current detailPanel.changeResolution=更改分辨率. Matches. |
 | **Java Edition** <br><sub>Minecraft: Java Edition (product name)</sub> | Java 版 | Current doubleResWarning renders 'Minecraft（Java版）'. Matches; keep 'Java' Latin. Prefer a space: 'Java 版'. |
