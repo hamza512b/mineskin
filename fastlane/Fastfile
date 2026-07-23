@@ -148,11 +148,14 @@ end
 
 # App Store Connect API key — non-interactive auth (no Apple ID password / 2FA).
 def asc_api_key
+  key_content = ENV.fetch("ASC_KEY")
+  key_is_base64 = !key_content.lstrip.start_with?("-----BEGIN")
+
   app_store_connect_api_key(
     key_id: ENV.fetch("ASC_KEY_ID"),
     issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-    key_content: ENV.fetch("ASC_KEY"),
-    is_key_content_base64: true,
+    key_content: key_content,
+    is_key_content_base64: key_is_base64,
     in_house: false,
   )
 end
