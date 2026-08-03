@@ -289,6 +289,45 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
   const pickerPressProps = useFilePickerTrigger(openPicker);
   const emptyStatePressProps = useTapToOpen(openPicker);
 
+  // Dropping art onto the panel is the other half of pasting it: the whole
+  // panel takes the drop, not just the empty state, so a second reference
+  // doesn't have to be aimed at the one small tile in the filmstrip.
+  const [dragOver, setDragOver] = useState(false);
+  // Moving between children fires dragleave on the one being left, so a plain
+  // boolean flickers off halfway across the panel. Counting enter/leave pairs
+  // is what actually tracks whether the cursor is still inside.
+  const dragDepth = useRef(0);
+  const dropProps = useMemo(
+    () => ({
+      onDragEnter: (e: React.DragEvent) => {
+        if (!e.dataTransfer.types.includes("Files")) return;
+        dragDepth.current += 1;
+        setDragOver(true);
+      },
+      onDragOver: (e: React.DragEvent) => {
+        if (!e.dataTransfer.types.includes("Files")) return;
+        // Without this the browser navigates to the dropped file instead.
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+      },
+      onDragLeave: () => {
+        dragDepth.current = Math.max(0, dragDepth.current - 1);
+        if (dragDepth.current === 0) setDragOver(false);
+      },
+      onDrop: (e: React.DragEvent) => {
+        // Clear first: a drop carrying no files still ends the drag, and
+        // bailing out before this would strand the highlight on.
+        dragDepth.current = 0;
+        setDragOver(false);
+        const files = Array.from(e.dataTransfer.files ?? []);
+        if (files.length === 0) return;
+        e.preventDefault();
+        void addFiles(files);
+      },
+    }),
+    [addFiles],
+  );
+
   const atLimit = entries.length >= MAX_REFERENCES;
   const limitMessage = dict.reference.limitReached.replace(
     "{{count}}",
@@ -296,7 +335,10 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
   );
 
   return (
-    <div className={cn("flex min-h-0 flex-col gap-3", className)}>
+    <div
+      className={cn("flex min-h-0 flex-col gap-3", className)}
+      {...dropProps}
+    >
       {header}
 
       <input
@@ -378,7 +420,7 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
         </button>
       </div>
 
-      {false && active ? (
+      {active ? (
         <ReferenceViewport
           entry={active}
           onPick={handlePick}
@@ -390,7 +432,14 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
         // arbitrating between the two per press is what made the photo picker
         // unreliable. Leaving it plain hands every press it doesn't need to
         // the sheet, and the button below is the only thing that imports.
-        <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-neutral-300 px-4 text-center text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
+        <div
+          className={cn(
+            "flex min-h-40 flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-4 text-center text-xs transition-colors",
+            dragOver
+              ? "border-blue-600 bg-blue-600/5 text-blue-600 dark:border-blue-500 dark:text-blue-400"
+              : "border-neutral-300 text-neutral-500 dark:border-neutral-700 dark:text-neutral-400",
+          )}
+        >
           <span>
             {isLoading ? dict.reference.loading : dict.reference.emptyState}
           </span>
