@@ -28,6 +28,7 @@
   "toolbar": {
     "colorPicker": "منتقي الألوان",
     "color": "اللون",
+    "reference": "الصور المرجعية",
     "penTool": "أداة القلم",
     "bulkPaint": "الطلاء الجماعي",
     "eraser": "الممحاة",
@@ -363,6 +364,26 @@
     "invalidDimensions": "يجب أن تكون أبعاد السكن 64x64 أو 64x32 أو 128x128 بكسل.",
     "uploadFailed": "فشل رفع السكن.",
     "dropzoneHint": "PNG (64x64 أو 64x32 أو 128x128)"
+  },
+  "reference": {
+    "title": "المرجع",
+    "add": "إضافة صورة مرجعية",
+    "remove": "إزالة المرجع",
+    "removed": "تمت إزالة المرجع",
+    "emptyState": "أضف صورة لانتقاء الألوان منها",
+    "pickFromImage": "صورة مرجعية. اسحب للتصويب، ثم أفلت لانتقاء لون.",
+    "loading": "جارٍ التحميل",
+    "loadFailed": "تعذّر تحميل هذه الصورة.",
+    "invalidFormat": "هذا الملف ليس صورة.",
+    "importFailed": "تعذّرت إضافة هذه الصورة.",
+    "limitReached": "يمكنك الاحتفاظ بما يصل إلى {{count}} صورة مرجعية.",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "resetZoom": "إعادة تعيين التكبير",
+    "imageColors": "ألوان هذه الصورة",
+    "allColors": "ألوان كل المراجع",
+    "thisImage": "هذه الصورة",
+    "allReferences": "كل المراجع"
   },
   "onboarding": {
     "welcomeTitle": "مرحبًا بك في MineSkin",

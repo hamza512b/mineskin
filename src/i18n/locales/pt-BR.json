@@ -28,6 +28,7 @@
   "toolbar": {
     "colorPicker": "Seletor de cores",
     "color": "Cor",
+    "reference": "Imagens de referência",
     "penTool": "Ferramenta caneta",
     "bulkPaint": "Pintura em massa",
     "eraser": "Borracha",
@@ -363,6 +364,26 @@
     "invalidDimensions": "As dimensões da skin devem ser 64x64, 64x32 ou 128x128 pixels.",
     "uploadFailed": "Falha ao carregar a skin.",
     "dropzoneHint": "PNG (64x64, 64x32 ou 128x128)"
+  },
+  "reference": {
+    "title": "Referência",
+    "add": "Adicionar imagem de referência",
+    "remove": "Remover referência",
+    "removed": "Referência removida",
+    "emptyState": "Adicione uma imagem para escolher cores dela",
+    "pickFromImage": "Imagem de referência. Arraste para mirar, solte para escolher uma cor.",
+    "loading": "Carregando",
+    "loadFailed": "Não foi possível carregar esta imagem.",
+    "invalidFormat": "Esse arquivo não é uma imagem.",
+    "importFailed": "Não foi possível adicionar essa imagem.",
+    "limitReached": "Você pode manter até {{count}} imagens de referência.",
+    "zoomIn": "Aumentar zoom",
+    "zoomOut": "Diminuir zoom",
+    "resetZoom": "Redefinir zoom",
+    "imageColors": "Cores desta imagem",
+    "allColors": "Cores de todas as referências",
+    "thisImage": "Esta imagem",
+    "allReferences": "Todas as referências"
   },
   "onboarding": {
     "welcomeTitle": "Bem-vindo ao MineSkin",

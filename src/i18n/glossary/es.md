@@ -15,8 +15,9 @@
 | `{{shortcuts}}` | Keyboard shortcut hint (e.g. Ctrl+Z / Ctrl+Y) |
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
+| `{{count}}` | A number (e.g. the maximum reference images allowed) |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` and valid 2-space JSON.
 
 ## Voice & register
 
@@ -110,6 +111,19 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Lightness** | Luminosidad | Current colorPicker.lightness = "Luminosidad". Matches; keep distinct from "Valor" (HSV value). |
 | **Value** <br><sub>HSV value component</sub> | Valor | HSV value component. Current saturationValueSelector = "Selector de saturación y valor" uses "Valor". Matches. Keep distinct from "Luminosidad" (HSL lightness). |
 | **Hex Code** | Código hex | Current colorPicker.hexCode = "Código Hex", invalidHexCode = "Código hex inválido". Content matches; sentence-case "hex". Keep "hex" (community term). |
+
+### Reference images
+
+| English | es | Notes |
+|---|---|---|
+| **Reference** <br><sub>Panel title (reference.title) for the imported-images panel</sub> | Referencia | Short noun, sentence case. The panel/tool where users import photos or artwork to sample colors from. |
+| **Reference image** <br><sub>A single imported image (toolbar.reference, reference.add/pickFromImage)</sub> | Imagen de referencia <br>*(referencia)* | Full form for labels and the toolbar button ("Imágenes de referencia"). Short "referencia" is fine once context is established (reference.remove = "Eliminar referencia", reference.allReferences = "Todas las referencias"). Never "imagen de consulta". |
+| **Pick a color** <br><sub>Sampling a color off a reference image (eyedropper-style)</sub> | Tomar un color | Use the verb "tomar" for sampling a color from an image, to keep it distinct from "Seleccionar" (choosing from the picker/palette) and from "Selector de color" (the picker tool). Ex.: "suelta para tomar un color", "Añade una imagen de la que tomar colores". |
+| **Add** <br><sub>Adding a reference image</sub> | Añadir | Spain-Spanish canonical for adding an item (matches saveImage.instruction "Añadir a Fotos"). Note feedback.addScreenshotButtonLabel still says "Agregar" — legacy drift; prefer "Añadir" for new strings. |
+| **Remove** <br><sub>Removing a reference image</sub> | Eliminar | Same verb already used for feedback.removeScreenshotButtonLabel ("Eliminar captura de pantalla") and library.deleteSkin. Keep distinct from "Descartar" (Discard). |
+| **Zoom** <br><sub>The noun, when a label needs it (reference.resetZoom)</sub> | zoom | Loanword already used in the file (tutorial.touchDrawModeContent: "hacen zoom en el modelo"). Keep "zoom", not the RAE-preferred "zum" and not "ampliación" — "zoom" is what ES users read on image controls. |
+| **Zoom in / Zoom out** <br><sub>The + / − buttons over a reference image (reference.zoomIn / zoomOut)</sub> | Acercar / Alejar | Standard Spain-Spanish button verbs for image zoom controls (same pair Apple/Fotos uses). One word each — these are tiny icon buttons. Do NOT use "Ampliar/Reducir" (reads as resizing the image itself) or "Aumentar/Disminuir zoom" (too long). |
+| **Reset zoom** <br><sub>Reset button over a reference image (reference.resetZoom)</sub> | Restablecer zoom | Uses the canonical Reset verb "Restablecer" (see Actions) + the "zoom" loanword. Not "Reiniciar" — Reset ≠ Restart. |
 
 ### Actions
 

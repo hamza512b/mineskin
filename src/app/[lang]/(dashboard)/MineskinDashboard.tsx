@@ -10,6 +10,7 @@ import { useRendererStore, selectUndoCount, selectRedoCount } from "@/store";
 import { getLibraryState } from "@/store/libraryStore";
 import ActionBar from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
+import ReferencePanel from "@/widgets/ReferencePanel/ReferencePanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import React, {
@@ -66,6 +67,7 @@ export function Dashboard({
     (state) => state.environmentPreset,
   );
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
+  const [referencePanelOpen, setReferencePanelOpen] = useState(false);
   const isFine = !useIsTouch();
 
   // The 3D canvas is a full-screen `fixed` layer painted behind the workspace
@@ -100,6 +102,30 @@ export function Dashboard({
       backend.setViewportCenterOffset(0);
     };
   }, [canvasRef, backendNotSupported, renderer]);
+
+  // R toggles the reference panel. It lives here rather than in
+  // EditInputManager's shortcut block because the panel's open state is React
+  // state, not renderer state — but the guards mirror that block so bare-letter
+  // shortcuts stay out of typing contexts and browser combos.
+  useEffect(() => {
+    if (mode !== "Editing") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key !== "r") return;
+      const target = e.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+      ) {
+        return;
+      }
+      setReferencePanelOpen((open) => !open);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mode]);
 
   // Animation-related state and functions
   const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
@@ -395,6 +421,15 @@ export function Dashboard({
           top: "max(env(safe-area-inset-top, 0px), var(--app-banner-height, 0px))",
         }}
       >
+        {/* Docks on the leading edge (RTL-flipped by flex order) so it can sit
+            open alongside the settings panel rather than competing with it. */}
+        {mode === "Editing" && (
+          <ReferencePanel
+            open={referencePanelOpen}
+            setOpen={setReferencePanelOpen}
+          />
+        )}
+
         <div
           ref={mainRef}
           className="relative min-w-0 flex-1"
@@ -417,6 +452,8 @@ export function Dashboard({
               undoCount={undoCount}
               settingsOpen={controlPanelOpen}
               setSettingsOpen={setSettingsOpen}
+              referenceOpen={referencePanelOpen}
+              setReferenceOpen={setReferencePanelOpen}
               getUniqueColors={getUniqueColors}
               availableAnimations={availableAnimations}
               currentAnimation={currentAnimation}

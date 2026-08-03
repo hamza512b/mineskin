@@ -13,6 +13,19 @@ export const ColorPickerIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+export const ReferenceImageIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} {...props}>
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 5.5A1.5 1.5 0 0 1 4.5 4h15A1.5 1.5 0 0 1 21 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5zM3 16l4.5-4.5a1.5 1.5 0 0 1 2.1 0L15 17m-1.5-1.5 2-2a1.5 1.5 0 0 1 2.1 0L21 16M8.5 8.5h.01"
+    />
+  </svg>
+);
+
 export const PartsFilterIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" {...props}>
     <path
