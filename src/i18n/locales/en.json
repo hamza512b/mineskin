@@ -318,7 +318,14 @@
     "supportAppText": "The full editor, on iOS and Android.",
     "supportTipTitle": "Coffee?",
     "supportTipText": "Leave a one-time tip to help fund new features.",
-    "alsoOnMobile": "Also on iOS & Android"
+    "alsoOnMobile": "Also on iOS & Android",
+    "openSourceHeading": "MineSkin is open source.",
+    "openSourceDescription": "A star helps other players find it, and tells me what to build next.",
+    "githubStar": "Star",
+    "githubStargazers": "Stargazers on GitHub",
+    "copyEmail": "Copy",
+    "copiedEmail": "Copied",
+    "copyEmailLabel": "Copy email address"
   },
   "languageDetection": {
     "title": "Language Available",

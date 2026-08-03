@@ -129,6 +129,16 @@ Address the user directly in the second person masculine singular (the neutral M
 | **Record clip** <br><sub>Record a shareable video</sub> | تسجيل مقطع | Current toolbar.recordClip = "تسجيل مقطع". Matches. |
 | **Share** | مشاركة | Current recorder.share = "مشاركة الفيديو", shareImage = "مشاركة الصورة". Base verb مشاركة matches. |
 | **Discard** | تجاهل | Current recorder.discard = "تجاهل". Matches. Keep distinct from إلغاء (Cancel). |
+| **Copy** <br><sub>Copy-to-clipboard button (`home.copyEmail`, `home.copyEmailLabel`)</sub> | نسخ | Bare maṣdar per the short action-label rule. Full aria-label spells the object out: نسخ عنوان البريد الإلكتروني (Copy email address), reusing البريد الإلكتروني from feedback.emailLabel. |
+| **Copied** <br><sub>Post-copy confirmation state on the same button (`home.copiedEmail`)</sub> | تم النسخ | Follows the تمّ + مصدر passive-confirmation pattern established by reference.removed (تمت إزالة المرجع); تم (masculine) agrees with the masculine مصدر نسخ. |
+
+### Open source / GitHub
+
+| English | ar | Notes |
+|---|---|---|
+| **Open source** <br><sub>`home.openSourceHeading`</sub> | مفتوح المصدر | Standard Arabic dev-community term. The heading starts with the Latin brand name, so it takes a leading RLM (`‏MineSkin مفتوح المصدر.`) like promoBanner.title. |
+| **Star** <br><sub>GitHub star action — label on the button that opens the repo (`home.githubStar`)</sub> | أضف نجمة <br>*(نجمة)* | GitHub's star, not the astronomy sense — نجمة is what Arabic-speaking developers say ("أضف نجمة للمستودع"). Imperative + noun, matching the imperative action-label register. Do NOT use نجم، كوكب، تمييز بنجمة، or المفضلة. |
+| **Stargazers** <br><sub>Accessible label on the star-count link (`home.githubStargazers`)</sub> | عدد النجوم على GitHub | The link shows a count, so the count reading (عدد النجوم) is clearer in Arabic than a coined agent noun. Keep نجوم as the plural of the same نجمة term above; do not invent مُنجِّمون/المراقبون. |
 
 ### Animation
 

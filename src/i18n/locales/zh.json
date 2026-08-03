@@ -318,7 +318,14 @@
     "supportAppText": "完整编辑器，支持 iOS 和 Android。",
     "supportTipTitle": "来杯咖啡？",
     "supportTipText": "一次性打赏，助力开发新功能。",
-    "alsoOnMobile": "同样支持 iOS 和 Android"
+    "alsoOnMobile": "同样支持 iOS 和 Android",
+    "openSourceHeading": "MineSkin 是开源项目。",
+    "openSourceDescription": "点个 Star，能让更多玩家发现它，也让我知道接下来该开发什么。",
+    "githubStar": "Star",
+    "githubStargazers": "GitHub 上的 Star 数",
+    "copyEmail": "复制",
+    "copiedEmail": "已复制",
+    "copyEmailLabel": "复制邮箱地址"
   },
   "languageDetection": {
     "title": "语言可用",

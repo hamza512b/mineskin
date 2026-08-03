@@ -131,6 +131,18 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Toggle** <br><sub>Show/hide toggles: partFilter.toggle*, toggleWholeLayer</sub> | Alternar | Established pattern: "Alternar cabeza", "Alternar casco", etc. New partFilter.toggleWholeLayer ("Toggle whole layer") follows it: "Alternar toda la capa". |
 | **Toggle all (short)** <br><sub>Compact visible button label under each layer's part grid (partFilter.toggleWholeLayerShort); the full "Alternar toda la capa" stays as the screen-reader text</sub> | Alternar todo | Neuter "todo" (= everything in this layer's grid), not "toda": the button sits under a specific layer, so "capa" stays implicit and eliding it is natural. Keeps the canonical "Alternar" verb. |
 
+### Open source & GitHub
+
+| English | es | Notes |
+|---|---|---|
+| **Open source** <br><sub>home.openSourceHeading</sub> | de código abierto | Standard ES term ("MineSkin es de código abierto"). Do not translate as "fuente abierta" or leave "open source" in English. |
+| **Star** <br><sub>Verb/button that stars the GitHub repo (home.githubStar)</sub> | Destacar | This is GitHub's own Spanish UI wording for the Star button, so it is what ES-speaking developers actually see. Not "Estrella" (the noun) and not "Marcar como favorito". |
+| **Stargazers** <br><sub>Accessible label on the star-count link (home.githubStargazers)</sub> | Usuarios que lo han destacado | Never leave "Stargazers" in English and never coin "Destacadores". Full string: "Usuarios que lo han destacado en GitHub". Keeps the canonical "destacar" verb. |
+| **A star** <br><sub>The star itself, in running prose (home.openSourceDescription)</sub> | una estrella | In prose the noun stays "estrella" — the star icon is universally read that way by the ES dev community — while the button keeps GitHub's verb "Destacar". Both forms are intentional; do not merge them. |
+| **Copy** <br><sub>Tiny button next to the contact email (home.copyEmail)</sub> | Copiar | Canonical clipboard verb. Keep the infinitive, sentence case. |
+| **Copied** <br><sub>Confirmation state of that same button (home.copiedEmail)</sub> | Copiado | Bare participle, no exclamation marks — the button is tiny and the state is transient. |
+| **Email address** <br><sub>aria-label "Copy email address" (home.copyEmailLabel)</sub> | dirección de correo | Spain-Spanish: "correo" (not "email"/"e-mail", not Latin-American "correo electrónico" in full when space is tight). Full string: "Copiar dirección de correo". |
+
 ### Animation
 
 | English | es | Notes |
