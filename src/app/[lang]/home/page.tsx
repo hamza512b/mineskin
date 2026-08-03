@@ -17,6 +17,7 @@ import Link from "next/link";
 import { NativeRedirect } from "./NativeRedirect";
 import StoreBadges from "@/widgets/StoreBadges";
 import CoffeeButton from "@/widgets/CoffeeButton";
+import OpenSourceSection from "@/widgets/OpenSourceSection";
 
 export default function HomePage({
   params,
@@ -195,7 +196,7 @@ async function HomeContent({ params }: { params: Promise<{ lang: string }> }) {
         {/* Support CTA */}
         <section
           id="support"
-          className="relative scroll-mt-24 overflow-hidden rounded-3xl border border-neutral-200 bg-gradient-to-br from-white via-white to-blue-50/50 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-950/30 sm:p-10 mb-12"
+          className="relative scroll-mt-24 overflow-hidden rounded-3xl border border-neutral-200 bg-gradient-to-br from-white via-white to-blue-50/50 p-6 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900 dark:to-blue-950/30 sm:p-10"
         >
           <div
             aria-hidden
@@ -268,6 +269,9 @@ async function HomeContent({ params }: { params: Promise<{ lang: string }> }) {
             </div>
           </div>
         </section>
+
+        {/* Open source / community */}
+        <OpenSourceSection />
       </div>
     </main>
   );

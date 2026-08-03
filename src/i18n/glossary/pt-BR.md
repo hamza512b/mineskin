@@ -127,6 +127,9 @@ Use informal second person ("você", never "tu" or "vós"); this is the Brazilia
 | **Record clip** <br><sub>Record a shareable video</sub> | Gravar clipe | Current: 'Gravar clipe' (toolbar.recordClip). Matches; recorder strings use 'clipe' and 'Gravando…' consistently. |
 | **Share** | Compartilhar | Current: 'Compartilhar' (recorder.share/shareImage). Matches. Brazilian standard (not EU 'Partilhar'). |
 | **Discard** | Descartar | Current: 'Descartar' (recorder.discard). Matches. Kept distinct from 'Cancelar' and 'Excluir'. |
+| **Copy** <br><sub>Copy-to-clipboard button (home.copyEmail)</sub> | Copiar | Short imperative, sentence case, matching the other action buttons. Never 'Copiar para a área de transferência' on the tiny button — the long form belongs only in an aria-label if one is ever needed. |
+| **Copied** <br><sub>Confirmation state of the copy button (home.copiedEmail)</sub> | Copiado | Masculine past participle: it agrees with the implicit 'endereço (de e-mail)'. Never 'Copiada'. |
+| **Email address** <br><sub>The developer's contact address (home.copyEmailLabel)</sub> | Endereço de e-mail | Brazilian spelling is 'e-mail' with the hyphen (not 'email' or 'correio eletrônico'). Current: 'Copiar endereço de e-mail' (home.copyEmailLabel). |
 
 ### Animation
 
@@ -173,6 +176,15 @@ Use informal second person ("você", never "tu" or "vós"); this is the Brazilia
 | **Changelog** | Histórico de Alterações <br>*(Novidades)* | Current: 'Histórico de Alterações' (changelog.title, 'Ver histórico de alterações'). Matches. 'Novidades' is a friendlier alt if space allows, but keep current for accuracy. |
 | **Settings** | Configurações | Current: 'Configurações' (common.settings). Matches consistently across the file. |
 | **Appearance** <br><sub>Color-theme selector label (theme.label)</sub> | Aparência | Label above the theme dropdown (System/Light/Dark). Standard pt-BR OS term for a theme/appearance setting. Sentence-case single noun, matching 'Idioma' (languageSwitcher.language). |
+
+### Open source & GitHub
+
+| English | pt-BR | Notes |
+|---|---|---|
+| **Open source** <br><sub>The project's licensing/status (home.openSourceHeading)</sub> | de código aberto <br>*(open source)* | The homepage audience is the general public ('people', deliberately broader than 'players'), not only developers, so the transparent 'de código aberto' is preferred over the loanword. Current: 'O MineSkin é de código aberto.' (home.openSourceHeading). Note the definite article before the brand ('O MineSkin'), matching supportDescription and languageDetection.description. |
+| **Star** <br><sub>Verb/button that stars the GitHub repo (home.githubStar)</sub> | Dar estrela <br>*(Marcar com estrela)* | GitHub's own pt-BR wording is 'marcar com estrela'; it is too long for this tiny button, and 'dar estrela' is what Brazilian developers actually say. Never the bare noun 'Estrela' (reads as a label, not an action) and never 'Favoritar' (that is GitHub's separate bookmark concept). |
+| **Stargazers** <br><sub>Accessible label on the star-count link (home.githubStargazers)</sub> | Estrelas no GitHub | The link shows a count, so the countable noun is clearer than a literal rendering of 'stargazers' (which has no natural pt-BR equivalent — avoid 'observadores', that is GitHub's 'watchers'). Keeps 'GitHub' verbatim. |
+| **Repository** | Repositório | Current: 'Repositório do GitHub' (about.githubRepository). Matches. |
 
 ## Consistency watch-list
 

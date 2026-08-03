@@ -318,7 +318,14 @@
     "supportAppText": "المحرر الكامل، على iOS و Android.",
     "supportTipTitle": "قهوة؟",
     "supportTipText": "ساهم مرة واحدة للمساعدة في تمويل ميزات جديدة.",
-    "alsoOnMobile": "متوفر أيضًا على iOS و Android"
+    "alsoOnMobile": "متوفر أيضًا على iOS و Android",
+    "openSourceHeading": "‏MineSkin مفتوح المصدر.",
+    "openSourceDescription": "النجمة تساعد أشخاصًا آخرين على العثور عليه، وتخبرني بما أبنيه بعد ذلك.",
+    "githubStar": "أضف نجمة",
+    "githubStargazers": "عدد النجوم على GitHub",
+    "copyEmail": "نسخ",
+    "copiedEmail": "تم النسخ",
+    "copyEmailLabel": "نسخ عنوان البريد الإلكتروني"
   },
   "languageDetection": {
     "title": "اللغة متاحة",

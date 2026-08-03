@@ -5,7 +5,7 @@
 
 ## Universal rules (all locales)
 
-**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG`. Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
+**Do-not-translate — verbatim, Latin script:** `MineSkin` · `MineSkin PRO` · `PRO` · `Minecraft` · `iOS` · `Android` · `App Store` · `Google Play` · `GitHub` · `Discord` · `PNG` · `Star` (the GitHub action/count — see Community & project). Also keep `PNG`, dimension strings (`64x64`, `64x32`, `128x128`) and `Hex` in Latin.
 
 **Interpolation placeholders — never translate, reorder, or respell** (replaced at runtime in `src/i18n/DictionaryContext.tsx`):
 
@@ -127,6 +127,15 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 | **Record clip** <br><sub>Record a shareable video</sub> | 录制片段 <br>*(录制短片)* | Current toolbar.recordClip=录制片段. Matches; note recorder.previewTitle uses 短片 for the resulting 'clip' — consistent enough. |
 | **Share** | 分享 | Current recorder.share=分享视频, shareImage=分享图片. Matches. |
 | **Discard** | 放弃 <br>*(丢弃)* | Current recorder.discard=放弃. Matches. |
+| **Copy** <br><sub>Copy-to-clipboard button (home.copyEmail)</sub> | 复制 | Bare 2-character verb on the tiny button. Confirmation state (home.copiedEmail) = 已复制 — the 已＋verb pattern for "done" states. Full aria-label spells out the object: 复制邮箱地址 (home.copyEmailLabel). |
+
+### Community & project
+
+| English | zh | Notes |
+|---|---|---|
+| **Open source** <br><sub>home.openSourceHeading</sub> | 开源 | 开源项目 for "is open source" as a noun phrase (MineSkin 是开源项目。) — more idiomatic in Chinese than a bare predicate 是开源的. |
+| **Star** <br><sub>GitHub star action; button label (home.githubStar)</sub> | Star | Keep verbatim in Latin. Chinese developers say and search "Star" (点个 Star / Star 数); the official GitHub zh-CN rendering 星标 is not what the community uses. Verb form in prose: 点个 Star. Never 收藏 or 加星. |
+| **Stargazers** <br><sub>Star-count link, accessible label (home.githubStargazers)</sub> | GitHub 上的 Star 数 | Chinese has no natural noun for "stargazers"; describe it as the count instead. Keep the space around the Latin `Star`. |
 
 ### Animation
 

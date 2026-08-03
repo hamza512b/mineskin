@@ -318,7 +318,14 @@
     "supportAppText": "El editor completo, en iOS y Android.",
     "supportTipTitle": "¿Un café?",
     "supportTipText": "Deja una propina única para financiar nuevas funciones.",
-    "alsoOnMobile": "También en iOS y Android"
+    "alsoOnMobile": "También en iOS y Android",
+    "openSourceHeading": "MineSkin es de código abierto.",
+    "openSourceDescription": "Una estrella ayuda a que otras personas lo encuentren y me dice qué crear a continuación.",
+    "githubStar": "Destacar",
+    "githubStargazers": "Usuarios que lo han destacado en GitHub",
+    "copyEmail": "Copiar",
+    "copiedEmail": "Copiado",
+    "copyEmailLabel": "Copiar dirección de correo"
   },
   "languageDetection": {
     "title": "Idioma Disponible",
