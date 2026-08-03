@@ -8,6 +8,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={isDark ? "dark" : "light"}
+      toastOptions={{
+        // Sonner's default action chip is 24px tall — an awkward target on a
+        // phone, which is exactly where the undo toasts matter most. Inline
+        // styles rather than classNames so they beat sonner's own stylesheet.
+        actionButtonStyle: {
+          height: "32px",
+          padding: "0 12px",
+          fontSize: "13px",
+          fontWeight: 600,
+        },
+      }}
       {...props}
     />
   )

@@ -41,6 +41,11 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 /** Exported screenshot edge length; matches the recorded clip's 1080px width. */
 const SCREENSHOT_SIZE = 1080;
 
+/** How far the visible canvas region's center sits from the window's, in px. */
+const CANVAS_CENTER_VAR = "--canvas-center-offset";
+/** Sonner's toast width (356px) plus breathing room on both sides. */
+const MIN_CENTERED_TOAST_WIDTH = 400;
+
 type RendererClass = {
   setup: (canvas: HTMLCanvasElement) => Promise<MiSkiRenderer>;
 };
@@ -90,7 +95,18 @@ export function Dashboard({
       const canvasRect = canvas.getBoundingClientRect();
       const mainCenter = mainRect.left + mainRect.width / 2;
       const canvasCenter = canvasRect.left + canvasRect.width / 2;
-      backend.setViewportCenterOffset(mainCenter - canvasCenter);
+      const offset = mainCenter - canvasCenter;
+      backend.setViewportCenterOffset(offset);
+      // Published for anything that sits outside this tree and still wants to
+      // line up with the model — the toasts, which would otherwise center on
+      // the window and end up half-hidden under a docked panel. Falling back to
+      // 0 when the region is too narrow to hold a toast keeps it on screen, and
+      // pages without a canvas never set the variable at all, so they center on
+      // the window as usual.
+      document.documentElement.style.setProperty(
+        CANVAS_CENTER_VAR,
+        `${mainRect.width >= MIN_CENTERED_TOAST_WIDTH ? Math.round(offset) : 0}px`,
+      );
     };
     sync();
     const ro = new ResizeObserver(sync);
@@ -100,6 +116,7 @@ export function Dashboard({
       ro.disconnect();
       window.removeEventListener("resize", sync);
       backend.setViewportCenterOffset(0);
+      document.documentElement.style.removeProperty(CANVAS_CENTER_VAR);
     };
   }, [canvasRef, backendNotSupported, renderer]);
 

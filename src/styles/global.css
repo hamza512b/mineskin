@@ -121,6 +121,30 @@ body {
   animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
+/* Toasts.
+   Sonner parks itself at 999999999, which the recorder overlays outrank; a
+   toast is never the thing that should be covered, so it goes to the ceiling.
+   Centered toasts also track the visible canvas region rather than the window,
+   so a docked panel doesn't end up sitting on half of one — the dashboard
+   publishes the drift and everywhere else falls back to the window center.
+   !important because sonner injects its stylesheet at runtime, after this. */
+[data-sonner-toaster] {
+  z-index: 2147483647 !important;
+}
+
+[data-sonner-toaster][data-x-position="center"] {
+  transform: translateX(
+    calc(-50% + var(--canvas-center-offset, 0px))
+  ) !important;
+}
+
+/* Sonner drops the -50% and pins both edges below its own mobile breakpoint. */
+@media (max-width: 600px) {
+  [data-sonner-toaster][data-x-position="center"] {
+    transform: translateX(var(--canvas-center-offset, 0px)) !important;
+  }
+}
+
 /* Toolbar flyout range slider */
 .mineskin-range::-webkit-slider-thumb {
   -webkit-appearance: none;
