@@ -16,6 +16,13 @@ const LOUPE_SIZE = 92;
 const LOUPE_ZOOM = 10;
 /** Gap between the touch point and the loupe's bottom edge. */
 const LOUPE_OFFSET = 26;
+/**
+ * How long a touch waits before the loupe appears. The two fingers of a pinch
+ * never land on the same frame, so the first one is indistinguishable from the
+ * start of a pick; showing the loupe right away flashes it at the top of every
+ * pinch. Sampling still starts immediately — only the display waits.
+ */
+const LOUPE_TOUCH_DELAY = 90;
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 16;
@@ -324,19 +331,41 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
     );
   }, []);
 
+  // While held, sampling continues but the loupe stays hidden — see
+  // LOUPE_TOUCH_DELAY.
+  const loupeHoldRef = useRef(false);
+  const loupeTimerRef = useRef<number | null>(null);
+  // Last sampled point, so the delayed reveal can draw where the finger is now
+  // rather than where it landed.
+  const lastSampleRef = useRef<{ x: number; y: number } | null>(null);
+
   const trackPointer = useCallback(
     (clientX: number, clientY: number) => {
+      lastSampleRef.current = { x: clientX, y: clientY };
       const point = toSourcePoint(clientX, clientY);
       const source = sourceRef.current;
       if (!point || !source) return null;
       const hex = samplePixel(source, point.x, point.y);
       if (!hex) return null;
-      setLoupe({ x: point.localX, y: point.localY, hex });
-      drawLoupe(point.x, point.y);
+      if (!loupeHoldRef.current) {
+        setLoupe({ x: point.localX, y: point.localY, hex });
+        drawLoupe(point.x, point.y);
+      }
       return hex;
     },
     [toSourcePoint, drawLoupe],
   );
+
+  const cancelLoupeHold = useCallback(() => {
+    if (loupeTimerRef.current !== null) {
+      window.clearTimeout(loupeTimerRef.current);
+      loupeTimerRef.current = null;
+    }
+    loupeHoldRef.current = false;
+  }, []);
+
+  // A pending reveal outlives the component if the panel closes mid-press.
+  useEffect(() => cancelLoupeHold, [cancelLoupeHold]);
 
   // Active pointers drive the one-finger-picks / two-fingers-transform split.
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
@@ -397,12 +426,14 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
       // Second finger turns the gesture into a transform. Stop it here too, or
       // the sheet's drag handling would still see it and fight the pinch.
       e.stopPropagation();
+      cancelLoupeHold();
       pickAbortedRef.current = true;
       setLoupe(null);
       pinchRef.current = pinchState();
       return;
     }
     if (!e.isPrimary) return;
+    cancelLoupeHold();
     pickAbortedRef.current = false;
     // Own the gesture so a drag across the image keeps updating the loupe and
     // isn't stolen by the sheet's own drag handling.
@@ -416,6 +447,21 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
       pickAbortedRef.current = true;
       setLoupe(null);
       return;
+    }
+    // A mouse can't grow a second finger, so it previews at once; touch waits
+    // out the window in which this press could still turn into a pinch.
+    if (e.pointerType !== "mouse") {
+      loupeHoldRef.current = true;
+      loupeTimerRef.current = window.setTimeout(() => {
+        loupeTimerRef.current = null;
+        loupeHoldRef.current = false;
+        const last = lastSampleRef.current;
+        // Only one finger ever landed, so this really was a pick.
+        if (!last || pickAbortedRef.current || pointersRef.current.size !== 1) {
+          return;
+        }
+        trackPointer(last.x, last.y);
+      }, LOUPE_TOUCH_DELAY);
     }
     trackPointer(e.clientX, e.clientY);
   };
@@ -492,6 +538,10 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
+    // The gesture resolved before the window elapsed; a lift is never a pinch.
+    // Releasing the hold here also lets a tap shorter than the delay still show
+    // its pick — the state updates batch, so nothing flashes on the way out.
+    cancelLoupeHold();
 
     if (wasMulti || pickAbortedRef.current) {
       // Finished a transform, not a pick. Stay aborted until every finger is
