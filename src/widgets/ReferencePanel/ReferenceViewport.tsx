@@ -1,6 +1,11 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { MinusIcon, PlusIcon, ResetIcon } from "@radix-ui/react-icons";
+import {
+  MinusIcon,
+  PlusIcon,
+  ResetIcon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
 import { useDictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
 import {
@@ -40,6 +45,12 @@ const IDENTITY: Transform = { zoom: 1, panX: 0, panY: 0 };
 interface ReferenceViewportProps {
   entry: ReferenceEntry;
   onPick: (hex: string) => void;
+  /**
+   * Removes the reference on screen. Optional because the surface that has a
+   * hover affordance on the thumbnail itself doesn't need a second one here;
+   * pass it and a trash button joins the control column.
+   */
+  onRemove?: () => void;
   className?: string;
 }
 
@@ -59,6 +70,7 @@ interface ReferenceViewportProps {
 const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
   entry,
   onPick,
+  onRemove,
   className,
 }) => {
   const { dictionary: dict } = useDictionary();
@@ -606,26 +618,51 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
         </div>
       )}
 
-      {!loading && !failed && (
+      {/* Remove keeps its slot even when the image never decoded — a reference
+          that fails to load is the one you most want to get rid of — so the
+          column outlives the zoom controls it usually holds. */}
+      {((!loading && !failed) || onRemove) && (
         <div className="absolute end-1.5 top-1.5 z-10 flex flex-col gap-1 pointer-coarse:end-2 pointer-coarse:top-2 pointer-coarse:gap-1.5">
-          <ZoomButton
-            label={dict.reference.zoomIn}
-            onClick={() => zoomByStep(ZOOM_STEP)}
-            disabled={zoom >= MAX_ZOOM}
-          >
-            <PlusIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
-          </ZoomButton>
-          <ZoomButton
-            label={dict.reference.zoomOut}
-            onClick={() => zoomByStep(1 / ZOOM_STEP)}
-            disabled={zoom <= MIN_ZOOM}
-          >
-            <MinusIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
-          </ZoomButton>
-          {zoomed && (
-            <ZoomButton label={dict.reference.resetZoom} onClick={resetTransform}>
-              <ResetIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
-            </ZoomButton>
+          {!loading && !failed && (
+            <>
+              <ControlButton
+                label={dict.reference.zoomIn}
+                onClick={() => zoomByStep(ZOOM_STEP)}
+                disabled={zoom >= MAX_ZOOM}
+              >
+                <PlusIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
+              </ControlButton>
+              <ControlButton
+                label={dict.reference.zoomOut}
+                onClick={() => zoomByStep(1 / ZOOM_STEP)}
+                disabled={zoom <= MIN_ZOOM}
+              >
+                <MinusIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
+              </ControlButton>
+              {/* Held even at 1x, where it does nothing: appearing only once
+                  zoomed shifted the trash under it down a slot mid-gesture,
+                  so a finger already reaching for one button landed on the
+                  other. */}
+              <ControlButton
+                label={dict.reference.resetZoom}
+                onClick={resetTransform}
+                disabled={!zoomed}
+              >
+                <ResetIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
+              </ControlButton>
+            </>
+          )}
+          {onRemove && (
+            // Last in the column and the only red one: it neighbours three
+            // controls that only change the view, and this one destroys
+            // something.
+            <ControlButton
+              label={dict.reference.remove}
+              onClick={onRemove}
+              className="mt-1 text-red-400 hover:bg-red-600/80 hover:text-white pointer-coarse:mt-1.5"
+            >
+              <TrashIcon className="h-3.5 w-3.5 pointer-coarse:h-5 pointer-coarse:w-5" />
+            </ControlButton>
           )}
         </div>
       )}
@@ -680,12 +717,13 @@ const ReferenceViewport: React.FC<ReferenceViewportProps> = ({
   );
 };
 
-const ZoomButton: React.FC<{
+const ControlButton: React.FC<{
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  className?: string;
   children: React.ReactNode;
-}> = ({ label, onClick, disabled, children }) => (
+}> = ({ label, onClick, disabled, className, children }) => (
   <button
     type="button"
     aria-label={label}
@@ -697,7 +735,10 @@ const ZoomButton: React.FC<{
     onClick={onClick}
     // 24px is a comfortable mouse target but well under the 44px finger
     // minimum, so touch pointers get a bigger tile.
-    className="flex h-6 w-6 items-center justify-center rounded-md bg-black/45 text-white transition-colors hover:bg-black/65 disabled:opacity-35 pointer-coarse:h-11 pointer-coarse:w-11"
+    className={cn(
+      "flex h-6 w-6 cursor-pointer items-center justify-center rounded-md bg-black/45 text-white transition-colors hover:bg-black/65 disabled:opacity-35 pointer-coarse:h-11 pointer-coarse:w-11",
+      className,
+    )}
   >
     {children}
   </button>

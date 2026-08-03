@@ -11,6 +11,7 @@ import { Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 import { useDictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
+import useIsTouch from "@/hooks/useIsTouch";
 import { ColorSwatch } from "@/components/ColorPicker/ColorSwatch";
 import { getRendererState, useRendererStore } from "@/store";
 import {
@@ -160,6 +161,10 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
   header,
 }) => {
   const { dictionary: dict } = useDictionary();
+  // Which input is in hand right now, not which the device has: a hybrid
+  // machine gets the hover badge under a mouse and the trash button under a
+  // finger, because the hook re-reads it on every pointerdown.
+  const isTouch = useIsTouch();
   const entries = useStore(referenceStore, (s) => s.entries);
   const activeId = useStore(referenceStore, (s) => s.activeReferenceId);
   const isLoading = useStore(referenceStore, (s) => s.isLoading);
@@ -371,7 +376,7 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
               aria-label={entry.name}
               aria-pressed={entry.id === activeId}
               className={cn(
-                "block h-10 w-10 overflow-hidden rounded-md transition-all",
+                "block h-10 w-10 cursor-pointer overflow-hidden rounded-md transition-all",
                 entry.id === activeId
                   ? "ring-2 ring-blue-600 dark:ring-blue-500"
                   : "opacity-80 hover:opacity-100",
@@ -387,23 +392,23 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
               )}
             </button>
             {/* Corner badge, not a full-tile overlay: an overlay sits above the
-                select button and swallows its clicks, so every tap on a
+                select button and swallows its clicks, so every press on a
                 thumbnail would remove it instead of selecting it. Staying in
                 the corner keeps the rest of the tile a select target, and it
                 stays inside the tile's box because the strip scrolls and
-                anything hanging outside gets clipped. It reveals on hover for
-                a mouse, and on the already-selected tile for touch. */}
+                anything hanging outside gets clipped. It's sized to be aimed
+                at rather than squinted at, which is most of the tile's top
+                edge — the select target that costs is the top-right corner,
+                and nothing needs to be clicked there. Revealed on hover for a
+                mouse; touch gets the trash button below instead. */}
             <button
               type="button"
               onClick={() => void handleDelete(entry)}
               aria-label={dict.reference.remove}
               title={dict.reference.remove}
-              className={cn(
-                "absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-bl-md rounded-tr-md bg-black/65 text-white opacity-0 transition-opacity hover:bg-black/80 focus-visible:opacity-100 group-hover/thumb:opacity-100",
-                entry.id === activeId && "pointer-coarse:opacity-100",
-              )}
+              className="pointer-events-none absolute right-0 top-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-bl-md rounded-tr-md bg-black/65 text-white opacity-0 transition-[opacity,background-color] hover:bg-black/85 focus-visible:pointer-events-auto focus-visible:opacity-100 group-hover/thumb:pointer-events-auto group-hover/thumb:opacity-100"
             >
-              <Cross1Icon className="h-3 w-3" />
+              <Cross1Icon className="h-3.5 w-3.5" />
             </button>
           </div>
         ))}
@@ -414,7 +419,7 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
           disabled={importing}
           aria-label={dict.reference.add}
           title={atLimit ? limitMessage : dict.reference.add}
-          className="group flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-md border border-dashed border-neutral-400 text-neutral-500 transition-colors hover:border-blue-600 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-400"
+          className="group flex h-10 w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-md border border-dashed border-neutral-400 text-neutral-500 transition-colors hover:border-blue-600 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-400"
         >
           <PlusIcon className="h-4 w-4 transition-colors group-hover:text-blue-600" />
         </button>
@@ -424,6 +429,11 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
         <ReferenceViewport
           entry={active}
           onPick={handlePick}
+          // Touch has no hover to reveal the badge on a thumbnail, and a badge
+          // standing there permanently would sit on the one spot a finger aims
+          // at. So removal moves into the viewport's control column, under the
+          // zoom buttons, acting on the image it sits on.
+          onRemove={isTouch ? () => void handleDelete(active) : undefined}
           className="min-h-40 flex-1"
         />
       ) : (
