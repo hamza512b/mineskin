@@ -441,5 +441,8 @@
     "share": "Compartilhar vídeo",
     "download": "Baixar",
     "discard": "Descartar"
+  },
+  "native": {
+    "cameraUsageDescription": "Tire uma foto para usar como imagem de referência e escolher cores dela."
   }
 }

@@ -123,6 +123,8 @@ Use informal second person ("você", never "tu" or "vós"); this is the Brazilia
 | **Zoom** <br><sub>Magnifying the reference photo to pick colors precisely</sub> | zoom | Keep the loanword — it is the Brazilian tech/gaming standard and the file already uses it in prose ('rotacionam e dão zoom no modelo', tutorial.touchDrawModeContent). Never 'ampliação'/'aproximação' as the noun. |
 | **Zoom in / Zoom out** <br><sub>The + and − buttons over a reference image</sub> | Aumentar zoom / Diminuir zoom <br>*(Ampliar / Reduzir)* | Current: reference.zoomIn / reference.zoomOut. Keep the explicit 'zoom' noun so the pair stays symmetrical and unambiguous — bare 'Reduzir' could read as shrinking the image itself. Sentence case, matching the other reference labels. |
 | **Reset zoom** <br><sub>Reset button restoring the default zoom level</sub> | Redefinir zoom | Current: reference.resetZoom. Uses the canonical 'Redefinir' for Reset (see Actions › Reset), not 'Restaurar' or 'Zoom padrão'. |
+| **Camera** <br><sub>The device camera used to capture a reference image (native permission prompt)</sub> | câmera | Brazilian spelling 'câmera' (never EU 'câmara'). Distinct from the 3D viewport camera section above, which only names sub-settings ('Campo de Visão', etc.) and never the bare word. Used in native.cameraUsageDescription. |
+| **Take a photo** <br><sub>Capturing a photo with the device camera to use as a reference image</sub> | Tirar uma foto <br>*(Tire uma foto (imperative))* | 'Tirar foto' is the standard Brazilian collocation. Never 'capturar' — that verb is reserved for 'Captura de tela' (screenshot, see Actions). Keep the noun 'foto', not 'fotografia'. Current: native.cameraUsageDescription. |
 
 ### Actions
 

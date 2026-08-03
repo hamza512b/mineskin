@@ -441,5 +441,8 @@
     "share": "Share video",
     "download": "Download",
     "discard": "Discard"
+  },
+  "native": {
+    "cameraUsageDescription": "Take a photo to use as a reference image for picking colors."
   }
 }

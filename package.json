@@ -12,6 +12,8 @@
     "start": "next start",
     "format": "prettier --write .",
     "lint": "eslint .",
+    "i18n:native": "node scripts/generate-native-strings.mjs",
+    "i18n:native:check": "node scripts/generate-native-strings.mjs --check",
     "cap:copy": "npx cap copy",
     "cap:build": "CAPACITOR_BUILD=true next build && npx cap sync",
     "cap:build:android": "CAPACITOR_BUILD=true next build && npx cap sync android",

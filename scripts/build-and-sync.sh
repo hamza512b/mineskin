@@ -80,6 +80,12 @@ ensure_node_on_path
 echo "build-and-sync.sh: building web app and syncing '$PLATFORM' (node $(node -v))"
 cd "$WEB_DIR"
 
+# Regenerate the native localized strings (iOS InfoPlist.strings / Android
+# native_strings.xml) from src/i18n/locales. These live outside the WebView, so
+# nothing else would catch a dictionary change before it ships. Fails the build
+# if a locale is untranslated or a new .lproj isn't registered in Xcode.
+node scripts/generate-native-strings.mjs
+
 # `cap copy` regenerates the native capacitor.config.json from
 # capacitor.config.ts, which injects server.url from CAP_SERVER_URL — a dev
 # convenience that must never reach a build unintentionally: a CAP_SERVER_URL

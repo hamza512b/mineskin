@@ -129,6 +129,7 @@ The Reference panel lets the user import photos/artwork and tap them to sample c
 | **Remove reference** | إزالة المرجع | reference.remove. Matches the إزالة pattern of feedback.removeScreenshotButtonLabel; keep distinct from حذف (Delete, used for library skins). |
 | **Reference removed** <br><sub>Passive toast confirmation after deleting a reference image, paired with an Undo action (`reference.removed`)</sub> | تمت إزالة المرجع | reference.removed. First "action done" toast in the file — establishes the تمّ/تمت + مصدر passive-confirmation pattern (تمت agrees with the feminine مصدر إزالة) for short post-action toasts, as distinct from the imperative verbs used for buttons/menu actions. Reuses إزالة المرجع from Remove reference above; do not switch to حذف. |
 | **Loading** <br><sub>Reference image still decoding</sub> | جارٍ التحميل | reference.loading. Matches the جارٍ + maṣdar progressive pattern already used by recorder.recording ("جارٍ التسجيل…"). |
+| **Take a photo** <br><sub>Capturing a new photo with the device camera to use as a reference (`native.cameraUsageDescription`)</sub> | التقط صورة <br>*(التقاط صورة — maṣdar form)* | التقاط is the standard verb for capturing a photo and is reserved for that meaning only — never use it for sampling a color off an image (that stays انتقاء, see **Pick a color** above). Use صورة, not لقطة (لقطة شاشة = Screenshot). The captured photo then becomes a صورة مرجعية. |
 | **Zoom** <br><sub>Zooming into the reference photo (`reference.zoomIn`, `reference.zoomOut`, `reference.resetZoom`)</sub> | تكبير / تصغير <br>*(التكبير — the noun for the zoom level)* | Zoom in = تكبير, Zoom out = تصغير: bare maṣdar with no article, per the short action-label rule. Reset zoom = إعادة تعيين التكبير, combining Reset = إعادة تعيين with the definite noun التكبير for the zoom level. Matches tutorial.touchDrawModeContent, which already renders "zoom the model" as تكبيره. Do NOT use تقريب/تبعيد or the transliteration زوم. |
 
 ### Actions
@@ -161,6 +162,7 @@ The Reference panel lets the user import photos/artwork and tap them to sample c
 
 | English | ar | Notes |
 |---|---|---|
+| **Camera** <br><sub>The device's physical camera, in the OS permission prompt (`native.cameraUsageDescription`)</sub> | الكاميرا | Device hardware, NOT the 3D viewport camera whose settings follow in this table (those are labeled by their own terms — مجال الرؤية، سرعة الحركة، التخميد — and never by the bare word camera). Keep الكاميرا with the definite article; do not use آلة التصوير or المصوّرة. |
 | **Field Of View** <br><sub>FOV</sub> | مجال الرؤية | Current detailPanel.fieldOfView = "مجال الرؤية". Matches. |
 | **Movement Speed** | سرعة الحركة | Current detailPanel.movementSpeed = "سرعة الحركة". Matches. |
 | **Damping** <br><sub>Camera inertia damping</sub> | التخميد | Current detailPanel.damping = "التخميد". Matches. |

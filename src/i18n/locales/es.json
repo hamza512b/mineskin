@@ -441,5 +441,8 @@
     "share": "Compartir vídeo",
     "download": "Descargar",
     "discard": "Descartar"
+  },
+  "native": {
+    "cameraUsageDescription": "Haz una foto para usarla como imagen de referencia de la que tomar colores."
   }
 }

@@ -124,6 +124,8 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Zoom** <br><sub>The noun, when a label needs it (reference.resetZoom)</sub> | zoom | Loanword already used in the file (tutorial.touchDrawModeContent: "hacen zoom en el modelo"). Keep "zoom", not the RAE-preferred "zum" and not "ampliación" — "zoom" is what ES users read on image controls. |
 | **Zoom in / Zoom out** <br><sub>The + / − buttons over a reference image (reference.zoomIn / zoomOut)</sub> | Acercar / Alejar | Standard Spain-Spanish button verbs for image zoom controls (same pair Apple/Fotos uses). One word each — these are tiny icon buttons. Do NOT use "Ampliar/Reducir" (reads as resizing the image itself) or "Aumentar/Disminuir zoom" (too long). |
 | **Reset zoom** <br><sub>Reset button over a reference image (reference.resetZoom)</sub> | Restablecer zoom | Uses the canonical Reset verb "Restablecer" (see Actions) + the "zoom" loanword. Not "Reiniciar" — Reset ≠ Restart. |
+| **Take a photo** <br><sub>Shooting a new photo with the device camera to use as a reference (native.cameraUsageDescription)</sub> | Hacer una foto <br>*(Sacar una foto)* | Spain-Spanish canonical: "hacer una foto", never the LatAm "tomar una foto" — "tomar" stays reserved for sampling a color (see **Pick a color**). Noun is "foto", not "fotografía" (too formal for this register). |
+| **Photo** <br><sub>An image shot with the camera, as opposed to an imported file</sub> | foto | Lowercase mid-sentence; feminine (la foto). Distinct from "imagen" (any reference image, imported or shot) — use "imagen" for the generic reference-panel wording. |
 
 ### Actions
 
@@ -157,6 +159,7 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 
 | English | es | Notes |
 |---|---|---|
+| **Camera (device)** <br><sub>The physical device camera, in the OS permission prompt (native.cameraUsageDescription)</sub> | cámara | Feminine (la cámara). Only the hardware camera used to shoot a reference photo — everything else in this table is the 3D viewport camera. Keep permission copy platform-neutral: never name iOS/Android, never repeat the app name (the OS supplies it in the prompt title). |
 | **Field Of View** <br><sub>FOV</sub> | Campo de visión <br>*(Campo de visión (FOV))* | Current detailPanel.fieldOfView = "Campo de Visión". Content matches; sentence-case. Add (FOV) only if the community abbreviation is helpful in context. |
 | **Movement Speed** | Velocidad de movimiento | Current detailPanel.movementSpeed = "Velocidad de Movimiento". Content matches; sentence-case. |
 | **Damping** <br><sub>Camera inertia damping</sub> | Amortiguación <br>*(Inercia)* | Current detailPanel.damping = "Amortiguación". Matches. "Inercia" is a friendlier alt for camera damping but keep "Amortiguación". |

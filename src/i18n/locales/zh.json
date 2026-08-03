@@ -441,5 +441,8 @@
     "share": "分享视频",
     "download": "下载",
     "discard": "放弃"
+  },
+  "native": {
+    "cameraUsageDescription": "拍摄照片作为参考图，以便从中取色。"
   }
 }
