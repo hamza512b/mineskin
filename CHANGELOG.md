@@ -1,3 +1,10 @@
+## 2026-08-05
+
+- Add reference images: import photos or camera shots, pick colors from them, zoom, and see each image's colors.
+- Add drag-and-drop for reference images.
+- Fix toasts being unclickable and off-center while the reference sheet is open.
+- Delay the pixel magnifier so it no longer fires when a touch turns into a pinch.
+
 ## 2026-07-20
 
 I reopened source the project again. Too many changes has happened since but though I did not keep track for all the changes.

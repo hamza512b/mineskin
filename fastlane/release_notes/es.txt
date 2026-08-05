@@ -1,1 +1,6 @@
-Correcciones de errores y mejoras.
+Novedad: imágenes de referencia.
+
+- Añade una foto de tus fotos o haz una con la cámara.
+- Toma colores directamente de la imagen y usa el zoom para dar con el píxel exacto.
+- Consulta de un vistazo los colores de cada imagen.
+- Correcciones de errores y pequeñas mejoras.
