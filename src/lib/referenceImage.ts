@@ -337,21 +337,3 @@ export function samplePixel(
   if (data[3] === 0) return null;
   return rgbToHex(data[0], data[1], data[2]);
 }
-
-/** Merge palettes across references, preserving order and dropping repeats. */
-export function mergePalettes(palettes: string[][]): string[] {
-  const seen = new Set<string>();
-  const merged: string[] = [];
-  // Round-robin rather than concatenating, so one image with a rich palette
-  // can't push every other reference's colors off the end of the strip.
-  const longest = palettes.reduce((max, p) => Math.max(max, p.length), 0);
-  for (let i = 0; i < longest; i++) {
-    for (const palette of palettes) {
-      const color = palette[i];
-      if (!color || seen.has(color)) continue;
-      seen.add(color);
-      merged.push(color);
-    }
-  }
-  return merged;
-}

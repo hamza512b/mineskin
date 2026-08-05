@@ -116,9 +116,8 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 
 | English | zh | Notes |
 |---|---|---|
-| **Reference image** <br><sub>Imported photo/artwork users tap to sample colors from</sub> | 参考图 <br>*(参考图片)* | toolbar.reference & reference.title=参考图. 参考图 is the established Chinese art/design term (shorter than 参考图片, fits toolbar and panel titles). Keep it singular in Chinese even when English says "Reference images". Compounds: 添加参考图 (add), 移除参考图 (remove), 全部参考图 (all references). |
+| **Reference image** <br><sub>Imported photo/artwork users tap to sample colors from</sub> | 参考图 <br>*(参考图片)* | toolbar.reference & reference.title=参考图. 参考图 is the established Chinese art/design term (shorter than 参考图片, fits toolbar and panel titles). Keep it singular in Chinese even when English says "Reference images". Compounds: 添加参考图 (add), 移除参考图 (remove). |
 | **Pick a color (from an image)** <br><sub>Eyedropper sampling off a reference</sub> | 取色 | reference.emptyState / pickFromImage use 从中取色 / 松开即可取色. 取色 is the community verb for eyedropper sampling; keeps 颜色选择器 (Color picker) free for the HSV tool and matches its alternative 取色器. Avoid 吸取颜色 for consistency. |
-| **This image / All references** <br><sub>Toggle switching the swatch strip between the active image's palette and the merged palette</sub> | 此图片 / 全部参考图 | reference.thisImage=此图片, reference.allReferences=全部参考图. Paired toggle labels — keep both forms locked so the pair reads symmetrically; the matching headings are 此图片中的颜色 / 全部参考图中的颜色. |
 | **Zoom** <br><sub>Scaling the reference image in/out to sample colors precisely</sub> | 缩放 | The noun/concept; used only in compounds today (reference.resetZoom=重置缩放, pairing with Reset=重置). Do not use 变焦 (camera lens) or 放大倍数. |
 | **Zoom in / Zoom out** <br><sub>+ and − icon buttons overlaid on the reference image (aria-labels/tooltips)</sub> | 放大 / 缩小 | reference.zoomIn=放大, reference.zoomOut=缩小. Standard Chinese UI pair for image zoom controls; keep them as bare 2-character verbs on these icon buttons — do not expand to 放大图片 / 缩小图片. |
 

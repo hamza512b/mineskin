@@ -380,10 +380,7 @@
     "zoomIn": "放大",
     "zoomOut": "缩小",
     "resetZoom": "重置缩放",
-    "imageColors": "此图片中的颜色",
-    "allColors": "全部参考图中的颜色",
-    "thisImage": "此图片",
-    "allReferences": "全部参考图"
+    "imageColors": "此图片中的颜色"
   },
   "onboarding": {
     "welcomeTitle": "欢迎来到 MineSkin",

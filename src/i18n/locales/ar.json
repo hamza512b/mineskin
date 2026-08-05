@@ -380,10 +380,7 @@
     "zoomIn": "تكبير",
     "zoomOut": "تصغير",
     "resetZoom": "إعادة تعيين التكبير",
-    "imageColors": "ألوان هذه الصورة",
-    "allColors": "ألوان كل المراجع",
-    "thisImage": "هذه الصورة",
-    "allReferences": "كل المراجع"
+    "imageColors": "ألوان هذه الصورة"
   },
   "onboarding": {
     "welcomeTitle": "مرحبًا بك في MineSkin",

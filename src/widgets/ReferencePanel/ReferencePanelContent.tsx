@@ -19,11 +19,7 @@ import {
   referenceStore,
   type ReferenceEntry,
 } from "@/store/referenceStore";
-import {
-  MAX_REFERENCES,
-  isAcceptedImageType,
-  mergePalettes,
-} from "@/lib/referenceImage";
+import { MAX_REFERENCES, isAcceptedImageType } from "@/lib/referenceImage";
 import ReferenceViewport from "./ReferenceViewport";
 
 /** Object URLs for filmstrip thumbnails, revoked when an entry goes away. */
@@ -172,7 +168,6 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
   // and rgbToHex emits uppercase, so these compare directly.
   const paintColor = useRendererStore((s) => s.paintColor);
 
-  const [showAllPalettes, setShowAllPalettes] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnails = useThumbnailUrls(entries);
@@ -182,10 +177,7 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
     [entries, activeId],
   );
 
-  const palette = useMemo(() => {
-    if (showAllPalettes) return mergePalettes(entries.map((e) => e.palette));
-    return active?.palette ?? [];
-  }, [showAllPalettes, entries, active]);
+  const palette = active?.palette ?? [];
 
   const addFiles = useCallback(
     async (files: (File | Blob)[]) => {
@@ -471,21 +463,8 @@ const ReferencePanelContent: React.FC<ReferencePanelContentProps> = ({
         <div className="shrink-0">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="text-xs text-neutral-500 dark:text-neutral-400">
-              {showAllPalettes
-                ? dict.reference.allColors
-                : dict.reference.imageColors}
+              {dict.reference.imageColors}
             </span>
-            {entries.length > 1 && (
-              <button
-                type="button"
-                onClick={() => setShowAllPalettes((v) => !v)}
-                className="cursor-pointer text-xs text-blue-600 hover:underline dark:text-blue-400"
-              >
-                {showAllPalettes
-                  ? dict.reference.thisImage
-                  : dict.reference.allReferences}
-              </button>
-            )}
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(28px,1fr))] gap-2">
             {palette.map((color) => (

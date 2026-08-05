@@ -380,10 +380,7 @@
     "zoomIn": "Aumentar zoom",
     "zoomOut": "Diminuir zoom",
     "resetZoom": "Redefinir zoom",
-    "imageColors": "Cores desta imagem",
-    "allColors": "Cores de todas as referências",
-    "thisImage": "Esta imagem",
-    "allReferences": "Todas as referências"
+    "imageColors": "Cores desta imagem"
   },
   "onboarding": {
     "welcomeTitle": "Bem-vindo ao MineSkin",

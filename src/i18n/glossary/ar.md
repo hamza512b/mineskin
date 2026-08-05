@@ -114,7 +114,7 @@ Address the user directly in the second person masculine singular (the neutral M
 | **Lightness** | الإضاءة <br>*(السطوع)* | Current colorPicker.lightness = "السطوع" — but السطوع is also used for Brightness (surfaceBrightness/overallBrightness), causing overlap. Recommend الإضاءة for the HSL Lightness component to keep it distinct from Brightness = السطوع. Flag: current file conflates the two. |
 | **Value** <br><sub>HSV value component</sub> | القيمة | Current colorPicker.saturationValueSelector uses "القيمة" (HSV value). Matches. |
 | **Hex Code** | كود Hex <br>*(الكود السداسي)* | Current colorPicker.hexCode = "كود Hex". Matches (keep Hex in Latin). الكود السداسي is a fully-Arabic alternative. |
-| **Swatch** <br><sub>A single color chip in a palette strip</sub> | عيّنة لون <br>*(عيّنة)* | No visible string yet (the swatch strip is labeled by `reference.imageColors` / `reference.allColors`). Use عيّنة لون if a swatch ever needs a label; do not use مربع أو رقعة. |
+| **Swatch** <br><sub>A single color chip in a palette strip</sub> | عيّنة لون <br>*(عيّنة)* | No visible string yet (the swatch strip is labeled by `reference.imageColors`). Use عيّنة لون if a swatch ever needs a label; do not use مربع أو رقعة. |
 
 ### Reference
 
@@ -124,7 +124,6 @@ The Reference panel lets the user import photos/artwork and tap them to sample c
 |---|---|---|
 | **Reference** <br><sub>Panel title (`reference.title`)</sub> | المرجع | Standalone panel heading, so it takes the definite article per the register rules. Keep مرجع as the single noun for an imported source image everywhere in this panel. |
 | **Reference image** <br><sub>An imported source image (`toolbar.reference`, `reference.add`, `reference.pickFromImage`)</sub> | صورة مرجعية <br>*(الصور المرجعية — plural)* | toolbar.reference = "الصور المرجعية", reference.add = "إضافة صورة مرجعية". Indefinite صورة مرجعية when referring to one image; الصور المرجعية for the collection. Do NOT use صورة مرجع or صورة استرشادية. |
-| **References** <br><sub>All imported reference images (`reference.allColors`, `reference.allReferences`)</sub> | المراجع <br>*(كل المراجع)* | reference.allReferences = "كل المراجع", allColors = "ألوان كل المراجع". مرجع/مراجع is the short form of صورة مرجعية used once the panel context is established. |
 | **Pick a color** <br><sub>Sampling a color off the reference image</sub> | انتقاء لون | Uses the same root as منتقي الألوان (Color picker) — keep انتقى/انتقاء for sampling, not اختيار (generic choosing) or التقاط. |
 | **Remove reference** | إزالة المرجع | reference.remove. Matches the إزالة pattern of feedback.removeScreenshotButtonLabel; keep distinct from حذف (Delete, used for library skins). |
 | **Reference removed** <br><sub>Passive toast confirmation after deleting a reference image, paired with an Undo action (`reference.removed`)</sub> | تمت إزالة المرجع | reference.removed. First "action done" toast in the file — establishes the تمّ/تمت + مصدر passive-confirmation pattern (تمت agrees with the feminine مصدر إزالة) for short post-action toasts, as distinct from the imperative verbs used for buttons/menu actions. Reuses إزالة المرجع from Remove reference above; do not switch to حذف. |
