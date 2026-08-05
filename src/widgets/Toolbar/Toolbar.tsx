@@ -11,6 +11,7 @@ import Dropdown, { DropdownItem } from "../../components/Dropdown";
 import {
   AnimationIcon,
   ColorPickerIcon,
+  ReferenceImageIcon,
   CursorFollowIcon,
   GearIcon,
   GridIcon,
@@ -68,6 +69,8 @@ interface FloatingToolbarProps {
   undoCount: number;
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
+  referenceOpen: boolean;
+  setReferenceOpen: (open: boolean) => void;
   getUniqueColors: () => string[];
 
   // Animation props (only used in Preview mode)
@@ -92,6 +95,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   undoCount,
   settingsOpen,
   setSettingsOpen,
+  referenceOpen,
+  setReferenceOpen,
   getUniqueColors,
   currentAnimation = null,
   onAnimationSelect,
@@ -177,6 +182,26 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                       active={colorPickerActive}
                     >
                       <ColorPickerIcon className="h-full w-full" />
+                    </ToolButton>
+                  </Hint>
+
+                  {/* Reference images sit with the color tools because that's
+                      what they're for — sourcing colors, not editing the skin. */}
+                  <Hint
+                    side={tooltipSide}
+                    text={
+                      <>
+                        {dict.toolbar.reference}{" "}
+                        <span className="text-neutral-400">(R)</span>
+                      </>
+                    }
+                  >
+                    <ToolButton
+                      label={dict.toolbar.reference}
+                      onClick={() => setReferenceOpen(!referenceOpen)}
+                      active={referenceOpen}
+                    >
+                      <ReferenceImageIcon className="h-full w-full" />
                     </ToolButton>
                   </Hint>
                 </div>

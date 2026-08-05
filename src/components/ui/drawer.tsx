@@ -8,6 +8,31 @@ import { cn } from "@/lib/utils";
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+  // vaul honours `modal={false}` itself (no overlay, no outside-dismiss) but
+  // never forwards it to the Radix Dialog it wraps, so the dialog still mounts
+  // a *modal* dismissable layer — and that parks `pointer-events: none` on
+  // <body> for as long as the sheet is open. vaul's own workaround only clears
+  // it once, when its Root mounts, which is long before the sheet ever opens.
+  // The result: everything outside the sheet goes dead — the canvas the
+  // non-modal sheet exists to keep paintable, and any toast that fires from
+  // inside it (the reference-image undo). Radix writes the style from an effect
+  // that runs a commit later, once its content node is attached, so a single
+  // assignment here would just be overwritten — watch the attribute instead and
+  // undo it for as long as the sheet is open.
+  const nonModalOpen = props.modal === false && props.open === true;
+  React.useEffect(() => {
+    if (!nonModalOpen) return;
+    const body = document.body;
+    const reenable = () => {
+      if (body.style.pointerEvents === "none")
+        body.style.pointerEvents = "auto";
+    };
+    reenable();
+    const observer = new MutationObserver(reenable);
+    observer.observe(body, { attributes: true, attributeFilter: ["style"] });
+    return () => observer.disconnect();
+  }, [nonModalOpen]);
+
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 

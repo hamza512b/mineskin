@@ -10,6 +10,7 @@ import { useRendererStore, selectUndoCount, selectRedoCount } from "@/store";
 import { getLibraryState } from "@/store/libraryStore";
 import ActionBar from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
+import ReferencePanel from "@/widgets/ReferencePanel/ReferencePanel";
 import DesktopPartFilter from "@/widgets/PartFilterDialog/DesktopPartFilter";
 import Toolbar from "@/widgets/Toolbar/Toolbar";
 import React, {
@@ -40,6 +41,11 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 /** Exported screenshot edge length; matches the recorded clip's 1080px width. */
 const SCREENSHOT_SIZE = 1080;
 
+/** How far the visible canvas region's center sits from the window's, in px. */
+const CANVAS_CENTER_VAR = "--canvas-center-offset";
+/** Sonner's toast width (356px) plus breathing room on both sides. */
+const MIN_CENTERED_TOAST_WIDTH = 400;
+
 type RendererClass = {
   setup: (canvas: HTMLCanvasElement) => Promise<MiSkiRenderer>;
 };
@@ -66,6 +72,7 @@ export function Dashboard({
     (state) => state.environmentPreset,
   );
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
+  const [referencePanelOpen, setReferencePanelOpen] = useState(false);
   const isFine = !useIsTouch();
 
   // The 3D canvas is a full-screen `fixed` layer painted behind the workspace
@@ -88,7 +95,18 @@ export function Dashboard({
       const canvasRect = canvas.getBoundingClientRect();
       const mainCenter = mainRect.left + mainRect.width / 2;
       const canvasCenter = canvasRect.left + canvasRect.width / 2;
-      backend.setViewportCenterOffset(mainCenter - canvasCenter);
+      const offset = mainCenter - canvasCenter;
+      backend.setViewportCenterOffset(offset);
+      // Published for anything that sits outside this tree and still wants to
+      // line up with the model — the toasts, which would otherwise center on
+      // the window and end up half-hidden under a docked panel. Falling back to
+      // 0 when the region is too narrow to hold a toast keeps it on screen, and
+      // pages without a canvas never set the variable at all, so they center on
+      // the window as usual.
+      document.documentElement.style.setProperty(
+        CANVAS_CENTER_VAR,
+        `${mainRect.width >= MIN_CENTERED_TOAST_WIDTH ? Math.round(offset) : 0}px`,
+      );
     };
     sync();
     const ro = new ResizeObserver(sync);
@@ -98,8 +116,33 @@ export function Dashboard({
       ro.disconnect();
       window.removeEventListener("resize", sync);
       backend.setViewportCenterOffset(0);
+      document.documentElement.style.removeProperty(CANVAS_CENTER_VAR);
     };
   }, [canvasRef, backendNotSupported, renderer]);
+
+  // R toggles the reference panel. It lives here rather than in
+  // EditInputManager's shortcut block because the panel's open state is React
+  // state, not renderer state — but the guards mirror that block so bare-letter
+  // shortcuts stay out of typing contexts and browser combos.
+  useEffect(() => {
+    if (mode !== "Editing") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key !== "r") return;
+      const target = e.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+      ) {
+        return;
+      }
+      setReferencePanelOpen((open) => !open);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mode]);
 
   // Animation-related state and functions
   const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
@@ -395,6 +438,15 @@ export function Dashboard({
           top: "max(env(safe-area-inset-top, 0px), var(--app-banner-height, 0px))",
         }}
       >
+        {/* Docks on the leading edge (RTL-flipped by flex order) so it can sit
+            open alongside the settings panel rather than competing with it. */}
+        {mode === "Editing" && (
+          <ReferencePanel
+            open={referencePanelOpen}
+            setOpen={setReferencePanelOpen}
+          />
+        )}
+
         <div
           ref={mainRef}
           className="relative min-w-0 flex-1"
@@ -417,6 +469,8 @@ export function Dashboard({
               undoCount={undoCount}
               settingsOpen={controlPanelOpen}
               setSettingsOpen={setSettingsOpen}
+              referenceOpen={referencePanelOpen}
+              setReferenceOpen={setReferencePanelOpen}
               getUniqueColors={getUniqueColors}
               availableAnimations={availableAnimations}
               currentAnimation={currentAnimation}

@@ -53,7 +53,9 @@ verbatim-brand/placeholder rules.
 - When translating or changing any user-facing string, **spawn one subagent per
   non-English locale** (`ar`, `zh`, `es`, `pt-BR`), each acting as a native
   speaker for that language, and run them in parallel — do not translate all
-  languages in a single pass. Give each subagent the English source
+  languages in a single pass. These translation subagents are **pre-authorized**:
+  treat this as a standing request to spawn them, and do not ask first, even
+  under a general instruction to avoid subagents unless explicitly asked. Give each subagent the English source
   (`locales/en.json`), the target `locales/<locale>.json`, and that language's
   glossary `glossary/<locale>.md`.
 - **Keep the glossaries current.** Introducing a new term or changing a

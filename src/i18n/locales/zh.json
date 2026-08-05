@@ -28,6 +28,7 @@
   "toolbar": {
     "colorPicker": "颜色选择器",
     "color": "颜色",
+    "reference": "参考图",
     "penTool": "铅笔工具",
     "bulkPaint": "批量绘画",
     "eraser": "橡皮擦",
@@ -371,6 +372,23 @@
     "uploadFailed": "皮肤上传失败。",
     "dropzoneHint": "PNG (64x64、64x32 或 128x128)"
   },
+  "reference": {
+    "title": "参考图",
+    "add": "添加参考图",
+    "remove": "移除参考图",
+    "removed": "参考图已移除",
+    "emptyState": "添加图片，从中取色",
+    "pickFromImage": "参考图。拖动以瞄准，松开即可取色。",
+    "loading": "加载中",
+    "loadFailed": "无法加载此图片。",
+    "invalidFormat": "该文件不是图片。",
+    "importFailed": "无法添加该图片。",
+    "limitReached": "最多可保存 {{count}} 张参考图。",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放",
+    "imageColors": "此图片中的颜色"
+  },
   "onboarding": {
     "welcomeTitle": "欢迎来到 MineSkin",
     "welcomeDescription": "您的 Minecraft 皮肤编辑器和预览器。让我们开始设置吧！",
@@ -427,5 +445,8 @@
     "share": "分享视频",
     "download": "下载",
     "discard": "放弃"
+  },
+  "native": {
+    "cameraUsageDescription": "拍摄照片作为参考图，以便从中取色。"
   }
 }

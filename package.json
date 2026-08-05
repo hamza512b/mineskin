@@ -12,6 +12,8 @@
     "start": "next start",
     "format": "prettier --write .",
     "lint": "eslint .",
+    "i18n:native": "node scripts/generate-native-strings.mjs",
+    "i18n:native:check": "node scripts/generate-native-strings.mjs --check",
     "cap:copy": "npx cap copy",
     "cap:build": "CAPACITOR_BUILD=true next build && npx cap sync",
     "cap:build:android": "CAPACITOR_BUILD=true next build && npx cap sync android",
@@ -21,11 +23,15 @@
     "version:bump": "node scripts/bump-version.mjs",
     "release:ios": "fastlane ios beta",
     "release:ios:prod": "fastlane ios release",
+    "release:ios:prod:review": "fastlane ios release_review",
     "release:android": "fastlane android beta",
     "release:android:prod": "fastlane android release",
+    "release:android:prod:review": "fastlane android release_review",
     "release:beta": "fastlane ios beta && fastlane android beta",
     "release:beta:ios": "fastlane ios beta",
-    "release:beta:android": "fastlane android beta"
+    "release:beta:android": "fastlane android beta",
+    "release:prod": "fastlane ios release && fastlane android release",
+    "release:prod:review": "fastlane ios release_review && fastlane android release_review"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.2",

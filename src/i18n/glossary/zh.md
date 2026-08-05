@@ -15,8 +15,9 @@
 | `{{shortcuts}}` | Keyboard shortcut hint (e.g. Ctrl+Z / Ctrl+Y) |
 | `{{language}}` | A language name, injected into the language-detection prompt |
 | `{{date}}` | The promo end date |
+| `{{count}}` | A number (e.g. the maximum reference-image count) — keep Western digits, add a Chinese measure word after it (`{{count}} 张参考图`) |
 
-Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` (366 keys) and valid 2-space JSON.
+Never change `languageSwitcher.*` endonyms. Keep files at key parity with `en.json` and valid 2-space JSON.
 
 ## Voice & register
 
@@ -109,6 +110,16 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 | **Lightness** | 亮度 | Current colorPicker.lightness=亮度. Matches. Distinguish from Value=明度 (HSV). |
 | **Value** <br><sub>HSV value component</sub> | 明度 | Current saturationValueSelector uses 明度. Matches; correctly distinct from Lightness=亮度. |
 | **Hex Code** | 十六进制代码 <br>*(十六进制)* | Current colorPicker.hexCode=十六进制代码. Matches. |
+| **Swatch** <br><sub>One color chip in the palette strip</sub> | 色块 | Not a visible string today, but the term to use if a swatch label is ever added; 调色板 stays the container (Palette), 色块 the individual chip. |
+
+### Reference images
+
+| English | zh | Notes |
+|---|---|---|
+| **Reference image** <br><sub>Imported photo/artwork users tap to sample colors from</sub> | 参考图 <br>*(参考图片)* | toolbar.reference & reference.title=参考图. 参考图 is the established Chinese art/design term (shorter than 参考图片, fits toolbar and panel titles). Keep it singular in Chinese even when English says "Reference images". Compounds: 添加参考图 (add), 移除参考图 (remove). |
+| **Pick a color (from an image)** <br><sub>Eyedropper sampling off a reference</sub> | 取色 | reference.emptyState / pickFromImage use 从中取色 / 松开即可取色. 取色 is the community verb for eyedropper sampling; keeps 颜色选择器 (Color picker) free for the HSV tool and matches its alternative 取色器. Avoid 吸取颜色 for consistency. |
+| **Zoom** <br><sub>Scaling the reference image in/out to sample colors precisely</sub> | 缩放 | The noun/concept; used only in compounds today (reference.resetZoom=重置缩放, pairing with Reset=重置). Do not use 变焦 (camera lens) or 放大倍数. |
+| **Zoom in / Zoom out** <br><sub>+ and − icon buttons overlaid on the reference image (aria-labels/tooltips)</sub> | 放大 / 缩小 | reference.zoomIn=放大, reference.zoomOut=缩小. Standard Chinese UI pair for image zoom controls; keep them as bare 2-character verbs on these icon buttons — do not expand to 放大图片 / 缩小图片. |
 
 ### Actions
 
@@ -152,6 +163,8 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 | **Field Of View** <br><sub>FOV</sub> | 视野 <br>*(视场角 / FOV)* | Current detailPanel.fieldOfView=视野. Matches. |
 | **Movement Speed** | 移动速度 | Current detailPanel.movementSpeed=移动速度. Matches. |
 | **Damping** <br><sub>Camera inertia damping</sub> | 阻尼 | Current detailPanel.damping=阻尼. Matches (camera inertia). |
+| **Camera** <br><sub>The physical device camera (native permission prompt, native.cameraUsageDescription) — NOT the 3D viewport camera above</sub> | 相机 | Use 相机 only for the hardware camera; the 3D viewport camera has no standalone label (it appears via 视野 / 移动速度 / 阻尼). Avoid 摄像头 (webcam register) and 照相机 (dated). Platform-neutral: never add iOS/Android to the permission text. |
+| **Take a photo** <br><sub>Capture a photo with the device camera to use as a reference image</sub> | 拍摄照片 <br>*(拍照)* | native.cameraUsageDescription=拍摄照片作为参考图，以便从中取色。 Prefer the full 拍摄照片 in permission/purpose sentences; bare 拍照 is acceptable only on a short button label. Chain with the locked terms 参考图 (Reference image) and 取色 (Pick a color). |
 
 ### Light
 

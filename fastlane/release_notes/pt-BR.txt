@@ -1,1 +1,6 @@
-Correções de bugs e melhorias.
+Novidade: imagens de referência.
+
+- Adicione uma foto da sua galeria ou tire uma nova com a câmera.
+- Escolha cores direto da imagem e use o zoom para acertar o pixel exato.
+- Veja de relance as cores de cada imagem.
+- Correções de bugs e pequenas melhorias.

@@ -504,7 +504,7 @@ const createRendererStore = () =>
       // IndexedDB
       initializeIndexDB: () => {
         return new Promise<IDBDatabase>((resolve, reject) => {
-          const request = indexedDB.open("MineskinSkin", 2);
+          const request = indexedDB.open("MineskinSkin", 3);
 
           request.onerror = (event) => {
             console.error("Error opening IndexedDB:", event);
@@ -536,6 +536,9 @@ const createRendererStore = () =>
             }
             if (oldVersion < 2) {
               db.createObjectStore("library", { keyPath: "id" });
+            }
+            if (oldVersion < 3) {
+              db.createObjectStore("references", { keyPath: "id" });
             }
           };
         });
