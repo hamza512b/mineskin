@@ -127,9 +127,10 @@ def ensure_java_home
   home
 end
 
-# Production releases submit straight to store review, so gate them behind an
-# explicit confirmation before anything is built or uploaded. Non-interactive
-# runs (e.g. CI) must opt in with RELEASE_CONFIRM=yes.
+# Production lanes burn a build/version number on the stores — and the `*_review`
+# lanes go straight to store review — so gate them behind an explicit
+# confirmation before anything is built or uploaded. Non-interactive runs
+# (e.g. CI) must opt in with RELEASE_CONFIRM=yes.
 def confirm_release!(prompt)
   return if ENV["RELEASE_CONFIRM"] == "yes"
   unless UI.interactive?
@@ -198,6 +199,52 @@ def archive_ios
   )
 end
 
+# Both production iOS lanes archive the same build and push the same localized
+# "What's New" to App Store Connect. The ONLY difference is whether the version
+# is also submitted to App Store review.
+def ship_ios(api_key:, submit_for_review:)
+  stage_ios_release_notes(release_notes_by_lang)
+  archive_ios
+  upload_to_app_store(
+    api_key: api_key,
+    submit_for_review: submit_for_review,
+    automatic_release: false, # after approval, press "Release" manually in App Store Connect
+    # Answers the review questions that would otherwise block/prompt the submission.
+    # Adjust if the app ever adds non-exempt encryption or an advertising SDK (IDFA).
+    # Ignored when not submitting.
+    submission_information: {
+      export_compliance_uses_encryption: false,
+      add_id_info_uses_idfa: false,
+    },
+    skip_metadata: false,   # push the staged "What's New" note...
+    skip_screenshots: true, # ...but only release_notes.txt exists, so nothing else changes
+    precheck_include_in_app_purchases: false,
+    force: true, # skip the HTML preview confirmation prompt
+  )
+end
+
+# Same deal on Android: identical AAB + changelog either way. Submitting means a
+# "completed" release (goes live at 100% once approved); not submitting leaves a
+# draft release on the production track with the edit committed but not sent for
+# review — Play rejects a draft whose changes were sent for review, so the two
+# flags always move together.
+def ship_android(submit_for_review:)
+  ensure_java_home
+  stage_android_changelog(release_notes_by_lang)
+  gradle(project_dir: "android", task: "clean")
+  gradle(project_dir: "android", task: "bundle", build_type: "Release")
+  upload_to_play_store(
+    track: "production",
+    aab: AAB_PATH,
+    release_status: submit_for_review ? "completed" : "draft",
+    changes_not_sent_for_review: !submit_for_review,
+    skip_upload_metadata: true,
+    skip_upload_changelogs: false, # upload the staged changelog
+    skip_upload_images: true,
+    skip_upload_screenshots: true,
+  )
+end
+
 platform :ios do
   desc "Archive and upload a new build to TestFlight"
   lane :beta do
@@ -212,27 +259,17 @@ platform :ios do
     UI.success("iOS build uploaded to TestFlight ✈️")
   end
 
-  desc "Archive, upload to the App Store, and submit for review (release manually after approval)"
+  desc "Archive and upload to App Store Connect WITHOUT submitting for review"
   lane :release do
+    confirm_release!("Upload MineSkin #{ios_marketing_version || "(unknown version)"} to App Store Connect? It will NOT be sent for review.")
+    ship_ios(api_key: asc_api_key, submit_for_review: false)
+    UI.success("iOS build uploaded to App Store Connect — submit it for review from there when ready 🍎")
+  end
+
+  desc "Archive, upload to the App Store, and submit for review (release manually after approval)"
+  lane :release_review do
     confirm_release!("Submit MineSkin #{ios_marketing_version || "(unknown version)"} to the App Store and send it for review?")
-    api_key = asc_api_key
-    stage_ios_release_notes(release_notes_by_lang)
-    archive_ios
-    upload_to_app_store(
-      api_key: api_key,
-      submit_for_review: true,   # send the build to App Store review
-      automatic_release: false,  # after approval, press "Release" manually in App Store Connect
-      # Answers the review questions that would otherwise block/prompt the submission.
-      # Adjust if the app ever adds non-exempt encryption or an advertising SDK (IDFA).
-      submission_information: {
-        export_compliance_uses_encryption: false,
-        add_id_info_uses_idfa: false,
-      },
-      skip_metadata: false,   # push the staged "What's New" note...
-      skip_screenshots: true, # ...but only release_notes.txt exists, so nothing else changes
-      precheck_include_in_app_purchases: false,
-      force: true, # skip the HTML preview confirmation prompt
-    )
+    ship_ios(api_key: asc_api_key, submit_for_review: true)
     UI.success("iOS build uploaded to App Store Connect and submitted for review 🍎")
   end
 end
@@ -255,23 +292,17 @@ platform :android do
     UI.success("Android AAB uploaded to Play open-testing track 🤖")
   end
 
-  desc "Build a signed AAB, upload to the Play production track, and submit for review"
+  desc "Build a signed AAB and upload it as a draft on the Play production track (no review)"
   lane :release do
+    confirm_release!("Upload MineSkin #{android_version_name || "(unknown version)"} as a draft on the Google Play production track? It will NOT be sent for review.")
+    ship_android(submit_for_review: false)
+    UI.success("Android AAB uploaded as a Play production draft — send it for review from the Play Console when ready 🤖")
+  end
+
+  desc "Build a signed AAB, upload to the Play production track, and submit for review"
+  lane :release_review do
     confirm_release!("Submit MineSkin #{android_version_name || "(unknown version)"} to Google Play production and send it for review?")
-    ensure_java_home
-    stage_android_changelog(release_notes_by_lang)
-    gradle(project_dir: "android", task: "clean")
-    gradle(project_dir: "android", task: "bundle", build_type: "Release")
-    upload_to_play_store(
-      track: "production",
-      aab: AAB_PATH,
-      release_status: "completed", # send for review; goes live to 100% on approval
-      changes_not_sent_for_review: false,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: false, # upload the staged changelog
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-    )
+    ship_android(submit_for_review: true)
     UI.success("Android AAB uploaded to Play production and submitted for review 🤖")
   end
 end
