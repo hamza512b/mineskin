@@ -224,7 +224,7 @@
     "saturationValueSelector": "محدد التشبع والقيمة",
     "hexCode": "كود Hex",
     "invalidHexCode": "كود Hex غير صالح",
-    "tapToConfirm": "انقر للتأكيد",
+    "tapToConfirm": "اضغط للتأكيد",
     "pressEnterToConfirm": "اضغط Enter للتأكيد أو Escape للإلغاء",
     "opacity": "العتامة",
     "opacitySelector": "محدد العتامة"
@@ -379,6 +379,9 @@
     "removed": "تمت إزالة المرجع",
     "emptyState": "أضف صورة لانتقاء الألوان منها",
     "pickFromImage": "صورة مرجعية. اسحب للتصويب، ثم أفلت لانتقاء لون.",
+    "pickFromImageZoomed": "صورة مرجعية مُكبَّرة. اسحب لتحريك الصورة، واضغط لانتقاء لون.",
+    "panHintTouch": "اسحب للتحريك · اضغط للانتقاء",
+    "panHintMouse": "اسحب للتحريك · انقر للانتقاء",
     "loading": "جارٍ التحميل",
     "loadFailed": "تعذّر تحميل هذه الصورة.",
     "invalidFormat": "هذا الملف ليس صورة.",
