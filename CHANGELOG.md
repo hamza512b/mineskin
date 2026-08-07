@@ -1,3 +1,9 @@
+## 2026-08-07
+
+- Drag a zoomed reference image to move it; a press that stays put still picks a color.
+- Pan a reference image sideways with shift + wheel.
+- Stop the pixel magnifier from parking on top of the pixel being picked near the top edge.
+
 ## 2026-08-05
 
 - Add reference images: import photos or camera shots, pick colors from them, zoom, and see each image's colors.

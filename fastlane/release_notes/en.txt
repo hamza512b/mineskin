@@ -1,6 +1,1 @@
-New: reference images.
-
-- Add a photo from your library, or take one with the camera.
-- Pick colors straight from the image, and zoom in for the exact pixel.
-- See the colors of each image at a glance.
-- Bug fixes and small improvements.
+Bug fixes and stability improvements.
