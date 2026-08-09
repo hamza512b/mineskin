@@ -9,6 +9,7 @@ export async function generateStaticParams() {
     { path: ["preview"] },
     { path: ["editor"] },
     { path: ["report-problem"] },
+    { path: ["changelog"] },
   ];
 
   const guides = getAllDocs(["slug"], "guides", [defaultLocale]);

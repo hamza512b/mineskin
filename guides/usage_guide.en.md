@@ -5,7 +5,7 @@ description: "Learn how to use MineSkin PRO - the powerful Minecraft skin editor
 
 ## Overview
 
-MineSkin PRO is a powerful Minecraft skin editor and previewer that runs entirely in your browser. Edit your skins pixel-by-pixel with real-time 3D preview, advanced lighting controls, and professional editing tools.
+MineSkin PRO is a Minecraft skin editor and previewer with a real-time 3D view. It runs entirely on your device — in the browser, or as the iOS and Android app. Paint pixel by pixel directly on the 3D model, keep a library of skins, pick colors from reference images, and export a finished PNG for Minecraft.
 
 ---
 
@@ -13,281 +13,320 @@ MineSkin PRO is a powerful Minecraft skin editor and previewer that runs entirel
 
 ### First-Time Users
 
-When you first open the editor in **Editing Mode**, an interactive tutorial will guide you through the basic features. You can restart this tutorial anytime from the Settings panel.
+In the iOS and Android app, a short welcome flow greets you on first launch so you can set your language and cookie preferences. On the web there's no welcome flow — just a cookie prompt.
+
+Either way, the first time you open **Editor** mode an interactive tutorial walks you through the basics. You can restart it anytime from **Settings → Help → Restart Tutorial**.
 
 ### Quick Start
 
-1. **Upload** a skin using the Upload button (bottom action bar)
-2. Switch between **Preview** and **Editing** modes using the mode selector
-3. Start drawing with the **Pen Tool** (left toolbar)
-4. **Save** your edited skin using the Save button
+1. Open the **Library** from the bottom bar and create a skin — start from a template, upload a PNG, or import one from a Minecraft username.
+2. Pick a color, then choose a brush from the **Brushes** button in the left toolbar.
+3. Paint directly on the 3D model.
+4. Your work saves to the library automatically. To get a PNG out, open the **Library** and choose **Download** on the skin.
 
 ---
 
 ## Modes
 
+Switch modes with the selector in the bottom bar.
+
+### Editor Mode
+
+- All drawing tools, brushes, and reference images
+- Real-time 3D preview while you paint
+- Undo/redo, grid, symmetry
+
 ### Preview Mode
 
 - View your skin in 3D without editing tools
-- Perfect for showcasing and inspecting your work
-- Rotate the camera around the model
-- Upload new skins
-
-### Editing Mode
-
-- Full access to all drawing and editing tools
-- Real-time 3D preview while editing
-- Pixel-perfect precision
-- Undo/redo support
+- Play animations, follow the cursor with the head
+- Take screenshots and record shareable clips
 
 ---
 
-## Drawing Tools
+## Your Skin Library
 
-Access all drawing tools from the **left toolbar** (Editing Mode only).
+Open **Library** from the bottom bar. It holds every skin you've made, with the active one marked.
 
-### Pen Tool (`P`)
+### Creating a Skin
 
-Your primary drawing tool for pixel-by-pixel editing.
+**Library → New Skin** gives you:
 
-- Click on the 3D model to paint individual pixels
-- Uses the currently selected color
-- **Shortcut:** Press `P` to activate
+- **Templates:** Empty, Steve (classic arms), Alex (slim arms)
+- **Import from Minecraft:** enter a Minecraft username to pull that player's current skin
+- **Upload a file:** drag and drop a PNG, or browse for one
 
-### Bulk Paint Tool (`U`)
+Accepted uploads are PNGs sized **64×64**, **64×32** (old format), or **128×128**.
 
-Fill entire sections with a single click.
+### Managing Skins
 
-- Paint connected areas of the same color
-- Great for filling large sections quickly
-- **Shortcut:** Press `U` to activate
+Each skin in the library can be:
 
-### Eraser Tool (`E`)
+- **Renamed** — the name is also used for exported files
+- **Downloaded** — saves a PNG ready to upload to Minecraft
+- **Deleted** — deleting the last skin leaves you with a fresh empty one
 
-Remove pixels from your skin.
+### Where Skins Are Stored
 
-- Click to erase individual pixels
-- Erases from both base and overlay layers when both are visible
-- **Shortcut:** Press `E` to activate
-
-### Variation/Shading Tool (`V`)
-
-Add depth and dimension to your skin.
-
-- Creates color variations for shading effects
-- Adjust intensity in Settings → Paint → Variation Tool Intensity
-- **Shortcut:** Press `V` to activate
+Skins live **locally on your device**, and every edit is saved automatically as you paint — so your work survives a reload. Because the storage is local, clearing your browser or app data will remove them. Download anything you don't want to lose.
 
 ---
 
-## Color Tools
+## Brushes
+
+The **Brushes** button in the left toolbar shows the brush you're currently using. Click it to open the brush panel — a side popover on desktop, a bottom sheet on touch devices.
+
+- **Pen** (`P`) — paints a single pixel per click or drag
+- **Bulk paint** (`U`) — fills a whole face, or a disc of pixels
+- **Shading** (`V`) — darkens or lightens what's already there for depth
+- **Dither** (`D`) — paints a 50% checkerboard of your color over what's underneath
+- **Eraser** (`E`) — clears pixels back to transparent
+
+### Brush Options
+
+Each brush shows its own options in the panel:
+
+- **Bulk paint → Radius:** `0` fills the entire face you clicked; `1`–`8` fills a disc of that many pixels around the hit. With a radius above 0 you can also choose a **Square** or **Circle** shape.
+- **Shading → Intensity:** `1`–`6`, how strong each shading step is.
+- **Eraser → Size:** `0`–`8`, shown as the resulting diameter in pixels.
+
+Pen, shading, and dither always affect a single pixel, so they have no size control.
+
+### Symmetry
+
+**Symmetry** (`M`) mirrors every stroke onto the other side of the model — paint the left arm and the right arm follows. Toggle it from the brush panel. While it's on, a shortcut button appears in the toolbar so you can switch it off without opening the panel.
+
+---
+
+## Color
 
 ### Color Picker
 
-Located at the top of the left toolbar.
+The swatch at the top of the left toolbar opens the full picker:
 
-- Select any color using the color wheel and sliders
-- Choose from a palette of colors already used in your skin
-- Real-time preview of the selected color
+- Pick from the saturation/lightness field and hue slider
+- Type an exact **hex code**
+- Set **opacity**
+- Switch to the **Palette** tab to reuse colors already present in your skin
 
-### Eye Dropper Tool (`I`)
+> Opacity only applies to the **armor (overlay) layer**. The body layer renders solid in-game, so paint there is always fully opaque.
 
-Pick colors directly from your skin.
+### Eye Dropper (`I`)
 
-- Click the Eye Dropper icon to activate
-- Click any pixel on your 3D model to copy its color
-- **Shortcut:** Press `I` to activate
-
----
-
-## History Management
-
-### Undo/Redo
-
-Never lose your work with comprehensive undo/redo support.
-
-- **Undo:** `Ctrl+Z` (Windows/Linux) or `⌘+Z` (Mac)
-- **Redo:** `Ctrl+Shift+Z` or `Ctrl+Y` (Windows/Linux) or `⌘+Shift+Z` (Mac)
-- Visual buttons available in the left toolbar
-- _Note:_ History is not persistent after page reload
+Click the eye dropper button, then click any pixel on the 3D model to make its color your paint color.
 
 ---
 
-## Body Part Visibility
+## Reference Images
 
-Control which parts of your skin are visible during editing.
+Press `R` or click the **Reference images** button to open the reference panel, docked beside the canvas in Editor mode.
 
-### Desktop
-
-Use the **Parts Filter panel** on the right side of the screen to:
-
-- Toggle individual body parts (head, body, arms, legs)
-- Show/hide base layer and overlay layer independently
-- Great for accessing hard-to-reach areas
-
-### Mobile
-
-- Click the **Parts Filter icon** in the toolbar
-- Opens a dialog with all visibility options
-- Same controls as desktop in a mobile-friendly format
-
-### Layers
-
-- **Base Layer:** The main skin texture
-- **Overlay Layer:** The second layer (hats, clothing, etc.)
-- Toggle each part independently for precise editing
+- Add up to **12** images
+- Drag on an image to aim, release to pick that color as your paint color
+- **Zoom in / out / reset** to work with fine detail
+- The **Colors in this image** row shows the image's dominant colors as swatches
+- Remove images you're done with
 
 ---
 
-## Camera Controls
+## Body Parts and Layers
+
+Every skin has two layers:
+
+- **Body** — the base skin texture
+- **Armor** — the overlay layer (hats, jackets, sleeves, pants)
+
+Hide parts you're not working on to reach surfaces that are otherwise buried — for example, hide the armor layer to paint the head underneath it.
+
+- **Desktop:** the parts panel sits in the top-right corner of the canvas
+- **Touch:** tap the **Parts Filter** button in the toolbar to open it as a dialog
+
+You can toggle each part individually (head, torso, arms, legs), or toggle a whole layer at once.
+
+---
+
+## Camera and View
 
 ### Rotation Gizmo
 
-Located in the top-right corner:
+The gizmo in the top-right corner shows which way the camera is facing. Drag it to orbit around the model.
 
-- Click and drag to rotate the camera around your skin
-- Visual representation of current direction of the camera
-- Smooth, intuitive 3D navigation
+### Mouse and Touch
 
-### Mouse/Touch Controls
+- **Drag:** orbit the camera
+- **Scroll / pinch:** zoom in and out
 
-- **Drag:** Rotate the camera
-- **Scroll/Pinch:** Zoom in and out
-- **Right-click drag:** Pan the camera (desktop)
+The camera coasts after you release, with how much it carries controlled by the damping setting.
 
-### Advanced Camera Settings
+### Look at Cursor
 
-Access via Settings panel:
-
-- **Field of View:** Adjust perspective
-- **Movement Speed:** Control camera movement speed
-- **Damping:** Smooth or snappy camera movement
-
-> Fun fact: You can lower the damping to 0 to make the camera move infinitely.
-
----
-
-## Grid Toggle
-
-Enable a visual grid overlay to help with pixel-perfect editing:
-
-- Click the **Grid icon** in the toolbar
-- Helps align pixels and maintain symmetry
-- Available in Editing Mode only
-
----
-
-## Advanced Settings
-
-Access the **Settings panel** by clicking the gear icon in the toolbar.
-
-### Skin Mode
-
-- **Standard:** Regular arm width (4 pixels)
-- **Slim Mode:** Thinner arms (3 pixels), also known as "Alex" model
-- _Switching modes will modify the skin texture_
-
-### Paint Settings (Editing Mode)
-
-- **Variation Tool Intensity:** Control the strength of color variations (0.05 - 1.0)
-
-### Skin Properties
-
-#### Surface Appearance
-
-- **Surface Brightness:** Control diffuse lighting (0 - 1.0)
-- **Shine/Glossiness:** Add specular highlights (0 - 1.0)
-
-#### Position Controls
-
-- **Move Left/Right:** Move the skin horizontally on X-axis (-100 to 100)
-- **Move Forward/Back:** Move the skin vertically on Z-axis (-100 to 100)
-- **Move Up/Down:** Move the skin in the depth on Y-axis (-100 to 100)
-
-#### Rotation Controls
-
-- **Tilt Up/Down:** Rotate the skin around X-axis
-- **Turn Left/Right:** Rotate the skin around Y-axis
-- **Roll:** Rotate the skin around Z-axis
+In Preview mode on desktop, **Look at Cursor** makes the model's head follow your pointer around the screen.
 
 ### Camera Settings
 
-- **Field of View:** Adjust camera perspective
-- **Movement Speed:** Control responsiveness (0 - 0.5)
-- **Damping:** Smooth camera transitions (0 - 1.0)
+Under **Settings → Preferences → Camera**:
 
-### Lighting
+- **Field of View** — how wide the perspective is
+- **Movement Speed** — `0`–`0.5`, how fast the camera responds
+- **Damping** — `0`–`1`, how quickly motion settles
 
-#### Main Light
-
-- **Main Light Intensity:** Control directional light strength (0 - 1.0)
-- **Light Position:**
-  - Left/Right (-10 to 10)
-  - Up/Down (-10 to 10)
-  - Forward/Back (-10 to 10)
-
-#### Ambient Light
-
-- **Overall Brightness:** Set base illumination level (0 - 1.0)
-- Affects all surfaces uniformly
+> Fun fact: set damping to 0 and the camera will keep spinning forever.
 
 ---
 
-## File Management
+## Grid
 
-### Upload Skin
+The **Grid** button in the toolbar (Editor mode) overlays pixel guides on the model, which helps with alignment and symmetry.
 
-- Click the **Upload** button in the bottom action bar
-- Supports standard Minecraft skin formats (64x64 or 64x32)
-- Compatible with both classic and slim models
+---
 
-### Save/Download
+## Animations
 
-- Available in **Editing Mode** only
-- Click the **Save** button to download your edited skin
-- Downloads as a PNG file ready for Minecraft
+In Preview mode, the **Animations** button plays the model through a loop:
+
+- Idle
+- Walking
+- Running
+- Flying
+- Wave
+- Crouch
+- Hit
+
+Choose **No Animation** to return the model to its rest pose.
+
+---
+
+## Screenshots and Clips
+
+Both live in the Preview mode toolbar.
+
+### Screenshot
+
+Captures a square 1080×1080 PNG of the model, with a small MineSkin badge. You get a preview first, then choose to save or share it.
+
+### Record Clip
+
+Records a short vertical (9:16) video of your skin turning, badge included. A progress overlay appears while it renders, and you can cancel at any point. When it's done, preview the clip and then share or download it.
+
+---
+
+## Settings
+
+Open the **Settings** panel with the gear icon in the toolbar. It has three tabs.
+
+### Actions
+
+- **Slim mode** — switches between classic (4px arms) and slim/"Alex" (3px arms). This modifies the skin texture, so you'll be asked to confirm.
+- **Double resolution (128×128)** — doubles the texture resolution. Also a texture-modifying change. Note that **Minecraft (Java Edition) does not support 128×128 skins**.
+- **Flip front to back** — swaps the front and back of every body part so the skin faces the other way.
+
+### Preferences
+
+**Paint** (Editor mode)
+
+- **Variation Tool Intensity** — `1`–`6`
+
+**Skin**
+
+- **Surface Brightness** — `0`–`1`, diffuse lighting on the model
+- **Shine / Glossiness** — `0`–`1`, specular highlights
+- **Move Left/Right**, **Move Forward/Back**, **Move Up/Down** — `-100` to `100`
+- **Tilt Up/Down**, **Turn Left/Right**, **Roll** — full rotation on each axis
+
+> The three position sliders are locked while a 3D environment is active, since the environment places the model for you.
+
+**Camera** — Field of View, Movement Speed, Damping (see [Camera and View](#camera-and-view))
+
+**Light**
+
+- **Main Light** — `0`–`1`, directional light strength
+- **Light Left/Right**, **Light Up/Down**, **Light Forward/Back** — `-10` to `10`
+- **Overall Brightness (Ambient Light)** — `0`–`1`, uniform base illumination
+
+**Environment** — switch between backdrops:
+
+- **Grid** — the default reference grid
+- **Empty** — a plain gradient
+- **Grassland Day** — an outdoor 3D scene
+- **Arena** — a stylised indoor scene
+
+**Language** — English, Arabic, Chinese, Spanish, Portuguese (Brazil)
+
+**Appearance** — System, Light, or Dark theme
+
+### Help
+
+- Restart the interactive tutorial
+- Report a problem (you can attach a screenshot; no account needed)
+- Links to this guide, the changelog, the Discord server, and the GitHub repository
+- Links to the iOS and Android apps
+
+---
+
+## History
+
+- **Undo:** `Ctrl+Z` (Windows/Linux) or `⌘+Z` (Mac)
+- **Redo:** `Ctrl+Shift+Z` / `Ctrl+Y`, or `⌘+Shift+Z` (Mac)
+- Buttons for both sit in the left toolbar
+
+> Undo history is **not** kept across a page reload. Your skin itself is saved, but the steps that got you there are cleared.
 
 ---
 
 ## Keyboard Shortcuts
 
-### Tool Selection
+### Tools
 
-- `P` - Pen Tool
-- `U` - Bulk Paint
-- `E` - Eraser
-- `V` - Variation/Shading
-- `I` - Eye Dropper (Color Picker)
+- `P` — Pen
+- `U` — Bulk paint
+- `V` — Shading
+- `D` — Dither
+- `E` — Eraser
+- `I` — Eye dropper
+- `M` — Toggle symmetry
+- `R` — Toggle the reference panel
 
 ### History
 
-- `Ctrl/⌘ + Z` - Undo
-- `Ctrl/⌘ + Shift + Z` or `Ctrl + Y` - Redo
+- `Ctrl/⌘ + Z` — Undo
+- `Ctrl/⌘ + Shift + Z` or `Ctrl + Y` — Redo
+
+> Single-letter shortcuts are ignored while you're typing in a text field, so entering a hex code or renaming a skin won't switch tools.
+
+---
+
+## Touch and Mobile
+
+The editor is fully touch-enabled:
+
+- Drag to orbit, pinch to zoom
+- The brush panel opens as a bottom sheet — the tool row always stays visible, and the chevron unfolds the color palette, symmetry, and the active brush's settings
+- The parts filter opens as a full dialog
+
+### Draw Mode vs View Mode
+
+On touch devices in Editor mode, a single finger can either paint or move the camera — not both. The **Draw Mode / View Mode** button in the toolbar switches between them:
+
+- **Draw Mode** — one finger paints; two fingers still pinch to zoom
+- **View Mode** — one finger orbits the camera
+
+---
+
+## Apps
+
+MineSkin PRO is also available as a native app on the **App Store** and **Google Play**, and as an installable web app (PWA) with offline support. The editor is the same in all of them.
 
 ---
 
 ## Tips & Best Practices
 
-### Editing Tips
-
-1. **Use Layer Visibility:** Hide parts to access difficult areas
-2. **Grid for Precision:** Enable the grid when aligning details
-3. **Color Palette:** The color picker shows all colors in your skin for consistency
-4. **Variation Tool:** Perfect for adding quick shading and depth
-5. **Undo is Your Friend:** Don't be afraid to experiment!
-
-### Performance
-
-- The editor uses WebGL2 for hardware-accelerated rendering. It built on top WebGL api and optimized every frame so it could be run on most devices.
-- Mobile-friendly interface for touch devices
-
-### Workflow Suggestions
-
-1. Start in **Preview Mode** to inspect an existing skin
-2. Switch to **Editing Mode** to make changes
-3. Use **Body Part Visibility** to isolate areas
-4. **Save frequently** as undo history is not persistent
-5. Test in different lighting conditions using the Light settings
+1. **Hide layers to reach what's under them** — the armor layer covers the body layer everywhere it's visible.
+2. **Use the grid** when lining up details or matching both sides of the model.
+3. **Symmetry saves half the work** on anything that mirrors — sleeves, legs, faces.
+4. **Dither over flat fills** for texture that doesn't look painted on.
+5. **Reference images beat guessing** — drop in artwork and pull colors straight from it.
+6. **Download when you hit a milestone.** Skins are stored locally, and undo history doesn't survive a reload.
+7. **Check your skin under different lighting** before exporting — the light settings will show you seams flat lighting hides.
 
 ---
 
@@ -295,24 +334,11 @@ Access the **Settings panel** by clicking the gear icon in the toolbar.
 
 ### Report Issues
 
-Found a bug? Report it on the [GitHub Repository](https://github.com/hamza512b/mineskin/issues)
+Found a bug? Use **Settings → Help → Report a problem**, or file an issue on the [GitHub Repository](https://github.com/hamza512b/mineskin/issues).
 
 ### Join the Community
 
-Connect with other skin creators on the [Discord Server](https://discord.gg/2egvhmqdza)
-
----
-
-## Mobile Considerations
-
-The editor is fully responsive and touch-enabled:
-
-- Touch to paint with active tool
-- Pinch to zoom
-- Drag to rotate camera
-- Action menu (three dots) provides quick access to Upload/Save
-
-> On touch mobile , you can not batch paint or erase. Because the stroke is used for moving the camera.
+Connect with other skin creators on the [Discord Server](https://discord.gg/2egvhmqdza).
 
 ---
 

@@ -290,7 +290,7 @@
   "changelog": {
     "viewChangelog": "View changelog",
     "title": "Changelog",
-    "closeChangelog": "Close changelog",
+    "pageDescription": "New features, improvements, and fixes in MineSkin PRO.",
     "helpText": "Need help? Join our discord server on",
     "discord": "Discord"
   },

@@ -290,7 +290,7 @@
   "changelog": {
     "viewChangelog": "Ver histórico de alterações",
     "title": "Histórico de Alterações",
-    "closeChangelog": "Fechar histórico de alterações",
+    "pageDescription": "Novos recursos, melhorias e correções no MineSkin PRO.",
     "helpText": "Precisa de ajuda? Entre no nosso servidor do Discord em",
     "discord": "Discord"
   },

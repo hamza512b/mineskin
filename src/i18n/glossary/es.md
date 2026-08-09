@@ -207,7 +207,7 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Library** <br><sub>Saved skins collection</sub> | Biblioteca | Current library.title = "Biblioteca". Matches. |
 | **New Skin** | Nueva skin | Current library.newSkin/defaultName = "Nueva Skin". Content matches; sentence-case "skin" (feminine loanword). |
 | **Templates** | Plantillas | Current library.templates = "Plantillas". Matches. |
-| **Changelog** | Registro de cambios | Current changelog.title = "Registro de cambios". Matches; viewChangelog/closeChangelog consistent. |
+| **Changelog** | Registro de cambios | Current changelog.title = "Registro de cambios". Matches; viewChangelog ("Ver registro de cambios") and pageDescription consistent. |
 | **Appearance** <br><sub>Label for the color-theme selector (System/Light/Dark)</sub> | Apariencia | theme.label = "Apariencia". Field label above the theme dropdown; sentence case, same register as languageSwitcher.language = "Idioma". |
 | **Settings** | Configuración <br>*(Ajustes)* | Current common.settings = "Configuración". Minor inconsistency: onboarding.cookieDescription and tutorial say "en ajustes"/"en la configuración" interchangeably. Standardize the noun on "Configuración"; "ajustes" is acceptable in running prose but pick one for the panel label. |
 

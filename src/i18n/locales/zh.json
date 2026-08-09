@@ -290,7 +290,7 @@
   "changelog": {
     "viewChangelog": "查看更新日志",
     "title": "更新日志",
-    "closeChangelog": "关闭更新日志",
+    "pageDescription": "MineSkin PRO 的新功能、改进与问题修复。",
     "helpText": "需要帮助？加入我们的 Discord 服务器",
     "discord": "Discord"
   },

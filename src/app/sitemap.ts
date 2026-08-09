@@ -8,6 +8,7 @@ const pages = [
   { path: "/home", priority: 0.9 },
   { path: "/preview", priority: 1.0 },
   { path: "/editor", priority: 0.8 },
+  { path: "/changelog", priority: 0.6 },
   { path: "/policies/privacy-policy", priority: 0.5 },
   { path: "/policies/cookie-policy", priority: 0.5 },
   { path: "/report-problem", priority: 0.3 },

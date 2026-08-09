@@ -1,3 +1,8 @@
+## 2026-08-09
+
+- The changelog now has its own page, in every language.
+- Rewrite the usage guide to match how the app works today.
+
 ## 2026-08-07
 
 - Drag a zoomed reference image to move it; a press that stays put still picks a color.

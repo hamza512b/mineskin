@@ -730,6 +730,23 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
                       ),
                     })}
                 </p>
+                <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <a
+                    href={`/${locale}/changelog`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={dict.changelog.title}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    onClick={(e) => {
+                      if (isNativeWebview()) {
+                        e.preventDefault();
+                        openExternalUrl(`/${locale}/changelog`);
+                      }
+                    }}
+                  >
+                    {dict.changelog.viewChangelog}
+                  </a>
+                </p>
               </div>
 
               {/* Two separate ways to help — the app-install ask and the tip ask
