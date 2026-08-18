@@ -224,30 +224,9 @@ async function HomeContent({ params }: { params: Promise<{ lang: string }> }) {
               </p>
             </div>
 
-            {/* Two distinct ways to help — kept visually separate so the
-                install-the-app ask never blurs into the tip-the-dev ask. */}
-            <div className="mt-8 grid overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/40 sm:grid-cols-2">
-              <div className="border-b border-neutral-200 p-6 dark:border-neutral-800 sm:border-b-0 sm:border-r">
-                <div className="flex items-center gap-2.5">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100 dark:bg-blue-500/10 dark:text-blue-300 dark:ring-blue-400/20">
-                    <Smartphone className="h-4 w-4" strokeWidth={1.5} />
-                  </span>
-                  <h3 className="text-sm font-semibold">
-                    {home.supportAppTitle}
-                  </h3>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-                  {home.supportAppText}
-                </p>
-                <StoreBadges
-                  source="home"
-                  size="sm"
-                  appStoreAlt={home.appStoreAlt}
-                  playStoreAlt={home.playStoreAlt}
-                  className="mt-4"
-                />
-              </div>
-
+            {/* The apps are a free download, so they live in their own section
+                below — this card is only about tipping the dev. */}
+            <div className="mt-8 overflow-hidden rounded-2xl border border-neutral-200 bg-white/70 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/40">
               <div className="p-6">
                 <div className="flex items-center gap-2.5">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/20">
@@ -267,6 +246,35 @@ async function HomeContent({ params }: { params: Promise<{ lang: string }> }) {
                 />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Mobile apps — a free download, kept apart from the support section
+            so grabbing them never reads as a way to fund the project. */}
+        <section className="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-10">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-500/5 blur-3xl dark:bg-blue-400/10"
+          />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <Smartphone className="h-3 w-3" />
+                {home.alsoOnMobile}
+              </div>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+                {home.appHeading}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-neutral-600 dark:text-neutral-300 sm:text-base">
+                {home.appDescription}
+              </p>
+            </div>
+            <StoreBadges
+              source="home"
+              appStoreAlt={home.appStoreAlt}
+              playStoreAlt={home.playStoreAlt}
+              className="shrink-0"
+            />
           </div>
         </section>
 

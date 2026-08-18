@@ -207,6 +207,28 @@ Use informal second person ("você", never "tu" or "vós"); this is the Brazilia
 | **Stargazers** <br><sub>Accessible label on the star-count link (home.githubStargazers)</sub> | Estrelas no GitHub | The link shows a count, so the countable noun is clearer than a literal rendering of 'stargazers' (which has no natural pt-BR equivalent — avoid 'observadores', that is GitHub's 'watchers'). Keeps 'GitHub' verbatim. |
 | **Repository** | Repositório | Current: 'Repositório do GitHub' (about.githubRepository). Matches. |
 
+### App promo banners
+
+| English | pt-BR | Notes |
+|---|---|---|
+| **Free** <br><sub>Zero-cost, as a price (promoBanner.*, freeAppBanner.*)</sub> | grátis <br>*(de graça — adverbial, after a verb)* | 'Grátis' is the adjective/price word ('MineSkin PRO é grátis'); 'de graça' is the adverbial form and reads better right after a verb ('Baixe o app completo de graça'). Never 'gratuito' here — it is stiffer and longer than the banners allow, and never 'livre' (that is 'free' as in freedom). |
+| **Is free** <br><sub>Permanent vs. limited-time state</sub> | é grátis (permanente) / está grátis (temporário) | The ser/estar split carries the whole difference between the two banners: promoBanner is a limited-time sale, so 'MineSkin PRO **está** grátis esta semana'; freeAppBanner announces a permanent price change, so 'MineSkin PRO **é** grátis no iOS e no Android'. Do not swap them — 'está grátis' would make the permanent banner read as another temporary promo. |
+| **Now free** <br><sub>Badge on the permanently-free banner (freeAppBanner.badge)</sub> | Agora grátis | Short badge, sentence case, pairing with 'Tempo limitado' (promoBanner.badge). Never 'Agora gratuito' or 'Já é grátis'. |
+| **Get it free** <br><sub>Banner CTA (promoBanner.cta, freeAppBanner.cta)</sub> | Baixar grátis | Already used by promoBanner.cta; kept identical in freeAppBanner so the two banners share one CTA. Uses the canonical 'Baixar' for Download (see Actions). |
+| **Dismiss** <br><sub>Close button on a banner</sub> | Fechar | Current: 'Fechar' (promoBanner.dismiss, freeAppBanner.dismiss). Kept distinct from 'Descartar' (recorder.discard) — the banner is only hidden, nothing is thrown away. |
+
+### Home — support & mobile apps
+
+| English | pt-BR | Notes |
+|---|---|---|
+| **Tip** <br><sub>A one-time, optional payment to the developer (home.supportDescription, home.supportTipText)</sub> | contribuição única | 'Contribuição' is the natural pt-BR word for a voluntary tip to a creator; 'gorjeta' means a restaurant/service tip and would read wrong here. Always qualify it as 'única' when the source says 'one-time', so it never reads as a recurring subscription. Never 'doação' — that implies charity, and never 'dica' (that is 'tip' as in advice). |
+| **Support the project** <br><sub>Section badge over the tipping block (home.supportBadge)</sub> | Apoie o projeto | 'Apoiar' is reserved for this financial-support sense (badge + section). Keep it distinct from 'ajudar' (used in the body copy for what the money does) and from 'manter' (see next row). |
+| **Kept going by you** <br><sub>Second half of the coloured support heading (home.supportHeading2)</sub> | Mantido por você | 'Manter' carries 'keep going / keep alive' for a project. Masculine singular, agreeing with the implicit 'o MineSkin'. Keep it to three words — it renders as the coloured half of a two-sentence heading. |
+| **Free everywhere** <br><sub>First half of the support heading (home.supportHeading1)</sub> | Grátis em todo lugar | Uses the canonical price word 'grátis' (see App promo banners › Free). Never 'gratuito' (stiffer) and never 'em todos os lugares' (too long for a heading). |
+| **Take MineSkin with you** <br><sub>Heading of the mobile-apps section (home.appHeading)</sub> | Leve o MineSkin com você | Definite article before the brand ('o MineSkin'), matching home.openSourceHeading and home.supportDescription. Imperative in the informal 'você' register. |
+| **Free to download** <br><sub>Price of the mobile apps (home.appDescription)</sub> | Grátis para baixar | Pairs the canonical 'grátis' with the canonical 'Baixar' for Download (see Actions). Never 'download gratuito'. |
+| **No ads, no account needed** <br><sub>App selling points (home.appDescription)</sub> | sem anúncios e sem precisar de conta | 'Anúncios' is the standard pt-BR term for in-app ads (never 'propagandas' or the anglicism 'ads'). The 'sem … e sem …' pattern keeps the two negatives parallel, mirroring 'sem custo, sem pegadinhas' in home.supportDescription. |
+
 ## Consistency watch-list
 
 Terms with known drift in the current file — keep these locked to the recommended form:

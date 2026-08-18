@@ -1,3 +1,7 @@
+## 2026-08-18
+
+- MineSkin PRO ya es totalmente gratis en el App Store y en Google Play.
+
 ## 2026-08-09
 
 - El registro de cambios ahora tiene su propia página, en todos los idiomas.

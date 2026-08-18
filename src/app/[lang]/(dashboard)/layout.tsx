@@ -1,5 +1,6 @@
 "use client";
 import { useInitRendererState } from "@/store";
+import FreeAppBanner from "@/widgets/FreeAppBanner";
 import PromoSaleBanner from "@/widgets/PromoSaleBanner";
 import { usePathname } from "next/navigation";
 import React, { useEffect } from "react";
@@ -61,6 +62,7 @@ export default function DashboardLayout({
   return (
     <>
       <PromoSaleBanner />
+      <FreeAppBanner />
       {children}
     </>
   );

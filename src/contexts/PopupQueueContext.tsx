@@ -13,9 +13,10 @@ export const POPUP_PRIORITIES = {
   languageDetection: 1, // important, first visit, need to know user's language
   cookie: 2, // important first visit cookie consent popup
   promoBanner: 3, // Limited-time "100% off" sale — takes precedence over the evergreen app-install banner while it's running.
-  appInstallBanner: 4, // Native advertisement for mobile app, show it to as many people as possible, after one reload so it doesn't interfere with first impression
-  pwaInstall: 5, // Prompt first to install pwa, better user experience for them then having their money.
-  iosInstall: 5, // Prompt iOS users to install the app, since they won't get the PWA install prompt.
+  freeAppBanner: 4, // Evergreen "the app is completely free on the stores" banner — outranks the plain app-install banner, yields to the limited-time sale.
+  appInstallBanner: 5, // Native advertisement for mobile app, show it to as many people as possible, after one reload so it doesn't interfere with first impression
+  pwaInstall: 6, // Prompt first to install pwa, better user experience for them then having their money.
+  iosInstall: 6, // Prompt iOS users to install the app, since they won't get the PWA install prompt.
   tutorial: 7, // Guide users through the app's features.
   modeSwitchHint: 8,
   brushIntroHint: 8, // Tell returning users the drawing tools collapsed into the brush slot.

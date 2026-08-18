@@ -152,6 +152,19 @@ Second person: informal singular "tú" throughout (never "usted", never "vosotro
 | **Toggle** <br><sub>Show/hide toggles: partFilter.toggle*, toggleWholeLayer</sub> | Alternar | Established pattern: "Alternar cabeza", "Alternar casco", etc. New partFilter.toggleWholeLayer ("Toggle whole layer") follows it: "Alternar toda la capa". |
 | **Toggle all (short)** <br><sub>Compact visible button label under each layer's part grid (partFilter.toggleWholeLayerShort); the full "Alternar toda la capa" stays as the screen-reader text</sub> | Alternar todo | Neuter "todo" (= everything in this layer's grid), not "toda": the button sits under a specific layer, so "capa" stays implicit and eliding it is natural. Keeps the canonical "Alternar" verb. |
 
+### Support & mobile apps
+
+| English | es | Notes |
+|---|---|---|
+| **Support the project** <br><sub>Section badge (home.supportBadge)</sub> | Apoya el proyecto | Verb "apoyar", informal imperative. Since the apps are free, "apoyar" now means tipping only — never imply buying or downloading. |
+| **Tip** <br><sub>One-time donation to the developer (home.supportTipText, supportDescription)</sub> | propina | Feminine (una propina). Canonical: "una propina única" for "a one-time tip". Do NOT use "donación" (too formal/charity-like) or "aporte"/"aportación" (LatAm register). |
+| **Free** <br><sub>Zero price (home.heroFree, supportHeading1, supportDescription)</sub> | gratis | Invariable adjective — "gratis en la web", "gratis en iOS y Android". Prefer "gratis" over "gratuito" in headings; "gratuito/a" is fine as a modifier in prose ("descarga gratuita"). Never "libre" (that is free-as-in-freedom). |
+| **No cost, no catch** <br><sub>Reassurance tail (home.supportDescription)</sub> | sin coste ni condiciones | Spain-Spanish "coste", never LatAm "costo". "sin condiciones" carries "no catch" without the heavier "sin trampa ni cartón". |
+| **App** <br><sub>The iOS/Android build (home.openApp, appHeading, appDescription)</sub> | la app | Feminine loanword, already used across the file ("Abrir la App"). Do not translate to "aplicación" in short UI labels. |
+| **Download (an app)** <br><sub>Getting the app from a store (home.appDescription, appStoreAlt/playStoreAlt)</sub> | Descargar <br>*(descarga gratuita)* | Same canonical verb as file downloads (see Actions). Store badges keep their official ES wording: App Store → "Descargar en el App Store", Google Play → "Disponible en Google Play". |
+| **No account needed** <br><sub>home.appDescription</sub> | sin necesidad de cuenta | Keep "cuenta" (never "registro" — the point is that no account exists, not just no sign-up form). |
+| **No ads** <br><sub>home.appDescription</sub> | sin anuncios | Not "sin publicidad" (reads as a marketing stance rather than a product fact) and never the anglicism "sin ads". |
+
 ### Open source & GitHub
 
 | English | es | Notes |

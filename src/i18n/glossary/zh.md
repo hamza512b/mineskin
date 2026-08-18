@@ -151,6 +151,28 @@ Second person: use the polite 您 consistently for the user; reserve 你 only in
 | **Star** <br><sub>GitHub star action; button label (home.githubStar)</sub> | Star | Keep verbatim in Latin. Chinese developers say and search "Star" (点个 Star / Star 数); the official GitHub zh-CN rendering 星标 is not what the community uses. Verb form in prose: 点个 Star. Never 收藏 or 加星. |
 | **Stargazers** <br><sub>Star-count link, accessible label (home.githubStargazers)</sub> | GitHub 上的 Star 数 | Chinese has no natural noun for "stargazers"; describe it as the count instead. Keep the space around the Latin `Star`. |
 
+### Support & mobile apps (home page)
+
+| English | zh | Notes |
+|---|---|---|
+| **Free everywhere** <br><sub>home.supportHeading1 — first half of the support heading</sub> | 全平台免费 | The apps are now free too, so the heading covers web + iOS + Android at once. Never re-narrow it to 网页端免费 (the old wording, when only the web was free). Pairs with the colored second half; keep both halves at 4–6 characters so they read as one punchy sentence pair. |
+| **Kept going by you** <br><sub>home.supportHeading2 — colored second half</sub> | 因您而延续 | Credits the user for the project continuing, without implying a purchase. Do not use 靠您养活 / 由您赞助 (too transactional) or 由移动应用驱动 (the old wording, now wrong — the apps no longer fund the project). |
+| **Tip** <br><sub>One-time tip to the developer (home.supportDescription, home.supportTipText)</sub> | 打赏 | Locked term for the voluntary payment: 一次性打赏 for "a one-time tip". This is the ONLY thing the Support section asks for now — never describe downloading the app as a way to 支持项目. Avoid 捐赠 (charity register) and 小费 (restaurant tipping). |
+| **No cost, no catch** <br><sub>home.supportDescription</sub> | 没有任何费用和附加条件 | Fixed rendering; 附加条件 carries "no catch" (no strings attached). Do not shorten to 没有套路. |
+| **Take MineSkin with you** <br><sub>home.appHeading — h2 of the mobile-apps section</sub> | 把 MineSkin 带在身边 | Inviting, not a command to buy; the section is purely "the apps exist and are free". Keep MineSkin Latin with a space on each side. |
+| **The full editor** <br><sub>home.appDescription (replaces the removed home.supportAppText)</sub> | 完整编辑器 | Nothing is held back on mobile. Sibling of the banner term 完整版应用 (the full app) — use 完整编辑器 when the sentence names the editor itself. |
+| **Free to download** <br><sub>home.appDescription</sub> | 免费下载 | Bare verb phrase in prose. The banner CTA button keeps its own rendering 免费获取 (Get it free); do not swap the two. |
+| **No ads, no account needed** <br><sub>home.appDescription</sub> | 无广告，无需账号 | Parallel 无＋noun pairs keep the rhythm of the English. Use 账号 (not 帐号/账户) for a user account. |
+
+### Banners
+
+| English | zh | Notes |
+|---|---|---|
+| **Now free** <br><sub>Badge on the permanent free-app banner (freeAppBanner.badge)</sub> | 现已免费 | The 现已＋adjective pattern marks a state that has changed and now holds indefinitely — deliberately contrasted with the limited-time promo badge (promoBanner.badge = 限时). Never use 限时 or 免费限时 here: this banner announces that MineSkin PRO is free for good, not a sale. |
+| **The full app** <br><sub>"Download the full app free" (freeAppBanner.description)</sub> | 完整版应用 | Stresses that nothing is held back behind a purchase (no 精简版/试用版). |
+| **Get it free** <br><sub>Banner CTA (promoBanner.cta, freeAppBanner.cta)</sub> | 免费获取 | One rendering shared by both banners; keep them identical so the CTA reads the same wherever it appears. |
+| **Dismiss** <br><sub>Banner close button (promoBanner.dismiss, freeAppBanner.dismiss)</sub> | 关闭 | Same as common.close; do not use 忽略 or 不再显示. |
+
 ### Animation
 
 | English | zh | Notes |
