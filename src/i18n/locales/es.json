@@ -61,7 +61,16 @@
     "dither": "Tramado",
     "showAllColors": "Mostrar todos los colores",
     "showFewerColors": "Mostrar menos colores",
-    "recordClip": "Grabar clip"
+    "recordClip": "Grabar clip",
+    "poseMode": "Posar extremidades",
+    "poseModeHint": "Haz clic en una extremidad para ver sus flechas de eje y arrastra una flecha para mover su punta en ese eje. Haz doble clic en una extremidad para restablecerla. El controlador del centro del modelo mueve toda la skin, o haz doble clic en él para volver a centrarla.",
+    "poseModeHintTouch": "Toca el controlador de una extremidad para ver sus flechas de eje y arrastra una flecha para mover su punta en ese eje. Tócalo dos veces para restablecer esa extremidad. El controlador del centro del modelo mueve toda la skin, o tócalo dos veces para volver a centrarla.",
+    "poseMove": "Mover",
+    "poseTwist": "Girar",
+    "poseTwistHint": "Haz clic en una extremidad para ver sus anillos de giro y arrastra un anillo para girarla sobre ese eje. Haz doble clic en una extremidad para restablecerla. El anillo del centro del modelo gira toda la skin, o haz doble clic en él para que vuelva a mirar al frente.",
+    "poseTwistHintTouch": "Toca el controlador de una extremidad para ver sus anillos de giro y arrastra un anillo para girarla sobre ese eje. Tócalo dos veces para restablecer esa extremidad. El anillo del centro del modelo gira toda la skin, o tócalo dos veces para que vuelva a mirar al frente.",
+    "resetPose": "Restablecer pose",
+    "resetPosition": "Restablecer posición del modelo"
   },
   "detailPanel": {
     "actions": "Acciones",

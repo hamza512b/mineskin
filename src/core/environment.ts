@@ -226,7 +226,11 @@ function paintFaceFromImage(
         const bgSampleY = Math.floor(
           ((y + 0.5) / BLOCK_TEXEL_DENSITY) * fallbackImageData.height,
         );
-        const background = sampleImageData(fallbackImageData, bgSampleX, bgSampleY);
+        const background = sampleImageData(
+          fallbackImageData,
+          bgSampleX,
+          bgSampleY,
+        );
         const alpha = foreground[3] / 255;
         color = [
           clampByte(foreground[0] * alpha + background[0] * (1 - alpha)),
@@ -237,7 +241,8 @@ function paintFaceFromImage(
       }
       if (tintStrength > 0) {
         const tintDelta =
-          (noise2d(x + tintSeed * 1.7, y + tintSeed * 0.9, tintSeed * 3.1) - 0.5) *
+          (noise2d(x + tintSeed * 1.7, y + tintSeed * 0.9, tintSeed * 3.1) -
+            0.5) *
           2 *
           tintStrength;
         color = [
@@ -247,12 +252,7 @@ function paintFaceFromImage(
           color[3],
         ];
       }
-      setPixel(
-        material,
-        u0 + x,
-        v0 + y,
-        color,
-      );
+      setPixel(material, u0 + x, v0 + y, color);
     }
   }
 }
@@ -287,12 +287,16 @@ function applyInternetTextures(
       const imageData = textures.get(faceUrls[face]);
       if (!imageData) return;
       const isSideFace =
-        face === "front" || face === "back" || face === "left" || face === "right";
+        face === "front" ||
+        face === "back" ||
+        face === "left" ||
+        face === "right";
       const shouldCompositeSideOverBottom =
         sources.compositeSideOverBottom === true;
-      const fallbackImageData = isSideFace && shouldCompositeSideOverBottom
-        ? textures.get(faceUrls.bottom)
-        : undefined;
+      const fallbackImageData =
+        isSideFace && shouldCompositeSideOverBottom
+          ? textures.get(faceUrls.bottom)
+          : undefined;
       paintFaceFromImage(
         material,
         face,
@@ -802,6 +806,21 @@ export function getEnvironmentCameraFloorY(
     default:
       return null;
   }
+}
+
+/**
+ * Whether the environment pins the model in place.
+ *
+ * The built environments are modelled around a character standing on their
+ * ground, so the move offsets are ignored while one is on — sliding the model
+ * off its own footing looks like a bug, not a setting. Asked in three places
+ * (the backend that builds the transform, the sliders, and the move gizmo), so
+ * it lives here rather than being spelled out at each of them.
+ */
+export function isEnvironmentTransformLocked(
+  preset: EnvironmentPreset,
+): boolean {
+  return preset === "grassland" || preset === "scifi";
 }
 
 export function createEnvironmentWorld(

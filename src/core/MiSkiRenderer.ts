@@ -27,6 +27,15 @@ import { identityM44, multiplyM4V3, type M44, type V3 } from "./maths";
 import { Mesh, MeshGroup } from "./mesh";
 import { MeshImageMaterial, MinecraftSkinMaterial } from "./MeshMaterial";
 import { MinecraftSkin } from "./MinecraftSkin";
+import {
+  buildPoseGizmoGeometry,
+  computeAxisHandles,
+  computePoseHandles,
+  type PoseGizmoGeometry,
+} from "./PoseGizmo";
+import { PoseInputManager } from "./PoseInputManager";
+import { PoseSystem } from "./PoseSystem";
+import { multiplyQuat, quatFromEuler } from "./quaternion";
 import { computeRay, getMeshAtRay, getMeshsAtRay } from "./rayTracing";
 import { Renderer } from "./Renderer";
 import { mirrorSkinTexel } from "./skinMirror";
@@ -53,16 +62,31 @@ const SHADE_SAT_STEP = 4; // %
 
 export class MiSkiRenderer extends Renderer {
   public undoRedoManager: UndoRedoManager;
+  /**
+   * Manual limb pose. Lives on the base renderer, not the preview subclass, so
+   * a posed model can also be painted — reaching an armpit or the sole of a
+   * foot is the main reason to pose in the first place.
+   */
+  public poseSystem: PoseSystem;
+  public poseInputManager: PoseInputManager;
   private unsubscribe: (() => void) | null = null;
   private environmentMesh: MeshGroup | null = null;
+  /** Set while a capture is in flight; see {@link setPoseGizmoSuppressed}. */
+  private poseGizmoSuppressed = false;
 
   constructor(backend: Backend) {
     super(backend);
     this.undoRedoManager = new UndoRedoManager(this);
+    this.poseSystem = new PoseSystem();
+    this.poseInputManager = new PoseInputManager(this);
   }
 
   public override mount() {
     super.mount();
+
+    const state = getRendererState();
+    this.poseSystem.setupBodyParts(this.getMainSkin(), state.skinIsPocket);
+    this.poseSystem.setPose(state.pose);
 
     // Subscribe to store for visibility and pocket changes
     this.unsubscribe = subscribeToRenderer((state, prevState) => {
@@ -74,9 +98,12 @@ export class MiSkiRenderer extends Renderer {
     this.updateMeshVisibility(getRendererState());
 
     this.undoRedoManager.mountListeners();
+    this.poseInputManager.mountListeners();
   }
 
   public override unmount() {
+    this.poseInputManager.unmountListeners();
+    this.poseSystem.dispose();
     // Create a copy of children array to avoid modifying collection while iterating
     const meshesToRemove = [...this.world.getChildren()];
     for (const mesh of meshesToRemove) {
@@ -116,9 +143,76 @@ export class MiSkiRenderer extends Renderer {
       }
     }
 
+    if (state.poseMode !== prevState.poseMode) {
+      // `EditInputManager` stops tracking the pointer in pose mode, so it never
+      // gets to clear the texel outline it last drew — do it here, or a stale
+      // highlight sits on the model for the whole posing session.
+      this.hoverHighlight = null;
+      this.poseInputManager.clearHover();
+      this.poseInputManager.clearSelection();
+    }
+
+    // Switching tools deliberately keeps the selection: both tools put a gizmo
+    // on the selected part — arrows for move, rings for twist — so the swap is
+    // a change of gizmo on the limb being worked on, not a change of limb.
+
+    // The slim and wide arm are different boxes, so the collider has to be
+    // pointed at whichever one is on screen or it would test the hidden one.
+    if (state.skinIsPocket !== prevState.skinIsPocket) {
+      this.poseSystem.setColliderVariant(state.skinIsPocket);
+    }
+
     // Handle pocket change (only when triggered by PocketSwitch)
     // We detect this by checking if skinIsPocket changed and wasn't already processed
     // The origin tracking is now implicit - we only process here if it's from PocketSwitch
+  }
+
+  /**
+   * Hides the pose gizmo for a capture (screenshot, recorded clip). The overlay
+   * is an editing control, not part of the model, so it has no business being
+   * baked into an image or a video the user shares.
+   */
+  public setPoseGizmoSuppressed(suppressed: boolean): void {
+    this.poseGizmoSuppressed = suppressed;
+  }
+
+  /**
+   * Whether the pose gizmo is on screen right now. Input asks the same question
+   * the renderer does, because the handles are also the hit targets — an
+   * invisible ring the pointer still grabs is worse than no ring at all.
+   */
+  public isPoseGizmoVisible(): boolean {
+    return (
+      getRendererState().poseMode &&
+      !this.poseGizmoSuppressed &&
+      !this.isPlayingClipAnimation()
+    );
+  }
+
+  /**
+   * True while an animation clip is driving the limbs. Picking a dance switches
+   * pose mode off, so this is a backstop rather than the main path: it keeps the
+   * handles from flashing over a dancing model for the frame or two between pose
+   * mode coming back on and the clip being stopped in response. Overridden by
+   * the preview renderer; the editor plays no clips.
+   */
+  protected isPlayingClipAnimation(): boolean {
+    return false;
+  }
+
+  /**
+   * The pose gizmo overlay for the frame being drawn, or null when there is
+   * nothing to show. Built on demand instead of per tick because it depends on
+   * the camera matrices, which the backend only settles once the frame starts.
+   */
+  public getPoseGizmo(): PoseGizmoGeometry | null {
+    if (!this.isPoseGizmoVisible()) return null;
+    const selected = this.poseInputManager.getSelectedPart();
+    return buildPoseGizmoGeometry(this, computePoseHandles(this), {
+      highlighted: this.poseInputManager.getHighlightedPart(),
+      axisHandles: computeAxisHandles(this, selected),
+      activeAxis: this.poseInputManager.getActiveAxis(),
+    });
   }
 
   private visibilityChanged(
@@ -141,6 +235,17 @@ export class MiSkiRenderer extends Renderer {
       state.overlayleftLegVisible !== prevState.overlayleftLegVisible ||
       state.overlayrightLegVisible !== prevState.overlayrightLegVisible
     );
+  }
+
+  /**
+   * Points the pose system at the current skin object and replays the stored
+   * pose onto it. Swapping resolution or loading a library entry builds a whole
+   * new `MinecraftSkin`, so without this the limbs would snap back to rest.
+   */
+  public rebindPoseSystem(): void {
+    const state = getRendererState();
+    this.poseSystem.setupBodyParts(this.getMainSkin(), state.skinIsPocket);
+    this.poseSystem.setPose(state.pose);
   }
 
   public updateMeshVisibility(state: RendererStore): void {
@@ -270,6 +375,7 @@ export class MiSkiRenderer extends Renderer {
     // Add new skin to world and backend
     this.addMesh(newSkin);
     this.backend.bindMeshGroup(newSkin);
+    this.rebindPoseSystem();
 
     // Update state
     state.setValue("skinIsDoubleRes", newIsDoubleRes, "App");
@@ -410,6 +516,7 @@ export class MiSkiRenderer extends Renderer {
 
       this.addMesh(newSkin);
       this.backend.bindMeshGroup(newSkin);
+      this.rebindPoseSystem();
     } else {
       const skin = this.getMainSkin();
       const imageData = new ImageData(
@@ -1168,6 +1275,8 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
     const state = getRendererState();
 
     this.animationSystem.setupBodyParts(skin, state.skinIsPocket);
+    // Clips animate away from the user's pose rather than from the T-pose.
+    this.animationSystem.setPoseSystem(this.poseSystem);
 
     // Subscribe to pocket/resolution changes for animation system
     this.pocketChangeUnsubscribe = subscribeToRenderer((state, prevState) => {
@@ -1175,6 +1284,7 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
         state.skinIsPocket !== prevState.skinIsPocket ||
         state.skinIsDoubleRes !== prevState.skinIsDoubleRes
       ) {
+        this.rebindPoseSystem();
         this.animationSystem.setupBodyParts(
           this.getMainSkin(),
           state.skinIsPocket,
@@ -1235,11 +1345,12 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
       );
       this.boundOnMouseMove = null;
     }
-    // Reset head rotation
+    // Reset head rotation — back to the posed rest position, not to neutral.
     const skin = this.getMainSkin();
     if (skin.baseHead) skin.baseHead.rotation = [0, 0, 0];
     if (skin.overlayHead) skin.overlayHead.rotation = [0, 0, 0];
     this.currentHeadRotation = [0, 0];
+    this.poseSystem.apply();
   }
 
   private applyLookAtCursor(deltaTime: number): void {
@@ -1262,12 +1373,21 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
       0,
     ];
 
+    // Look-at is a delta on top of however the head is posed, so a tilted head
+    // still tracks the cursor from its tilted rest position.
+    const posedHead = this.poseSystem.getPartRotation("head");
+    const composed = multiplyQuat(posedHead, quatFromEuler(...rotation));
+
     const skin = this.getMainSkin();
-    if (skin.baseHead) skin.baseHead.rotation = rotation;
-    if (skin.overlayHead) skin.overlayHead.rotation = rotation;
+    if (skin.baseHead) skin.baseHead.rotationQuat = composed;
+    if (skin.overlayHead) skin.overlayHead.rotationQuat = composed;
   }
 
   public playAnimation(animationName: string): void {
+    // The gizmo leaves the screen for the clip, so drop what it was pointing at
+    // rather than leaving a stale hover or selection waiting for the clip to end.
+    this.poseInputManager.clearHover();
+    this.poseInputManager.clearSelection();
     this.animationSystem.playAnimation(animationName);
   }
 
@@ -1280,6 +1400,10 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
   }
 
   public isAnimationPlaying(): boolean {
+    return this.animationSystem.isAnimationPlaying();
+  }
+
+  protected override isPlayingClipAnimation(): boolean {
     return this.animationSystem.isAnimationPlaying();
   }
 
@@ -1371,6 +1495,11 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
       // sync keeps writing, so a resize mid-record can't corrupt the clip and
       // clearing suppression below restores the *current* offset, not a stale one.
       this.backend.setViewportCenterOffsetSuppressed(true);
+      // The pose handles are an editing control; a clip records the model, not
+      // the tools pointed at it. Suppressed for the whole record rather than
+      // relying on the clip animation to hide them, since a caller can record a
+      // static spin with no animation at all.
+      this.setPoseGizmoSuppressed(true);
 
       // Wait for the watermark logo + encoder selection before the first frame.
       await recorder.ready();
@@ -1420,6 +1549,7 @@ export class MiSkPreviewRenderer extends MiSkiRenderer {
       // frame renders the recentered view using the current layout offset (safe
       // as a plain field write).
       this.backend.setViewportCenterOffsetSuppressed(false);
+      this.setPoseGizmoSuppressed(false);
       if (this.isMounted) {
         // Replay the user's prior animation, or stop so a default clip animation
         // doesn't linger on a model they'd left un-animated.

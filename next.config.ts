@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   turbopack: {},
   devIndicators: false,
-  allowedDevOrigins: ["192.168.68.59"],
+  allowedDevOrigins: ["192.168.68.51"],
 };
 
 export default withSentryConfig(withSerwist(nextConfig), {

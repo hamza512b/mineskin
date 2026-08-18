@@ -6,7 +6,12 @@ import {
   MiSkiEditingRenderer,
   MiSkPreviewRenderer,
 } from "@/core/MiSkiRenderer";
-import { useRendererStore, selectUndoCount, selectRedoCount } from "@/store";
+import {
+  getRendererState,
+  useRendererStore,
+  selectUndoCount,
+  selectRedoCount,
+} from "@/store";
 import { getLibraryState } from "@/store/libraryStore";
 import ActionBar from "@/widgets/ActionBar/ActionBar";
 import DetailPanel from "@/widgets/DetailPanel/DetailPanel";
@@ -24,6 +29,10 @@ import React, {
 import useRenderer from "./useRenderer";
 import useIsTouch from "@/hooks/useIsTouch";
 import { downloadFile } from "@/core/downloadFile";
+import {
+  resetModelTranslation,
+  resetModelRotation,
+} from "@/core/modelTransform";
 import { shareVideo } from "@/core/shareVideo";
 import {
   DEFAULT_WATERMARK,
@@ -154,6 +163,11 @@ export function Dashboard({
     return [];
   }, [renderer]);
 
+  // Posing and dancing are mutually exclusive: the handles mark each limb's
+  // *posed* rest position, which is nowhere near where a dancing limb actually
+  // is, so they cannot be aimed while a clip plays. Starting one therefore
+  // switches the other off. The pose itself always survives — the clip animates
+  // out of it, and stopping the clip returns to it.
   const handleAnimationSelect = useCallback(
     (animation: string | null) => {
       if (renderer instanceof MiSkPreviewRenderer) {
@@ -161,6 +175,11 @@ export function Dashboard({
           renderer.stopAnimation();
           setCurrentAnimation(null);
         } else {
+          // Switch posing off exactly as tapping the pose button would, so the
+          // toolbar reads inactive rather than showing a mode the model is
+          // ignoring.
+          const state = getRendererState();
+          if (state.poseMode) state.setValue("poseMode", false);
           renderer.playAnimation(animation);
           setCurrentAnimation(animation);
         }
@@ -168,6 +187,17 @@ export function Dashboard({
     },
     [renderer],
   );
+
+  const poseMode = useRendererStore((s) => s.poseMode);
+  const wasPoseMode = useRef(poseMode);
+  useEffect(() => {
+    const justEnabled = poseMode && !wasPoseMode.current;
+    wasPoseMode.current = poseMode;
+    // The other half of the exclusion: switching posing back on stops the dance.
+    // Only on the transition into pose mode, so this never fights the write
+    // above.
+    if (justEnabled && currentAnimation) handleAnimationSelect(null);
+  }, [poseMode, currentAnimation, handleAnimationSelect]);
 
   const [lookAtCursor, setLookAtCursor] = useState(false);
 
@@ -182,6 +212,22 @@ export function Dashboard({
       }
     }
   }, [renderer]);
+
+  const handleResetPose = useCallback(() => {
+    if (!renderer) return;
+    renderer.poseSystem.reset();
+    // Mirror the cleared pose into the store so it also clears on disk.
+    getRendererState().setValue("pose", {});
+  }, [renderer]);
+
+  // The torso handle moves the whole model rather than posing a joint, so its
+  // reset is the sidebar's move and rotate values — position, tilt, turn and
+  // roll — going back to default, separate from the pose, which it must not
+  // disturb.
+  const handleResetTransform = useCallback(() => {
+    resetModelTranslation();
+    resetModelRotation();
+  }, []);
 
   const setSettingsOpen = useCallback(
     (open: boolean) => {
@@ -258,12 +304,16 @@ export function Dashboard({
     if (backend) {
       backend.setEnvironmentGridSuppressed(true);
       backend.setViewportCenterOffset(0);
+      // The pose handles are an editing control, not part of the model — keep
+      // them out of the exported image.
+      renderer?.setPoseGizmoSuppressed(true);
       backend.onRenderFrame(renderer);
     }
     ctx.drawImage(canvas, sx, sy, size, size, 0, 0, output, output);
     if (backend) {
       backend.setEnvironmentGridSuppressed(false);
       backend.setViewportCenterOffset(prevOffset);
+      renderer?.setPoseGizmoSuppressed(false);
     }
     // Bake in the same attribution pill shared clips carry.
     const logo = await loadWatermarkLogo();
@@ -481,6 +531,8 @@ export function Dashboard({
               onRecord={mode === "Preview" ? handleRecord : undefined}
               recording={recording}
               mode={mode}
+              onResetPose={handleResetPose}
+              onResetTransform={handleResetTransform}
             />
           </ClientOnly>
           <ActionBar

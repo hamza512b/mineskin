@@ -26,6 +26,7 @@ import { PartFilterDialog } from "../PartFilterDialog/PartFilterDialog";
 import ToolButton from "./ToolButton";
 import BrushFlyout, { SymmetryIcon } from "./BrushFlyout";
 import BrushIntroHint from "./BrushIntroHint";
+import PoseFlyout from "./PoseFlyout";
 
 const isMac =
   typeof window !== "undefined" &&
@@ -86,6 +87,11 @@ interface FloatingToolbarProps {
   onRecord?: () => void;
   recording?: boolean;
   mode: "Editing" | "Preview";
+
+  /** Clears every posed joint back to rest. */
+  onResetPose?: () => void;
+  /** Puts the whole model back at the origin, facing forward. */
+  onResetTransform?: () => void;
 }
 
 const Toolbar: React.FC<FloatingToolbarProps> = ({
@@ -106,6 +112,8 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
   onRecord,
   recording = false,
   mode,
+  onResetPose,
+  onResetTransform,
 }) => {
   const { dictionary: dict, locale } = useDictionary();
   const isRtl = locale === "ar";
@@ -348,6 +356,17 @@ const Toolbar: React.FC<FloatingToolbarProps> = ({
                   </Tooltip.Root>
                 </Tooltip.Provider>
               )}
+
+              {/* Touch gets the handles only: a one-finger drag on the model
+                  itself is already claimed by painting and orbiting, but the
+                  handle at a limb's end is a small discrete target, so grabbing
+                  one is unambiguous. Free rotation stays on mouse. */}
+              <PoseFlyout
+                side={flyoutSide}
+                tooltipSide={tooltipSide}
+                onResetPose={onResetPose}
+                onResetTransform={onResetTransform}
+              />
 
               {mode === "Preview" && !isTouch && onToggleLookAtCursor && (
                 <Hint side={tooltipSide} text={dict.toolbar.lookAtCursor}>

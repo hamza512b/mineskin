@@ -18,11 +18,15 @@ import {
 import { MeshGroup, MinecraftPart } from "../mesh";
 import { MeshImageMaterial } from "../MeshMaterial";
 import { MinecraftSkin } from "../MinecraftSkin";
-import { MiSkiEditingRenderer } from "../MiSkiRenderer";
+import { MiSkiEditingRenderer, MiSkiRenderer } from "../MiSkiRenderer";
+import type { PoseGizmoGeometry } from "../PoseGizmo";
 import { Renderer } from "../Renderer";
 import { resizeCanvasToDisplaySize } from "../utils";
 import { Backend } from "./Backend";
-import { getEnvironmentClearColor } from "../environment";
+import {
+  getEnvironmentClearColor,
+  isEnvironmentTransformLocked,
+} from "../environment";
 
 export interface RendererProgramLike {
   getProgram(): WebGLProgram;
@@ -37,8 +41,7 @@ export abstract class BaseGlBackend<
   TProgram extends RendererProgramLike,
   TGpuResources,
   THighlightResources,
-> implements Backend
-{
+> implements Backend {
   protected gl: TGl | null = null;
   protected mainProgram: TProgram | null = null;
   protected globalTransformation = identityM44();
@@ -245,9 +248,7 @@ export abstract class BaseGlBackend<
 
     this.onBeforeFrame(cameraPosition);
 
-    const envLocked =
-      state.environmentPreset === "grassland" ||
-      state.environmentPreset === "scifi";
+    const envLocked = isEnvironmentTransformLocked(state.environmentPreset);
     this.globalTransformation = multiplyM44(
       translateM44(
         envLocked ? 0 : -state.objectTranslationX,
@@ -357,6 +358,11 @@ export abstract class BaseGlBackend<
     if (renderer instanceof MiSkiEditingRenderer && renderer.hoverHighlight) {
       this.renderHoverHighlight(renderer);
     }
+
+    if (renderer instanceof MiSkiRenderer) {
+      const gizmo = renderer.getPoseGizmo();
+      if (gizmo) this.renderPoseGizmo(gizmo);
+    }
   }
 
   protected renderMeshGroup(
@@ -378,16 +384,8 @@ export abstract class BaseGlBackend<
       gl.bindTexture(gl.TEXTURE_2D, texture);
       if (material.isDirty) {
         this.uploadTextureData(material);
-        gl.texParameteri(
-          gl.TEXTURE_2D,
-          gl.TEXTURE_WRAP_S,
-          gl.CLAMP_TO_EDGE,
-        );
-        gl.texParameteri(
-          gl.TEXTURE_2D,
-          gl.TEXTURE_WRAP_T,
-          gl.CLAMP_TO_EDGE,
-        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         material.markClean();
@@ -432,11 +430,7 @@ export abstract class BaseGlBackend<
         );
         const lineVertexCount =
           meshGroup.mergedVertices.length / 3 - meshGroup.linesOffset;
-        gl.drawArrays(
-          gl.TRIANGLES,
-          meshGroup.linesOffset,
-          lineVertexCount,
-        );
+        gl.drawArrays(gl.TRIANGLES, meshGroup.linesOffset, lineVertexCount);
         gl.uniform1f(gridLinesLoc, 0);
       }
 
@@ -480,6 +474,49 @@ export abstract class BaseGlBackend<
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
     this.unbindHighlightVao(res);
 
+    gl.uniform1f(program.getLocation("u_gridLines"), 0);
+    gl.uniform1f(program.getLocation("u_gridAlpha"), 1.0);
+  }
+
+  /**
+   * Draws the limb-posing handles. Its geometry already sits in the space the
+   * skin's own transforms produce, so only the camera matrices apply.
+   *
+   * Depth testing is off: a handle has to stay grabbable when the limb it
+   * belongs to has swung behind the torso, and a control the model can swallow
+   * is a control the user cannot find.
+   */
+  protected renderPoseGizmo(gizmo: PoseGizmoGeometry): void {
+    if (!this.gl || !this.mainProgram) return;
+    const gl = this.gl;
+    const program = this.mainProgram;
+
+    const res = this.ensureHighlightResources();
+    if (!res) return;
+
+    this.uploadHighlightBuffers(res, gizmo.vertices, gizmo.normals);
+
+    const m = multiplyM44(
+      this.projectTransformation,
+      this.viewTransformation,
+      this.globalTransformation,
+    );
+    gl.uniformMatrix4fv(program.getLocation("u_matrix"), false, m);
+    gl.uniform1f(program.getLocation("u_gridLines"), 1);
+
+    gl.disable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+
+    this.bindHighlightVao(res);
+    for (const batch of gizmo.batches) {
+      gl.uniform3fv(program.getLocation("u_gridColor"), batch.color);
+      gl.uniform1f(program.getLocation("u_gridAlpha"), batch.alpha);
+      gl.drawArrays(gl.TRIANGLES, batch.offset, batch.count);
+    }
+    this.unbindHighlightVao(res);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
     gl.uniform1f(program.getLocation("u_gridLines"), 0);
     gl.uniform1f(program.getLocation("u_gridAlpha"), 1.0);
   }
@@ -545,22 +582,21 @@ export abstract class BaseGlBackend<
       const skin = this.meshes
         .getChildren()
         .find(
-          (group) => group instanceof MinecraftSkin && group.name === "MainSkin",
+          (group) =>
+            group instanceof MinecraftSkin && group.name === "MainSkin",
         ) as MinecraftSkin | undefined;
       if (!skin) return false;
       this.cachedSkin = skin;
       this.cachedOpaqueGroup =
         (skin
           .getChildren()
-          .find(
-            (g) => g instanceof MeshGroup && g.name === "opaque",
-          ) as MinecraftPart | undefined) ?? null;
+          .find((g) => g instanceof MeshGroup && g.name === "opaque") as
+          MinecraftPart | undefined) ?? null;
       this.cachedTransparentGroup =
         (skin
           .getChildren()
-          .find(
-            (g) => g instanceof MeshGroup && g.name === "transparent",
-          ) as MinecraftPart | undefined) ?? null;
+          .find((g) => g instanceof MeshGroup && g.name === "transparent") as
+          MinecraftPart | undefined) ?? null;
     }
     if (!this.cachedEnvironmentGroup) {
       this.cachedEnvironmentGroup =

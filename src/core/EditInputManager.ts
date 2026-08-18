@@ -81,6 +81,10 @@ export class EditInputManager {
 
   private onPointerDown = (e: PointerEvent) => {
     if (!this.renderer.backend.canvas) return;
+    // Pose mode owns the pointer. Both managers listen on the canvas itself, so
+    // stopPropagation in PoseInputManager cannot stop this handler — the modes
+    // have to be mutually exclusive here rather than by listener ordering.
+    if (getRendererState().poseMode) return;
     const { x, y } = this.getPointerPos(e);
     if (e.pointerType === "touch") {
       if (this.onTouchPointerDown(e)) {
@@ -169,6 +173,9 @@ export class EditInputManager {
   };
 
   private onPointerMove = (e: PointerEvent) => {
+    // This listener is registered in the capture phase, so it would otherwise
+    // run ahead of the pose drag and repaint under it.
+    if (getRendererState().poseMode) return;
     if (e.pointerType === "touch" && this.onTouchPointerMove(e)) {
       e.preventDefault();
       e.stopPropagation();

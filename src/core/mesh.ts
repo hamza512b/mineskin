@@ -17,6 +17,7 @@ import {
   translateM44,
 } from "./maths";
 import { appendTriangleLine } from "./meshUtils";
+import { Quat, quatToM44 } from "./quaternion";
 
 type MeshMetadata = {
   [key: string]: string | number | boolean | Record<string, string | number>;
@@ -37,7 +38,16 @@ class Base {
 
   public setParent(parent: MeshGroup | null) {
     this.parent = parent;
+    this.invalidateTransformCache();
   }
+
+  /**
+   * Drops any cached world-space transform on this node and everything under
+   * it. World transforms are composed from the whole ancestor chain, so a node
+   * whose own transform never changes still goes stale the moment an ancestor
+   * moves — posing a limb is exactly that case.
+   */
+  public invalidateTransformCache(): void {}
 }
 
 export class Mesh extends Base {
@@ -127,9 +137,14 @@ export class Mesh extends Base {
 
   public setTransformMatrix(matrix: M44) {
     this.transformMatrix = matrix;
+    this.invalidateTransformCache();
   }
 
   private cachedTransformMatrix: M44 | null = null;
+
+  public override invalidateTransformCache(): void {
+    this.cachedTransformMatrix = null;
+  }
 
   public getTransformMatrix(): M44 {
     return (
@@ -143,10 +158,6 @@ export class Mesh extends Base {
 
   public getParent(): MeshGroup | null {
     return this.parent;
-  }
-
-  public setParent(parent: MeshGroup | null) {
-    this.parent = parent;
   }
 
   /**
@@ -245,8 +256,8 @@ export class MeshGroup extends Base {
     this.transformMatrix = multiplyM44(T, R, S);
 
     // Invalidate cached values when transform changes
-    this.cachedTransformMatrix = null;
-    this.cachedBoundingBox = null;
+    this.invalidateTransformCache();
+    this.invalidateAncestorBounds();
   }
 
   public addMesh(mesh: Mesh | MeshGroup) {
@@ -287,6 +298,15 @@ export class MeshGroup extends Base {
     return [sumX / totalVerts, sumY / totalVerts, sumZ / totalVerts];
   }
 
+  /**
+   * World-space axis-aligned bounds of everything in this group.
+   *
+   * Two things here only matter once a group is actually rotated, which is why
+   * they went unnoticed while every transform was identity: the AABB of a
+   * rotated box is the box over all eight transformed corners, not over the two
+   * transformed extremes; and child groups already report world space, so
+   * re-applying this group's transform to them would count it twice.
+   */
   public calculateBoundingBox(): { min: V3; max: V3 } {
     if (this.cachedBoundingBox) {
       return this.cachedBoundingBox;
@@ -294,39 +314,50 @@ export class MeshGroup extends Base {
 
     const min: V3 = [Infinity, Infinity, Infinity];
     const max: V3 = [-Infinity, -Infinity, -Infinity];
+    const expand = (point: V3) => {
+      for (let axis = 0; axis < 3; axis++) {
+        if (point[axis] < min[axis]) min[axis] = point[axis];
+        if (point[axis] > max[axis]) max[axis] = point[axis];
+      }
+    };
+
+    // Direct mesh children hold vertices in this group's local space.
+    const localMin: V3 = [Infinity, Infinity, Infinity];
+    const localMax: V3 = [-Infinity, -Infinity, -Infinity];
+    let hasLocalGeometry = false;
 
     for (const mesh of this.meshes) {
       if (mesh instanceof Mesh) {
-        // For each vertex in the mesh
+        hasLocalGeometry = true;
         for (let i = 0; i < mesh.vertices.length; i += 3) {
-          const x = mesh.vertices[i];
-          const y = mesh.vertices[i + 1];
-          const z = mesh.vertices[i + 2];
-
-          // Update min and max
-          min[0] = Math.min(min[0], x);
-          min[1] = Math.min(min[1], y);
-          min[2] = Math.min(min[2], z);
-          max[0] = Math.max(max[0], x);
-          max[1] = Math.max(max[1], y);
-          max[2] = Math.max(max[2], z);
+          for (let axis = 0; axis < 3; axis++) {
+            const value = mesh.vertices[i + axis];
+            if (value < localMin[axis]) localMin[axis] = value;
+            if (value > localMax[axis]) localMax[axis] = value;
+          }
         }
       } else if (mesh instanceof MeshGroup) {
         const childBox = mesh.calculateBoundingBox();
-        min[0] = Math.min(min[0], childBox.min[0]);
-        min[1] = Math.min(min[1], childBox.min[1]);
-        min[2] = Math.min(min[2], childBox.min[2]);
-        max[0] = Math.max(max[0], childBox.max[0]);
-        max[1] = Math.max(max[1], childBox.max[1]);
-        max[2] = Math.max(max[2], childBox.max[2]);
+        if (!Number.isFinite(childBox.min[0])) continue; // empty subtree
+        expand(childBox.min);
+        expand(childBox.max);
       }
     }
 
-    const localTransform = this.getTransformMatrix();
-    const transformedMin = multiplyM4V3(localTransform, min);
-    const transformedMax = multiplyM4V3(localTransform, max);
+    if (hasLocalGeometry) {
+      const localTransform = this.getTransformMatrix();
+      for (let corner = 0; corner < 8; corner++) {
+        expand(
+          multiplyM4V3(localTransform, [
+            corner & 1 ? localMax[0] : localMin[0],
+            corner & 2 ? localMax[1] : localMin[1],
+            corner & 4 ? localMax[2] : localMin[2],
+          ]),
+        );
+      }
+    }
 
-    this.cachedBoundingBox = { min: transformedMin, max: transformedMax };
+    this.cachedBoundingBox = { min, max };
     return this.cachedBoundingBox;
   }
 
@@ -338,11 +369,34 @@ export class MeshGroup extends Base {
   public setTransformMatrix(matrix: M44 | undefined) {
     this.transformMatrix = matrix || identityM44();
     // Invalidate cached values when transform changes
-    this.cachedTransformMatrix = null;
-    this.cachedBoundingBox = null;
+    this.invalidateTransformCache();
+    this.invalidateAncestorBounds();
   }
 
   private cachedTransformMatrix: M44 | null = null;
+
+  /**
+   * Clears this subtree's cached world transforms and bounds. Descendants cache
+   * the full parent chain, so moving this group invalidates all of them — this
+   * is what keeps ray-picking (which walks down to the individual pixel meshes)
+   * agreeing with what the renderer draws after a part is posed or animated.
+   */
+  public override invalidateTransformCache(): void {
+    this.cachedTransformMatrix = null;
+    this.cachedBoundingBox = null;
+    for (const child of this.meshes) {
+      child.invalidateTransformCache();
+    }
+  }
+
+  /** A moved child changes every ancestor's bounds, but not their transforms. */
+  private invalidateAncestorBounds(): void {
+    let ancestor = this.parent;
+    while (ancestor) {
+      ancestor.cachedBoundingBox = null;
+      ancestor = ancestor.parent;
+    }
+  }
 
   public getTransformMatrix(): M44 {
     return (
@@ -530,6 +584,7 @@ export class MeshGroup extends Base {
 export class MinecraftPart extends MeshGroup {
   private _jointPosition: V3 = [0, 0, 0];
   private _partRotation: V3 = [0, 0, 0];
+  private _rotationQuat: Quat | null = null;
 
   constructor(
     size: V3,
@@ -694,6 +749,49 @@ export class MinecraftPart extends MeshGroup {
     }
   }
 
+  private cachedLocalBounds: { min: V3; max: V3 } | null = null;
+
+  /**
+   * Axis-aligned bounds of the part's own geometry, in the part's local space —
+   * the same space `jointPosition` is expressed in, and unaffected by the
+   * part's rotation. `calculateBoundingBox` cannot answer this: it bakes in the
+   * world transform and transforms only the two corners, which stops meaning
+   * anything once the part is posed.
+   *
+   * Vertices are built once and never move (posing only changes the transform),
+   * so the result is cached on first use.
+   */
+  public getLocalBounds(): { min: V3; max: V3 } {
+    if (this.cachedLocalBounds) return this.cachedLocalBounds;
+
+    const min: V3 = [Infinity, Infinity, Infinity];
+    const max: V3 = [-Infinity, -Infinity, -Infinity];
+
+    const visit = (group: MeshGroup) => {
+      for (const child of group.getChildren()) {
+        if (child instanceof MeshGroup) {
+          visit(child);
+          continue;
+        }
+        for (let i = 0; i < child.vertices.length; i += 3) {
+          for (let axis = 0; axis < 3; axis++) {
+            const value = child.vertices[i + axis];
+            if (value < min[axis]) min[axis] = value;
+            if (value > max[axis]) max[axis] = value;
+          }
+        }
+      }
+    };
+    visit(this);
+
+    if (!Number.isFinite(min[0])) {
+      this.cachedLocalBounds = { min: [0, 0, 0], max: [0, 0, 0] };
+    } else {
+      this.cachedLocalBounds = { min, max };
+    }
+    return this.cachedLocalBounds;
+  }
+
   get jointPosition(): V3 {
     return [...this._jointPosition] as V3;
   }
@@ -702,13 +800,32 @@ export class MinecraftPart extends MeshGroup {
     this._jointPosition = [...value] as V3;
   }
 
+  /**
+   * Setting Euler angles drops any quaternion override, so the animation
+   * system and look-at-cursor keep working exactly as before.
+   */
   override set rotation(value: V3) {
     this._partRotation = [...value] as V3;
+    this._rotationQuat = null;
     this.updateJointBasedTransform();
   }
 
   override get rotation(): V3 {
     return [...this._partRotation] as V3;
+  }
+
+  /**
+   * Rotation as a quaternion, bypassing the fixed Z·Y·X Euler order. Interactive
+   * posing uses this so a drag never hits gimbal lock. `null` falls back to the
+   * Euler triple.
+   */
+  set rotationQuat(value: Quat | null) {
+    this._rotationQuat = value ? ([...value] as Quat) : null;
+    this.updateJointBasedTransform();
+  }
+
+  get rotationQuat(): Quat | null {
+    return this._rotationQuat ? ([...this._rotationQuat] as Quat) : null;
   }
 
   override set position(value: V3) {
@@ -748,12 +865,14 @@ export class MinecraftPart extends MeshGroup {
       -this._jointPosition[2]
     );
     
-    const rotation = rotateM44(
-      this._partRotation[0],
-      this._partRotation[1], 
-      this._partRotation[2]
-    );
-    
+    const rotation = this._rotationQuat
+      ? quatToM44(this._rotationQuat)
+      : rotateM44(
+          this._partRotation[0],
+          this._partRotation[1],
+          this._partRotation[2]
+        );
+
     const currentPosition = super.position;
     const currentScale = super.scale;
     

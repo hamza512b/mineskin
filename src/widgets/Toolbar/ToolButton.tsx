@@ -10,6 +10,12 @@ interface ToolButtonProps extends React.PropsWithChildren {
   active?: boolean;
   /** Renders a small flyout indicator in the corner (grouped tool slot). */
   grouped?: boolean;
+  /**
+   * Renders a dot on the tool's top corner, marking state the tool is holding
+   * that the rail can't otherwise show — a pose away from rest, say. It keeps
+   * a white ring while the tool is active so it stays legible on the blue slab.
+   */
+  badge?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
 }
 
@@ -26,6 +32,7 @@ const ToolButton: React.FC<ToolButtonProps> = React.forwardRef(
       disabled = false,
       active = false,
       grouped = false,
+      badge = false,
       ...rest
     }: ToolButtonProps,
     ref,
@@ -63,6 +70,17 @@ const ToolButton: React.FC<ToolButtonProps> = React.forwardRef(
         >
           {children}
         </span>
+
+        {badge && (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute right-[3px] top-[3px] h-[6px] w-[6px] rounded-full",
+              "bg-blue-500 transition-colors duration-200 dark:bg-blue-400",
+              active && "ring-[1.5px] ring-white",
+            )}
+          />
+        )}
 
         {grouped && (
           <span

@@ -6,8 +6,17 @@ import animations, {
   PartTransform,
 } from "./animations";
 import { lerpVector3, smoothStepLerpVector3 } from "./interpolationUtils";
+import { V3 } from "./maths";
 import { MeshGroup } from "./mesh";
 import { MinecraftSkin } from "./MinecraftSkin";
+import {
+  isPoseLimb,
+  Pose,
+  PoseLimb,
+  PoseSystem,
+  resolveBodyParts,
+} from "./PoseSystem";
+import { multiplyQuat, Quat, quatFromEuler } from "./quaternion";
 
 export class AnimationSystem {
   private currentAnimation: AnimationDefinition | null = null;
@@ -18,32 +27,24 @@ export class AnimationSystem {
   private originalTransforms: Map<string, PartTransform> = new Map();
   private parentGroups: Set<MeshGroup> = new Set();
   private onAnimationUpdate?: () => void;
+  /**
+   * The manual pose a clip animates away from. When set, each part's clip
+   * rotation is composed onto its posed rest position instead of replacing it,
+   * so "wave while posed" works and stopping a clip returns to the pose rather
+   * than to a T-pose.
+   */
+  private poseSystem: PoseSystem | null = null;
 
   constructor(onAnimationUpdate?: () => void) {
     this.onAnimationUpdate = onAnimationUpdate;
   }
 
+  public setPoseSystem(poseSystem: PoseSystem | null): void {
+    this.poseSystem = poseSystem;
+  }
+
   public setupBodyParts(skin: MinecraftSkin, isSlim: boolean): void {
-    this.bodyParts = [
-      { name: "head", base: skin.baseHead, overlay: skin.overlayHead },
-      { name: "body", base: skin.baseBody, overlay: skin.overlayBody },
-      {
-        name: "leftArm",
-        base: isSlim ? skin.baseLeftSlimArm : skin.baseLeftArm,
-        overlay: isSlim ? skin.overlayLeftSlimArm : skin.overlayLeftArm,
-      },
-      {
-        name: "rightArm",
-        base: isSlim ? skin.baseRightSlimArm : skin.baseRightArm,
-        overlay: isSlim ? skin.overlayRightSlimArm : skin.overlayRightArm,
-      },
-      { name: "leftLeg", base: skin.baseLeftLeg, overlay: skin.overlayLeftLeg },
-      {
-        name: "rightLeg",
-        base: skin.baseRightLeg,
-        overlay: skin.overlayRightLeg,
-      },
-    ];
+    this.bodyParts = resolveBodyParts(skin, isSlim);
 
     // Collect parent groups (opaqueGroup, transparentGroup) so body transform
     // can be applied to them, making all parts inherit body rotation/position
@@ -73,6 +74,7 @@ export class AnimationSystem {
 
   public stopAnimation(): void {
     this.currentAnimation = null;
+    this.isPlaying = false;
     this.resetToOriginalTransforms();
   }
 
@@ -130,11 +132,16 @@ export class AnimationSystem {
         bodyPartData,
         this.animationTime,
       );
-      for (const group of this.parentGroups) {
-        group.rotation = bodyTransform.rotation;
-        group.position = bodyTransform.position;
-      }
+      this.applyBodyTransform({
+        rotation: bodyTransform.rotation,
+        position: bodyTransform.position,
+      });
     }
+
+    // Limbs the clip poses through the collider, keyed by name so the solved
+    // rotation can be written back to the right meshes below.
+    const posedParts = new Map<PoseLimb, AnimationBodyPart>();
+    const posedRotations: Pose = {};
 
     // Apply animation to each part
     this.currentAnimation.parts.forEach((partData) => {
@@ -161,26 +168,59 @@ export class AnimationSystem {
         this.animationTime,
       );
 
-      if (bodyPart.base) {
-        bodyPart.base.rotation = transform.rotation;
-        if (bodyPart.base.position) {
-          bodyPart.base.position = transform.position;
+      // Compose the clip onto the posed rest position: the limb is already
+      // rotated by the pose, and the clip rotates it further within that frame.
+      const posed = this.composeWithPose(partData.name, transform.rotation);
+
+      for (const target of [bodyPart.base, bodyPart.overlay]) {
+        if (!target) continue;
+        // Rotations are held back until every part's offset is on the mesh:
+        // the collider reads position and scale straight off the meshes, so a
+        // clip that shifts a limb has to be solved where it will be drawn.
+        if (!posed) {
+          target.rotation = transform.rotation;
         }
-        if (bodyPart.base.scale) {
-          bodyPart.base.scale = transform.scale;
+        if (target.position) {
+          target.position = transform.position;
+        }
+        if (target.scale) {
+          target.scale = transform.scale;
         }
       }
 
-      if (bodyPart.overlay) {
-        bodyPart.overlay.rotation = transform.rotation;
-        if (bodyPart.overlay.position) {
-          bodyPart.overlay.position = transform.position;
-        }
-        if (bodyPart.overlay.scale) {
-          bodyPart.overlay.scale = transform.scale;
-        }
+      if (posed && isPoseLimb(partData.name)) {
+        posedParts.set(partData.name, bodyPart);
+        posedRotations[partData.name] = posed;
       }
     });
+
+    if (posedParts.size === 0) return;
+
+    // Clip and pose are authored blind to each other, so their composition can
+    // put a limb inside the torso or through the other arm. Stop each one where
+    // it meets whatever is in the way, exactly as a drag does.
+    const resolved =
+      this.poseSystem?.resolveAnimationFrame(posedRotations) ?? posedRotations;
+
+    for (const [name, bodyPart] of posedParts) {
+      const rotation = resolved[name] ?? posedRotations[name];
+      if (!rotation) continue;
+      if (bodyPart.base) bodyPart.base.rotationQuat = rotation;
+      if (bodyPart.overlay) bodyPart.overlay.rotationQuat = rotation;
+    }
+  }
+
+  /**
+   * Returns pose · clip for a posed part, or null when there is no pose to
+   * compose with — in which case the caller keeps the cheaper Euler path.
+   */
+  private composeWithPose(
+    partName: string,
+    clipRotation: [number, number, number],
+  ): Quat | null {
+    if (!this.poseSystem || !isPoseLimb(partName)) return null;
+    const pose = this.poseSystem.getPartRotation(partName);
+    return multiplyQuat(pose, quatFromEuler(...clipRotation));
   }
 
   private calculatePartTransformAtTime(
@@ -271,12 +311,30 @@ export class AnimationSystem {
     };
   }
 
-  private resetToOriginalTransforms(): void {
-    // Reset parent groups (body transform applied during animation)
-    for (const group of this.parentGroups) {
-      group.rotation = [0, 0, 0];
-      group.position = [0, 0, 0];
+  /**
+   * Moves the whole model, by transforming the groups every part hangs off.
+   *
+   * The user's torso pose lives on those same groups, so when there is a pose
+   * system it owns the matrix and composes the two; without one — the editor
+   * renderer never wires it up — the clip writes the groups itself, exactly as
+   * it always did.
+   */
+  private applyBodyTransform(
+    transform: { rotation: V3; position: V3 } | null,
+  ): void {
+    if (this.poseSystem) {
+      this.poseSystem.setBodyClipTransform(transform);
+      return;
     }
+    for (const group of this.parentGroups) {
+      group.rotation = transform?.rotation ?? [0, 0, 0];
+      group.position = transform?.position ?? [0, 0, 0];
+    }
+  }
+
+  private resetToOriginalTransforms(): void {
+    // Drop the clip's body transform; the user's torso pose stays.
+    this.applyBodyTransform(null);
 
     this.bodyParts.forEach((part) => {
       if (part.base) {
@@ -289,6 +347,11 @@ export class AnimationSystem {
         part.overlay.position = [0, 0, 0];
       }
     });
+
+    // Rest position is the user's pose, not the T-pose. Re-applying after the
+    // Euler writes above is what puts the limbs back where they were posed —
+    // those writes clear each part's quaternion override.
+    this.poseSystem?.apply();
   }
 
   public dispose(): void {

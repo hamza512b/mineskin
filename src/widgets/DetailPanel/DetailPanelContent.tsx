@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tabs";
 import { useTheme } from "@/hooks/useTheme";
 import { isNativeWebview } from "@/hooks/useNativeWebview";
+import { isEnvironmentTransformLocked } from "@/core/environment";
 import { openExternalUrl } from "@/core/openExternalUrl";
 import {
   LOCALE_TO_FLAG,
@@ -131,8 +132,7 @@ export const DetailPanelContent: React.FC<DetailPanelProps> = ({
       environmentPreset: state.environmentPreset,
     })),
   );
-  const envLocked =
-    environmentPreset === "grassland" || environmentPreset === "scifi";
+  const envLocked = isEnvironmentTransformLocked(environmentPreset);
 
   // Stable per-key setters so memo'd Sliders don't see a new onChange identity
   // on every parent render.

@@ -160,6 +160,34 @@ export const CursorFollowIcon = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+/** A figure with articulated joints, for the limb-posing toggle. */
+export const PoseIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    {...props}
+  >
+    <g
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+    >
+      <circle cx={12} cy={4} r={2.25} />
+      <path d="M12 6.5v7" />
+      <path d="M12 8.5 6.5 11m5.5 2.5L17 9" />
+      <path d="m12 13.5-3 3.5-1 3m4-6.5 3 3.5 1 3" />
+    </g>
+    <g fill="currentColor" opacity={0.35}>
+      <circle cx={6.5} cy={11} r={1.5} />
+      <circle cx={17} cy={9} r={1.5} />
+      <circle cx={8} cy={20} r={1.5} />
+      <circle cx={16} cy={20} r={1.5} />
+    </g>
+  </svg>
+);
+
 export const VariationIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" {...props}>
     <g fill="currentColor">

@@ -6,6 +6,7 @@ import {
   FormValues,
   HistorySnapshot,
   formSchema,
+  poseSchema,
   FLOOR_COLOR_LIGHT,
   FLOOR_COLOR_DARK,
   OLD_LOCALSTORAGE_KEY,
@@ -81,6 +82,11 @@ export const defaultFormValues: FormValues = {
   mode: "Preview",
   gridVisible: false,
   environmentPreset: "grid",
+  poseMode: false,
+  poseTool: "move",
+  poseSnap: false,
+  poseMirror: false,
+  pose: {},
 };
 
 // Parse saved state from localStorage
@@ -113,6 +119,37 @@ function migrateConfig(config: Partial<FormValues>): Partial<FormValues> {
       ...migrated,
       variationIntensity: Math.max(1, Math.round(vi * MAX_VARIATION_STEPS)),
     };
+  }
+
+  // Limb posing added `pose`. Configs saved before it have no such key, and a
+  // missing key would leave `pose` undefined rather than falling back to the
+  // default — `{...defaultFormValues, ...migrated}` only fills in keys that are
+  // absent, and a config written by a later build could carry `pose: undefined`
+  // explicitly. Normalize both cases, and drop anything that isn't one of the
+  // joints holding a finite 4-tuple, so neither a corrupted entry nor a joint
+  // this build no longer has can reach the quaternion math.
+  const pose = migrated.pose as Record<string, unknown> | undefined;
+  if (!pose || typeof pose !== "object") {
+    migrated = { ...migrated, pose: {} };
+  } else {
+    const cleaned: Record<string, [number, number, number, number]> = {};
+    for (const [joint, rotation] of Object.entries(pose)) {
+      if (
+        joint in poseSchema.shape &&
+        Array.isArray(rotation) &&
+        rotation.length === 4 &&
+        rotation.every((n) => typeof n === "number" && Number.isFinite(n))
+      ) {
+        cleaned[joint] = rotation as [number, number, number, number];
+      }
+    }
+    migrated = { ...migrated, pose: cleaned };
+  }
+
+  // Same story for the pose tool: absent in pre-posing configs, and a value
+  // outside the enum would reach the input manager as a tool it can't run.
+  if (migrated.poseTool !== "move" && migrated.poseTool !== "twist") {
+    migrated = { ...migrated, poseTool: "move" };
   }
 
   return migrated;
@@ -181,6 +218,13 @@ const createRendererStore = () =>
         mode: state.mode,
         gridVisible: state.gridVisible,
         environmentPreset: state.environmentPreset,
+        // poseMode is deliberately not persisted: it's a transient editing
+        // mode, and restoring into it would leave a returning user unable to
+        // paint until they noticed the toggle. The pose itself does persist.
+        poseTool: state.poseTool,
+        poseSnap: state.poseSnap,
+        poseMirror: state.poseMirror,
+        pose: state.pose,
       };
       localStorage.setItem(
         CURRENT_LOCALSTORAGE_KEY,
@@ -215,6 +259,9 @@ const createRendererStore = () =>
 
       // Touch drawing state (runtime flag, not persisted)
       touchDrawActive: false,
+
+      // Limb-drag state (runtime flag, not persisted)
+      poseDragActive: false,
 
       // IndexedDB reference
       indexDB: null,
@@ -623,6 +670,11 @@ const createRendererStore = () =>
       // Touch drawing
       setTouchDrawActive: (active) => {
         set({ touchDrawActive: active });
+      },
+
+      // Limb posing
+      setPoseDragActive: (active) => {
+        set({ poseDragActive: active });
       },
     };
   });

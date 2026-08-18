@@ -61,7 +61,16 @@
     "dither": "Pontilhado",
     "showAllColors": "Mostrar todas as cores",
     "showFewerColors": "Mostrar menos cores",
-    "recordClip": "Gravar clipe"
+    "recordClip": "Gravar clipe",
+    "poseMode": "Posicionar membros",
+    "poseModeHint": "Clique em um membro para ver as setas de eixo e arraste uma seta para mover essa ponta naquele eixo. Dê um clique duplo em um membro para redefini-lo. A alça no centro do modelo move a skin inteira, ou dê um clique duplo nela para centralizá-la de novo.",
+    "poseModeHintTouch": "Toque na alça de um membro para ver as setas de eixo e arraste uma seta para mover essa ponta naquele eixo. Dê um toque duplo na alça para redefinir esse membro. A alça no centro do modelo move a skin inteira, ou dê um toque duplo nela para centralizá-la de novo.",
+    "poseMove": "Posicionar",
+    "poseTwist": "Torcer",
+    "poseTwistHint": "Clique em um membro para ver os anéis de torção e arraste um anel para torcê-lo naquele eixo. Dê um clique duplo em um membro para redefini-lo. O anel no centro do modelo vira a skin inteira, ou dê um clique duplo nele para que ela volte a olhar para a frente.",
+    "poseTwistHintTouch": "Toque na alça de um membro para ver os anéis de torção e arraste um anel para torcê-lo naquele eixo. Dê um toque duplo na alça para redefinir esse membro. O anel no centro do modelo vira a skin inteira, ou dê um toque duplo nele para que ela volte a olhar para a frente.",
+    "resetPose": "Redefinir pose",
+    "resetPosition": "Redefinir posição da skin"
   },
   "detailPanel": {
     "actions": "Ações",

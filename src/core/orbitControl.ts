@@ -233,6 +233,9 @@ export class OrbitControl {
 
   private onMouseMove(event: MouseEvent) {
     if (!this.cursorEnabled) return;
+    // A pose gizmo drag owns the gesture — orbiting at the same time would spin
+    // the camera out from under the handle the pointer is holding.
+    if (getRendererState().poseDragActive) return;
     this.controlling = true;
     this.rotateVelocity[0] += event.movementX;
     this.rotateVelocity[1] -= event.movementY;
@@ -252,6 +255,11 @@ export class OrbitControl {
     if (state.touchDrawActive && event.touches.length === 1) {
       return;
     }
+    // A finger that landed on a pose handle is posing, not orbiting.
+    // `pointerdown` runs before `touchstart`, so the flag is already set here.
+    if (state.poseDragActive && event.touches.length === 1) {
+      return;
+    }
     this.controlling = true;
     // A new touch grabs the camera: kill any coast so the gesture starts fresh.
     this.stopCoast();
@@ -268,6 +276,9 @@ export class OrbitControl {
     const state = getRendererState();
     // If touch drawing is actively happening, don't rotate for single touch
     if (state.touchDrawActive && event.touches.length === 1) {
+      return;
+    }
+    if (state.poseDragActive && event.touches.length === 1) {
       return;
     }
     event.preventDefault();

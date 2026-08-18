@@ -61,7 +61,16 @@
     "dither": "Dither",
     "showAllColors": "Show all colors",
     "showFewerColors": "Show fewer colors",
-    "recordClip": "Record clip"
+    "recordClip": "Record clip",
+    "poseMode": "Pose Limbs",
+    "poseModeHint": "Click a limb for its axis arrows, then drag an arrow to move that end along it. Double-click a limb to reset it. The handle at the model's center moves the whole skin, or double-click it to recenter.",
+    "poseModeHintTouch": "Tap a limb's handle for its axis arrows, then drag an arrow to move that end along it. Double-tap the handle to reset that limb. The handle at the model's center moves the whole skin, or double-tap it to recenter.",
+    "poseMove": "Move",
+    "poseTwist": "Twist",
+    "poseTwistHint": "Click a limb for its twist rings, then drag a ring to turn it around that axis. Double-click a limb to reset it. The ring at the model's center turns the whole skin, or double-click it to face forward again.",
+    "poseTwistHintTouch": "Tap a limb's handle for its twist rings, then drag a ring to turn it around that axis. Double-tap the handle to reset that limb. The ring at the model's center turns the whole skin, or double-tap it to face forward again.",
+    "resetPose": "Reset Pose",
+    "resetPosition": "Reset Position"
   },
   "detailPanel": {
     "actions": "Actions",

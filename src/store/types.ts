@@ -14,12 +14,7 @@ export const CURRENT_LOCALSTORAGE_KEY = "rendererConfig_1";
 
 // Types
 export type Parts =
-  | "head"
-  | "body"
-  | "leftArm"
-  | "rightArm"
-  | "leftLeg"
-  | "rightLeg";
+  "head" | "body" | "leftArm" | "rightArm" | "leftLeg" | "rightLeg";
 
 export type Layers = "base" | "overlay";
 
@@ -34,6 +29,41 @@ export interface HistorySnapshot {
   skinIsPocket: boolean;
   skinIsDoubleRes: boolean;
 }
+
+/**
+ * A joint rotation, stored as a unit quaternion [x, y, z, w]. Quaternions
+ * rather than Euler angles because the renderer's fixed Z·Y·X order gimbal-locks
+ * within reach of a normal shoulder twist. See `src/core/quaternion.ts`.
+ */
+const quatSchema = z.tuple([z.number(), z.number(), z.number(), z.number()]);
+
+/**
+ * Manual limb pose. Every joint is optional — an absent joint is at rest, so a
+ * neutral pose persists as `{}` rather than five identity quaternions.
+ *
+ * The torso is not here: it has no joint of its own, so its handle moves the
+ * whole model instead, which is the `objectTranslation*`/`objectRotationY`
+ * transform the sidebar holds rather than anything about a pose.
+ */
+export const poseSchema = z.object({
+  head: quatSchema.optional(),
+  leftArm: quatSchema.optional(),
+  rightArm: quatSchema.optional(),
+  leftLeg: quatSchema.optional(),
+  rightLeg: quatSchema.optional(),
+});
+
+export type PoseValue = z.infer<typeof poseSchema>;
+
+/**
+ * Which gesture a limb drag performs. "move" swings the limb so its end tracks
+ * the pointer; "twist" spins it about its own long axis. They are separate
+ * tools rather than one gesture with a modifier because twisting has no useful
+ * touch equivalent otherwise — there is no second hand to hold a key with.
+ */
+export const poseToolSchema = z.enum(["move", "twist"]);
+
+export type PoseTool = z.infer<typeof poseToolSchema>;
 
 // Validation schema for form values
 export const formSchema = z.object({
@@ -138,6 +168,11 @@ export const formSchema = z.object({
   gridVisible: z.boolean(),
   floorColor: z.string(),
   environmentPreset: z.enum(["grid", "empty", "grassland", "scifi"]),
+  poseMode: z.boolean(),
+  poseTool: poseToolSchema,
+  poseSnap: z.boolean(),
+  poseMirror: z.boolean(),
+  pose: poseSchema,
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -175,6 +210,10 @@ export interface RendererStoreState extends FormValues {
 
   // Touch drawing state (runtime flag, not persisted)
   touchDrawActive: boolean;
+
+  // True while a limb is being dragged, so orbit control yields the gesture
+  // (runtime flag, not persisted)
+  poseDragActive: boolean;
 
   // IndexedDB reference
   indexDB: IDBDatabase | null;
@@ -230,6 +269,9 @@ export interface RendererStoreActions {
 
   // Touch drawing
   setTouchDrawActive: (active: boolean) => void;
+
+  // Limb posing
+  setPoseDragActive: (active: boolean) => void;
 }
 
 // Combined store type
